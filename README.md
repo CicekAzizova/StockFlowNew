@@ -40,6 +40,8 @@ A **sales associate** scans products and records sales.
 - Splash screen while the session is restored
 - JWT authentication, token stored in Keychain, automatic logout when the session expires
 - Pagination, pull to refresh
+- Product filter (All / In Stock / Low Stock / Out of Stock) is remembered between launches
+- Camera permission handling: the app asks for access and offers a shortcut to Settings if it was denied
 - Loading, error and empty states on every screen
 - Dark mode support
 
@@ -49,8 +51,9 @@ A **sales associate** scans products and records sales.
 - Observation (`@Observable`), `@State`, `@Binding`
 - Swift Concurrency (`async/await`)
 - URLSession-based network layer
-- Keychain for secure token storage
+- Keychain for secure token storage, `UserDefaults` for lightweight preferences (selected product filter)
 - PhotosUI (image picking), VisionKit `DataScanner` (barcode scanning)
+- SwiftUI Previews with sample data (Success / Empty / Error / Loading states)
 - Swift Testing + XCTest (unit and UI tests)
 - GitHub Actions (CI)
 - Backend: Node.js, Express, SQLite ([StockFlowBackend](https://github.com/CicekAzizova/StockFlowBackend))
@@ -67,7 +70,7 @@ View  →  ViewModel  →  Store / Repository  →  NetworkService  →  API
 - **ViewModel**: `@Observable` classes that hold screen state (`idle / loading / loaded / error`) and call repositories.
 - **Repository**: protocols (`ProductRepository`, `SalesRepository`, ...) with default implementations on top of `NetworkService`. Protocols make them easy to mock in tests.
 - **Stores**: `ProductsStore` and `SalesStore` keep shared data in sync across screens (Home, Products, Low Stock, Product Detail).
-- **Dependency injection**: `AppDependencies` creates repositories and builds every ViewModel.
+- **Dependency injection**: `AppDependencies` creates repositories and builds every ViewModel. `UserDefaults` is injected into `ProductViewModel` too, so tests use an isolated instance.
 - **Networking**: `Endpoint` protocol describes requests; `NetworkService` executes them. A `401` response posts a notification that logs the user out.
 
 ### Project structure
@@ -75,7 +78,7 @@ View  →  ViewModel  →  Store / Repository  →  NetworkService  →  API
 ```
 StockFlow/
 ├── App/            app entry point, app state, routing
-├── Core/           config, DI, extensions, navigation, network, security, stores, reusable UI
+├── Core/           config, DI, extensions, navigation, network, permissions, preview data, security, stores, reusable UI
 ├── Features/       Owner, SalesAssociate and Shared screens (View + ViewModel + State)
 ├── Models/         request and response models
 ├── Repositories/   repository protocols and implementations
@@ -114,12 +117,5 @@ Select an iPhone simulator and press `Cmd + R`. The simulator connects to `http:
 
 ### Real device (optional)
 Barcode scanning needs a real device (the simulator has no camera; use manual SKU entry there).
-Set your Mac's IP in `StockFlow/Core/Config/AppConfig.swift` (`ipconfig getifaddr en0`).
-The iPhone and the Mac must be on the same Wi-Fi network.
-
-## Testing
-
-- **Unit tests** (`StockFlowTests`): `LoginViewModel`, `ProductViewModel`, `ScanProductViewModel` and string validation. Repositories are replaced with mocks, so tests never call the real API. Both success and error cases are covered.
-- **UI tests** (`StockFlowUITests`): login screen.
-- Run all tests in Xcode with `Cmd + U`.
-- **CI**: GitHub Actions runs the unit tests on every push and pull request (`.github/workflows/tests.yml`).
+Set your Mac's address in `StockFlow/Core/Config/AppConfig.swift`, either its IP (`ipconfig getifaddr en0`) or its Bonjour name (`<LocalHostName>.local`, see `scutil --get LocalHostName`).
+The iPhone and the Mac must be on the same
