@@ -159,7 +159,6 @@ final class ProductsStore {
     
     // MARK: - Sync
     
-    /// Product stock changed outside of the products screens (e.g. after a sale).
     func refreshStock() async {
         try? await loadProducts(limit: productsPageSize)
         await refreshLowStock()

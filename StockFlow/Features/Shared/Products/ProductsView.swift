@@ -108,6 +108,7 @@ struct ProductsView: View {
         }
     }
 }
+#if DEBUG
 #Preview("Success") {
     @Previewable @State var path = NavigationPath()
     let store = ProductsStore(productRepository: PreviewProductRepository())
@@ -138,3 +139,4 @@ struct ProductsView: View {
     ProductsView(viewModel: ProductViewModel(productStore: store), path: $path, canManageProducts: true)
         .preferredColorScheme(.dark)
 }
+#endif

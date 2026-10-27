@@ -25,6 +25,14 @@ enum PreviewData {
         storeName: "Demo Store"
     )
 
+    static let salesAssociate = User(
+        id: 2,
+        email: "seller@stockflow.com",
+        name: "Seller",
+        role: .salesAssociate,
+        storeName: "Demo Store"
+    )
+
     static let products: [ProductsResponse] = [
         product(id: 1, name: "Wireless Mouse", sku: "WM-1001", price: 24.99, discount: 10, quantity: 40),
         product(id: 2, name: "USB-C Cable", sku: "UC-2002", price: 9.99, quantity: 3),
@@ -93,24 +101,86 @@ struct PreviewProductRepository: ProductRepository {
 
 struct PreviewSalesRepository: SalesRepository {
     var fails = false
+    var empty = false
 
     func getSalesSummary() async throws -> SalesSummaryResponse {
         if fails { throw PreviewError.failed }
+        if empty { return SalesSummaryResponse(todaySales: 0, todayOrders: 0, totalSales: 0, totalOrders: 0) }
         return PreviewData.summary
     }
 
     func getRecentSales(page: Int, limit: Int) async throws -> PaginationResponse<SaleResponse> {
         if fails { throw PreviewError.failed }
+        if empty { return PreviewData.page([]) }
         return PreviewData.page(PreviewData.sales)
     }
 
     func getSales(sellerId: Int, page: Int, limit: Int) async throws -> PaginationResponse<SaleResponse> {
         if fails { throw PreviewError.failed }
+        if empty { return PreviewData.page([]) }
         return PreviewData.page(PreviewData.sales)
     }
 
     func createSale(_ request: CreateSaleRequest) async throws -> CreateSaleResponse {
         throw PreviewError.failed
+    }
+}
+
+struct PreviewTokenStorage: TokenStoring {
+    func saveToken(_ token: String) throws {}
+    func readToken() throws -> String? { nil }
+    func deleteToken() throws {}
+}
+
+struct PreviewUserRepository: UserRepository {
+    func getUser() async throws -> User { PreviewData.owner }
+}
+
+struct PreviewAuthRepository: AuthRepository {
+    func login(email: String, password: String) async throws -> LoginResponse {
+        throw PreviewError.failed
+    }
+}
+
+struct PreviewStoreRepository: StoreRepository {
+    func createStore(_ request: StoreRequest) async throws -> StoreResponse {
+        throw PreviewError.failed
+    }
+}
+
+struct PreviewImageUploadRepository: ImageUploadRepository {
+    func uploadImage(_ imageData: Data) async throws -> String {
+        throw PreviewError.failed
+    }
+}
+
+struct PreviewSalesAssociateRepository: SalesAssociateRepository {
+    func addSalesAssociate(request: SalesAssociateRequest) async throws -> SalesAssociateResponse {
+        throw PreviewError.failed
+    }
+    func getSalesAssociates() async throws -> [SalesAssociateResponse] { [] }
+    func deleteSalesAssociate(id: Int) async throws {}
+}
+
+// MARK: - Preview AppDependencies
+
+extension AppDependencies {
+    @MainActor
+    static func preview(
+        productResult: Result<[ProductsResponse], Error> = .success(PreviewData.products),
+        salesFails: Bool = false,
+        salesEmpty: Bool = false
+    ) -> AppDependencies {
+        AppDependencies(
+            tokenStorage: PreviewTokenStorage(),
+            authRepository: PreviewAuthRepository(),
+            storeRepository: PreviewStoreRepository(),
+            userRepository: PreviewUserRepository(),
+            productRepository: PreviewProductRepository(result: productResult),
+            imageUploadRepository: PreviewImageUploadRepository(),
+            salesAssociateRepository: PreviewSalesAssociateRepository(),
+            salesRepository: PreviewSalesRepository(fails: salesFails, empty: salesEmpty)
+        )
     }
 }
 #endif

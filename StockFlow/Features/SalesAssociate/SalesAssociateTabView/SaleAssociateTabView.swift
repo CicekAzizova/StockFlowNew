@@ -105,3 +105,47 @@ struct SaleAssociateTabView: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("Success") {
+    let dependencies = AppDependencies.preview()
+    let appStateManager = AppStateManager(
+        tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
+    )
+
+    SaleAssociateTabView(
+        dependencies: dependencies,
+        appStateManager: appStateManager,
+        user: PreviewData.salesAssociate
+    )
+}
+
+#Preview("Empty") {
+    let dependencies = AppDependencies.preview(productResult: .success([]), salesEmpty: true)
+    let appStateManager = AppStateManager(
+        tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
+    )
+
+    SaleAssociateTabView(
+        dependencies: dependencies,
+        appStateManager: appStateManager,
+        user: PreviewData.salesAssociate
+    )
+}
+
+#Preview("Error") {
+    let dependencies = AppDependencies.preview(
+        productResult: .failure(PreviewError.failed),
+        salesFails: true
+    )
+    let appStateManager = AppStateManager(
+        tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
+    )
+
+    SaleAssociateTabView(
+        dependencies: dependencies,
+        appStateManager: appStateManager,
+        user: PreviewData.salesAssociate
+    )
+}
+#endif

@@ -5,7 +5,7 @@
 //  Created by Cicek on 15.10.26.
 //
 
-import Foundation
+import Foundation 
 @testable import StockFlow
 
 @MainActor

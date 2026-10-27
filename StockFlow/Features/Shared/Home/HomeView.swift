@@ -92,6 +92,7 @@ struct HomeView: View {
         }
     }
 }
+#if DEBUG
 #Preview("Success") {
     @Previewable @State var path = NavigationPath()
     let viewModel = HomeViewModel(
@@ -109,3 +110,4 @@ struct HomeView: View {
     )
     HomeView(viewModel: viewModel, path: $path, user: PreviewData.owner)
 }
+#endif

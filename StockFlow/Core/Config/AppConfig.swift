@@ -7,26 +7,13 @@
 import Foundation
 
 enum AppConfig {
-    static let baseURL: String = {
-        #if targetEnvironment(simulator)
-        return "http://localhost:3000"
-        #else
-        return "http://192.168.1.65:3000"
-        #endif
-    }()
+    static let baseURL = "https://stockflowbackendnew-api.onrender.com"
 }
 extension AppConfig {
     static func imageURL(from string: String) -> URL? {
         if string.hasPrefix("/") {
             return URL(string: baseURL + string)
         }
-        guard var components = URLComponents(string: string),
-              let base = URLComponents(string: baseURL) else {
-            return URL(string: string)
-        }
-        components.scheme = base.scheme
-        components.host = base.host
-        components.port = base.port
-        return components.url
+        return URL(string: string)
     }
 }

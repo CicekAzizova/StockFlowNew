@@ -81,6 +81,31 @@ final class AppDependencies {
         self.salesStore = salesStore
     }
 
+    #if DEBUG
+    init(
+        tokenStorage: TokenStoring,
+        authRepository: AuthRepository,
+        storeRepository: StoreRepository,
+        userRepository: UserRepository,
+        productRepository: ProductRepository,
+        imageUploadRepository: ImageUploadRepository,
+        salesAssociateRepository: SalesAssociateRepository,
+        salesRepository: SalesRepository
+    ) {
+        self.tokenStorage = tokenStorage
+        self.networkService = DefaultNetworkService(tokenStoring: tokenStorage)
+        self.authRepository = authRepository
+        self.storeRepository = storeRepository
+        self.userRepository = userRepository
+        self.productRepository = productRepository
+        self.imageUploadRepository = imageUploadRepository
+        self.productsStore = ProductsStore(productRepository: productRepository)
+        self.salesAssociateRepository = salesAssociateRepository
+        self.salesRepository = salesRepository
+        self.salesStore = SalesStore(salesRepository: salesRepository)
+    }
+    #endif
+
     @MainActor
     func makeLoginViewModel(    appStateManager: AppStateManager) -> LoginViewModel {
         LoginViewModel(

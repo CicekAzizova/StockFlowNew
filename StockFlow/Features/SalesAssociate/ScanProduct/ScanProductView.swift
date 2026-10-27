@@ -23,6 +23,7 @@ struct ScanProductView: View {
 
             content
         }
+        .dismissKeyboardOnTap()
         .navigationTitle("Scan Product")
         .navigationBarTitleDisplayMode(.inline)
     }

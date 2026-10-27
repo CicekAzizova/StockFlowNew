@@ -121,22 +121,46 @@ struct OwnerTabView: View {
     }
 
 }
-#Preview {
-    let dependencies = AppDependencies()
+#if DEBUG
+#Preview("Success") {
+    let dependencies = AppDependencies.preview()
     let appStateManager = AppStateManager(
         tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
     )
-    
+
     OwnerTabView(
         dependencies: dependencies,
         appStateManager: appStateManager,
-        user: User(
-            id: 1,
-            email: "test@test.com",
-            name: "owner",
-            role: .owner,
-            storeName: "test"
-        )
+        user: PreviewData.owner
     )
-    
 }
+
+#Preview("Empty") {
+    let dependencies = AppDependencies.preview(productResult: .success([]), salesEmpty: true)
+    let appStateManager = AppStateManager(
+        tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
+    )
+
+    OwnerTabView(
+        dependencies: dependencies,
+        appStateManager: appStateManager,
+        user: PreviewData.owner
+    )
+}
+
+#Preview("Error") {
+    let dependencies = AppDependencies.preview(
+        productResult: .failure(PreviewError.failed),
+        salesFails: true
+    )
+    let appStateManager = AppStateManager(
+        tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
+    )
+
+    OwnerTabView(
+        dependencies: dependencies,
+        appStateManager: appStateManager,
+        user: PreviewData.owner
+    )
+}
+#endif
