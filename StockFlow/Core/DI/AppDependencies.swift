@@ -11,6 +11,8 @@ final class AppDependencies {
     
     let tokenStorage: TokenStoring
     
+    let appLockManager: AppLockManager
+    
     let authRepository: AuthRepository
     
     let storeRepository: StoreRepository
@@ -32,6 +34,10 @@ final class AppDependencies {
 
     init() {
         let tokenStorage = KeychainWrapper()
+        
+        let pinStore = KeychainPinStore(keychain: KeychainService())
+        let appLockManager = AppLockManager(pinStore: pinStore)
+        
         let networkService = DefaultNetworkService(tokenStoring: tokenStorage)
 
  
@@ -62,6 +68,7 @@ final class AppDependencies {
         
         self.tokenStorage = tokenStorage
         self.networkService = networkService
+        self.appLockManager = appLockManager
 
         self.authRepository = authRepository
         
@@ -93,6 +100,7 @@ final class AppDependencies {
         salesRepository: SalesRepository
     ) {
         self.tokenStorage = tokenStorage
+        self.appLockManager = AppLockManager(pinStore: KeychainPinStore(keychain: KeychainService()))
         self.networkService = DefaultNetworkService(tokenStoring: tokenStorage)
         self.authRepository = authRepository
         self.storeRepository = storeRepository

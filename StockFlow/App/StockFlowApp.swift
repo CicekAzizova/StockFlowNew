@@ -12,6 +12,7 @@ struct StockFlowApp: App {
     let dependencies: AppDependencies
     @State private var isSplashVisible = true
     @State private var appStateManager: AppStateManager
+    @Environment(\.scenePhase) private var scenePhase
     
     init() {
         let dependencies = AppDependencies()
@@ -19,13 +20,17 @@ struct StockFlowApp: App {
         
         if CommandLine.arguments.contains("-uitesting") {
             try? dependencies.tokenStorage.deleteToken()
+            dependencies.appLockManager.disablePin()
         }
         
         let appStateManager = AppStateManager(tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository)
         
         appStateManager.onLogout = {
+            try? dependencies.appLockManager.enablePin("1234")
             dependencies.productsStore.reset()
             dependencies.salesStore.reset()
+            dependencies.appLockManager.disablePin()
+            
         }
         
         _appStateManager = State(initialValue: appStateManager)
@@ -39,6 +44,19 @@ struct StockFlowApp: App {
                     SplashView()
                         .transition(.opacity)
                         .zIndex(1)
+                }
+                
+                if appStateManager.state == .authenticated && dependencies.appLockManager.isLocked {
+                    LockView()
+                        .transition(.opacity)
+                        .zIndex(2)
+                }
+            }
+            .environment(appStateManager)
+            .environment(dependencies.appLockManager)
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .background {
+                    dependencies.appLockManager.lockIfNeeded()
                 }
             }
             .task {
