@@ -118,18 +118,20 @@ struct TeamView: View {
                 Text("\(viewModel.salesAssociateCount)")
                 Text("Sales Associates")
             }
-            Spacer()
+            .frame(maxWidth: .infinity)
+            
             Divider()
                 .background(.divider)
-            Spacer()
             
             VStack {
                 Text(viewModel.totalSales.asCurrency)
-                Text("Total Sales (This Month)")
+                Text("Total Sales")
+                Text("(this month)")
             }
+            .frame(maxWidth: .infinity)
         }
         .foregroundStyle(.textPrimary)
-        .padding(28)
+        .padding()
         .frame(maxWidth: .infinity)
         .background(.success.opacity(0.2))
         .clipShape(RoundedRectangle(cornerRadius: 12))

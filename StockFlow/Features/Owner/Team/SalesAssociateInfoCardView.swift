@@ -34,7 +34,7 @@ struct SalesAssociateInfoCardView: View {
             Spacer()
             
             if let price {
-                VStack(alignment: .leading) {
+                VStack(alignment: .trailing) {
                     Text("Today's Sales")
                         .foregroundStyle(.textPrimary)
                     Text(
