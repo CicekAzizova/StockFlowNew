@@ -151,7 +151,7 @@ struct ScanProductView: View {
                         if viewModel.isSubmitting {
                             ProgressView()
                         } else {
-                            Text(product.quantity == 0 ? "Out of stock" : "Complete Sale")
+                            Text(product.quantity == 0 ? LocalizedStringKey("Out of stock") : LocalizedStringKey("Complete Sale"))
                         }
                     }
                     .frame(maxWidth: .infinity)

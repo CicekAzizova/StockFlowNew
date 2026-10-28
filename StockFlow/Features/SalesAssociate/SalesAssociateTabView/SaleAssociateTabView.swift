@@ -11,6 +11,7 @@ struct SaleAssociateTabView: View {
     
     let dependencies: AppDependencies
     let appStateManager: AppStateManager
+    @Environment(LanguageManager.self) private var languageManager
     @State private var homePath = NavigationPath()
     @State private var productPath = NavigationPath()
     @State private var salesPath = NavigationPath()
@@ -50,6 +51,7 @@ struct SaleAssociateTabView: View {
                         
                     }
                 }
+                .id(languageManager.language)
             }label: {
                 Image(.homeIcon)
                     .renderingMode(.template)
@@ -71,6 +73,7 @@ struct SaleAssociateTabView: View {
                         )
                     }
                 }
+                .id(languageManager.language)
             }label: {
                 Image(.productsIcon)
                     .renderingMode(.template)
@@ -85,6 +88,7 @@ struct SaleAssociateTabView: View {
                             SalesDestinationView(route: route, dependencies: dependencies)
                         }
                 }
+                .id(languageManager.language)
                 
             }label: {
                 Image(.salesIcon)
@@ -96,7 +100,10 @@ struct SaleAssociateTabView: View {
             //MARK: - Profile
             
             Tab {
-                ProfileView(viewModel: dependencies.makeProfileViewModel(), appStateManager: appStateManager)
+                NavigationStack {
+                    ProfileView(viewModel: dependencies.makeProfileViewModel(), appStateManager: appStateManager)
+                }
+                .id(languageManager.language)
             }label: {
                 Image(.profileIcon)
                     .renderingMode(.template)

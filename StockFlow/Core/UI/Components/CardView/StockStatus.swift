@@ -12,7 +12,7 @@ enum StockStatus {
     case lowStock
     case outOfStock
 
-    func text(quantity: Int) -> String {
+    func text(quantity: Int) -> LocalizedStringKey {
         switch self {
         case .inStock:
             return "\(quantity) in stock"

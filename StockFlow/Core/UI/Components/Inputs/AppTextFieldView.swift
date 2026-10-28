@@ -9,8 +9,8 @@ import SwiftUI
 
 struct AppTextFieldView<FocusedField: Hashable>: View {
 
-    let title: String
-    let placeholder: String
+    let title: LocalizedStringKey
+    let placeholder: LocalizedStringKey
     let icon: String?
     let focusedField: FocusedField
     
@@ -74,7 +74,7 @@ struct AppTextFieldView<FocusedField: Hashable>: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             
             if let errorMessage {
-                Text(errorMessage)
+                Text(LocalizedStringKey(errorMessage))
                     .font(.inter(.regular, size: 12))
                     .foregroundStyle(.error)
                     .padding(.leading, 4)

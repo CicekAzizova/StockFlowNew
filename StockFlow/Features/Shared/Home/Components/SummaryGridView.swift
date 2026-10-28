@@ -8,13 +8,13 @@ import SwiftUI
 
 struct SummaryGridView: View {
     
-    let title: String
+    let title: LocalizedStringKey
     let value: String
     let icon: String
     let iconColor: Color
     var compactValue: String? = nil
     
-    init(title: String, amount: Double, icon: String, iconColor: Color) {
+    init(title: LocalizedStringKey, amount: Double, icon: String, iconColor: Color) {
         self.title = title
         self.value = amount.asCurrency
         self.compactValue = amount.asCompactCurrency
@@ -22,7 +22,7 @@ struct SummaryGridView: View {
         self.iconColor = iconColor
     }
     
-    init(title: String, value: String, icon: String, iconColor: Color) {
+    init(title: LocalizedStringKey, value: String, icon: String, iconColor: Color) {
         self.title = title
         self.value = value
         self.compactValue = nil

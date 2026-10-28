@@ -37,7 +37,7 @@ struct AddProductView: View {
             
             content
         }
-        .navigationTitle(isEditMode ? "Edit Product" : "Add Product")
+        .navigationTitle(isEditMode ? LocalizedStringKey("Edit Product") : LocalizedStringKey("Add Product"))
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showScanner) {
                 NavigationStack {
@@ -79,13 +79,13 @@ struct AddProductView: View {
     
     private var header: some View {
         VStack(alignment: .leading) {
-            Text(isEditMode ? "Edit product information" : "Product information")
+            Text(isEditMode ? LocalizedStringKey("Edit product information") : LocalizedStringKey("Product information"))
                 .font(.inter(.regular, size: 20))
             
             Text(
                 isEditMode
-                ? "Update the details of your product."
-                : "Enter the details of your new product."
+                ? LocalizedStringKey("Update the details of your product.")
+                : LocalizedStringKey("Enter the details of your new product.")
             )
             .font(.inter(.regular, size: 13))
         }
@@ -95,8 +95,8 @@ struct AddProductView: View {
     // MARK: - Form
     
     private func field(
-        _ title: String,
-        _ placeholder: String,
+        _ title: LocalizedStringKey,
+        _ placeholder: LocalizedStringKey,
         _ focus: AddProductFocusedField,
         next: AddProductFocusedField?,
         keyboard: UIKeyboardType = .default,
@@ -142,7 +142,7 @@ struct AddProductView: View {
         VStack(spacing: 8) {
             
             if let message = viewModel.validationMessage {
-                Text(message)
+                Text(LocalizedStringKey(message))
                     .font(.inter(.regular, size: 13))
                     .foregroundStyle(.error)
                     .multilineTextAlignment(.center)
@@ -156,7 +156,7 @@ struct AddProductView: View {
             }
             
             AppButtonView(
-                title: isEditMode ? "Save Product" : "Add Product",
+                title: isEditMode ? LocalizedStringKey("Save Product") : LocalizedStringKey("Add Product"),
                 isLoading: viewModel.state.isLoading,
                 background: .brandPrimary
             ) {

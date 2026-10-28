@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AppSecureFieldView<FocusedField: Hashable>: View {
     
-    let placeholder: String
+    let placeholder: LocalizedStringKey
     let focusedField: FocusedField?
     var errorMessage: String? = nil
     var submitLabel: SubmitLabel = .done
@@ -76,7 +76,7 @@ struct AppSecureFieldView<FocusedField: Hashable>: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 12))
             if let errorMessage {
-                Text(errorMessage)
+                Text(LocalizedStringKey(errorMessage))
                     .font(.inter(.regular, size: 12))
                     .foregroundStyle(.error)
                     .padding(.leading, 4)

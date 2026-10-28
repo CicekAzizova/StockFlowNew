@@ -26,7 +26,6 @@ struct StockFlowApp: App {
         let appStateManager = AppStateManager(tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository)
         
         appStateManager.onLogout = {
-            try? dependencies.appLockManager.enablePin("1234")
             dependencies.productsStore.reset()
             dependencies.salesStore.reset()
             dependencies.appLockManager.disablePin()
@@ -54,6 +53,8 @@ struct StockFlowApp: App {
             }
             .environment(appStateManager)
             .environment(dependencies.appLockManager)
+            .environment(dependencies.languageManager)
+            .environment(\.locale, dependencies.languageManager.locale)
             .onChange(of: scenePhase) { _, phase in
                 if phase == .background {
                     dependencies.appLockManager.lockIfNeeded()

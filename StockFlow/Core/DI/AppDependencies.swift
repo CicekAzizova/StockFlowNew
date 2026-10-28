@@ -13,6 +13,8 @@ final class AppDependencies {
     
     let appLockManager: AppLockManager
     
+    let languageManager: LanguageManager
+    
     let authRepository: AuthRepository
     
     let storeRepository: StoreRepository
@@ -36,7 +38,10 @@ final class AppDependencies {
         let tokenStorage = KeychainWrapper()
         
         let pinStore = KeychainPinStore(keychain: KeychainService())
+        
         let appLockManager = AppLockManager(pinStore: pinStore)
+        
+        let languageManager = LanguageManager()
         
         let networkService = DefaultNetworkService(tokenStoring: tokenStorage)
 
@@ -69,6 +74,7 @@ final class AppDependencies {
         self.tokenStorage = tokenStorage
         self.networkService = networkService
         self.appLockManager = appLockManager
+        self.languageManager = languageManager
 
         self.authRepository = authRepository
         
@@ -111,6 +117,7 @@ final class AppDependencies {
         self.salesAssociateRepository = salesAssociateRepository
         self.salesRepository = salesRepository
         self.salesStore = SalesStore(salesRepository: salesRepository)
+        self.languageManager = LanguageManager()
     }
     #endif
 

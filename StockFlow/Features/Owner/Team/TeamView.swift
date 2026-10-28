@@ -118,9 +118,10 @@ struct TeamView: View {
                 Text("\(viewModel.salesAssociateCount)")
                 Text("Sales Associates")
             }
-            
+            Spacer()
             Divider()
                 .background(.divider)
+            Spacer()
             
             VStack {
                 Text(viewModel.totalSales.asCurrency)
@@ -128,7 +129,7 @@ struct TeamView: View {
             }
         }
         .foregroundStyle(.textPrimary)
-        .padding()
+        .padding(28)
         .frame(maxWidth: .infinity)
         .background(.success.opacity(0.2))
         .clipShape(RoundedRectangle(cornerRadius: 12))

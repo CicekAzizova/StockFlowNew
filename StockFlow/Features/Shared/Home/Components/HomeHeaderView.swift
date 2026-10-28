@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeHeaderView: View {
 
     let user: User
-    let subtitle: String
+    let subtitle: LocalizedStringKey
 
     var body: some View {
         VStack(alignment: .leading) {

@@ -27,7 +27,7 @@ struct ProductFilterPicker: View {
         return Button{
             selectedFilter = filter
         }label: {
-            Text(filter.rawValue)
+            Text(filter.displayName)
                 .font(.inter(.regular, size: 12))
                 .foregroundStyle(isSelected ? .white : .textSecondary)
                 .padding(.horizontal,16)

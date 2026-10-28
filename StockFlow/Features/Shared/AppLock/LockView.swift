@@ -13,7 +13,7 @@ struct LockView: View {
     @Environment(AppStateManager.self) private var appStateManager
 
     @State private var pin = ""
-    @State private var errorMessage: String?
+    @State private var errorMessage: LocalizedStringKey?
 
     var body: some View {
         ZStack {

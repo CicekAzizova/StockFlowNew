@@ -10,9 +10,9 @@ import SwiftUI
 struct ConfirmationDialogModifier: ViewModifier {
     @Binding var isPresented: Bool
     
-    let title: String
-    let message: String?
-    let confirmTitle: String
+    let title: LocalizedStringKey
+    let message: LocalizedStringKey?
+    let confirmTitle: LocalizedStringKey
     let role: ButtonRole?
     let onConfirm: () -> Void
     
@@ -37,9 +37,9 @@ extension View {
     
     func confirmationDialog(
         isPresented: Binding<Bool>,
-        title: String,
-        message: String? = nil,
-        confirmTitle: String,
+        title: LocalizedStringKey,
+        message: LocalizedStringKey? = nil,
+        confirmTitle: LocalizedStringKey,
         role: ButtonRole? = .destructive,
         onConfirm: @escaping () -> Void
     ) -> some View {

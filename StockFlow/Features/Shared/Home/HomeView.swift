@@ -29,8 +29,8 @@ struct HomeView: View {
             HomeHeaderView(
                 user: user,
                 subtitle: user.role == .owner
-                ? "Owner access • Full store management"
-                : "Sales Associate access • Sales operations"
+                ? LocalizedStringKey("Owner access • Full store management")
+                : LocalizedStringKey("Sales Associate access • Sales operations")
             )
             ScrollView(showsIndicators: false) {
                 HomeSummaryGrid(

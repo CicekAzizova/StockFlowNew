@@ -167,7 +167,7 @@ struct PreviewSalesAssociateRepository: SalesAssociateRepository {
 extension AppDependencies {
     @MainActor
     static func preview(
-        productResult: Result<[ProductsResponse], Error> = .success(PreviewData.products),
+        productResult: Result<[ProductsResponse], Error>? = nil,
         salesFails: Bool = false,
         salesEmpty: Bool = false
     ) -> AppDependencies {
@@ -176,7 +176,7 @@ extension AppDependencies {
             authRepository: PreviewAuthRepository(),
             storeRepository: PreviewStoreRepository(),
             userRepository: PreviewUserRepository(),
-            productRepository: PreviewProductRepository(result: productResult),
+            productRepository: PreviewProductRepository(result: productResult ?? .success(PreviewData.products)),
             imageUploadRepository: PreviewImageUploadRepository(),
             salesAssociateRepository: PreviewSalesAssociateRepository(),
             salesRepository: PreviewSalesRepository(fails: salesFails, empty: salesEmpty)

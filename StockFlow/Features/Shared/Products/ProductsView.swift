@@ -10,7 +10,7 @@ struct ProductsView: View {
     @State var viewModel: ProductViewModel
     @Binding var path: NavigationPath
     let canManageProducts: Bool
-
+    
     init(
         viewModel: ProductViewModel,
         path: Binding<NavigationPath>,
@@ -20,13 +20,13 @@ struct ProductsView: View {
         _path = path
         self.canManageProducts = canManageProducts
     }
-
-    private var emptyDescription: String {
+    
+    private var emptyDescription: LocalizedStringKey {
         canManageProducts
-            ? "Add your first product to get started."
-            : "No products are available yet."
+        ? "Add your first product to get started."
+        : "No products are available yet."
     }
-
+    
     @ViewBuilder
     private var content: some View {
         switch viewModel.state {
@@ -50,13 +50,17 @@ struct ProductsView: View {
             )
         }
     }
-
+    
     private var productsList: some View {
         VStack {
             ProductFilterPicker(selectedFilter: $viewModel.selectedFilter)
-
+            
             if viewModel.filteredProducts.isEmpty {
-                ContentUnavailableView.search
+                ContentUnavailableView(
+                    "No Results",
+                    systemImage: "magnifyingglass",
+                    description: Text("Try a different search or filter.")
+                )
             } else {
                 ScrollView {
                     LazyVStack {
@@ -77,25 +81,25 @@ struct ProductsView: View {
             }
         }
     }
-
+    
     var body: some View {
         ZStack {
             Color.background
                 .ignoresSafeArea()
-
+            
             VStack {
                 ProductsHeader(
                     count: viewModel.productsCount,
                     onAdd: canManageProducts
-                        ? { path.append(ProductRoute.addProduct) }
-                        : nil
+                    ? { path.append(ProductRoute.addProduct) }
+                    : nil
                 )
-
+                
                 ProductSearchField(query: $viewModel.query)
-
+                
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-
+                
             }
             .padding()
             .dismissKeyboardOnTap()
@@ -132,7 +136,6 @@ struct ProductsView: View {
     let store = ProductsStore(productRepository: PreviewProductRepository(delay: .seconds(3600)))
     ProductsView(viewModel: ProductViewModel(productStore: store), path: $path)
 }
-
 #Preview("Dark") {
     @Previewable @State var path = NavigationPath()
     let store = ProductsStore(productRepository: PreviewProductRepository())

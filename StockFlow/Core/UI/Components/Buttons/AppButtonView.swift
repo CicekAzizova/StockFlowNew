@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AppButtonView: View {
 
-    let title: String
+    let title: LocalizedStringKey
     var isLoading: Bool = false
     var background: Color
     var action: () -> Void

@@ -89,12 +89,12 @@ struct ProductDetailView: View {
             }
             InfoRow(
                 title: "Current stock",
-                value: "\(product.quantity) units"
+                localizedValue: "\(product.quantity) units"
             )
 
             InfoRow(
                 title: "Low-stock threshold",
-                value: "\(product.lowStockLimit) units"
+                localizedValue: "\(product.lowStockLimit) units"
             )
         }
         .font(.inter(.regular, size: 15))

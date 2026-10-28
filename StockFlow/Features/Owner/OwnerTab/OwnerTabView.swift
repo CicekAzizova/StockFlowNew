@@ -12,6 +12,7 @@ struct OwnerTabView: View {
 
     let user: User?
 
+    @Environment(LanguageManager.self) private var languageManager
     @State private var homePath = NavigationPath()
     @State private var productPath = NavigationPath()
     @State private var teamPath = NavigationPath()
@@ -49,6 +50,7 @@ struct OwnerTabView: View {
                         }
                     }
                 }
+                .id(languageManager.language)
                 
             } label: {
                 Image(.homeIcon)
@@ -78,6 +80,7 @@ struct OwnerTabView: View {
                         )
                     }
                 }
+                .id(languageManager.language)
             } label: {
                 Image(.productsIcon)
                     .renderingMode(.template)
@@ -95,6 +98,7 @@ struct OwnerTabView: View {
                             SalesDestinationView(route: route, dependencies: dependencies)
                         }
                 }
+                .id(languageManager.language)
             } label: {
                 Image(.teamIcon)
                     .renderingMode(.template)
@@ -111,6 +115,7 @@ struct OwnerTabView: View {
                         appStateManager: appStateManager
                     )
                 }
+                .id(languageManager.language)
             } label: {
                 Image(.profileIcon)
                     .renderingMode(.template)

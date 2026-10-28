@@ -96,7 +96,7 @@ struct SalesAssociateDetailView: View {
 
     private var salesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(viewModel.salesCount > 0 ? "Sales (\(viewModel.salesCount))" : "Sales")
+            Text(viewModel.salesCount > 0 ? LocalizedStringKey("Sales (\(viewModel.salesCount))") : LocalizedStringKey("Sales"))
                 .font(.inter(.semiBold, size: 18))
                 .foregroundStyle(.textPrimary)
 

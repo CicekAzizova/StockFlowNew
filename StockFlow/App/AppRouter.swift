@@ -12,6 +12,7 @@ struct AppRouter: View {
     
     var dependencies: AppDependencies
     let appStateManager: AppStateManager
+    @Environment(AppLockManager.self) private var appLockManager
     
     var body: some View {
          content
@@ -25,21 +26,25 @@ struct AppRouter: View {
         case .unauthenticated:
             LoginView(viewModel: dependencies.makeLoginViewModel(appStateManager: appStateManager), dependencies: dependencies, appStateManager: appStateManager)
         case .authenticated:
-            switch appStateManager.user?.role {
-            case .owner:
-                OwnerTabView(
-                    dependencies: dependencies,
-                    appStateManager: appStateManager,
-                    user: appStateManager.user
-                )
-            case .salesAssociate:
-                SaleAssociateTabView(
-                    dependencies: dependencies,
-                    appStateManager: appStateManager,
-                    user: appStateManager.user
-                )
-            case .none:
-                ProgressView()
+            if !appLockManager.isPinEnabled {
+                PINSetupView()
+            } else {
+                switch appStateManager.user?.role {
+                case .owner:
+                    OwnerTabView(
+                        dependencies: dependencies,
+                        appStateManager: appStateManager,
+                        user: appStateManager.user
+                    )
+                case .salesAssociate:
+                    SaleAssociateTabView(
+                        dependencies: dependencies,
+                        appStateManager: appStateManager,
+                        user: appStateManager.user
+                    )
+                case .none:
+                    ProgressView()
+                }
             }
         }
     }
