@@ -39,7 +39,7 @@ final class AppDependencies {
         
         let pinStore = KeychainPinStore(keychain: KeychainService())
         
-        let appLockManager = AppLockManager(pinStore: pinStore)
+        let appLockManager = AppLockManager(pinStore: pinStore, biometrics: BiometricAuthenticator())
         
         let languageManager = LanguageManager()
         
@@ -106,7 +106,7 @@ final class AppDependencies {
         salesRepository: SalesRepository
     ) {
         self.tokenStorage = tokenStorage
-        self.appLockManager = AppLockManager(pinStore: KeychainPinStore(keychain: KeychainService()))
+        self.appLockManager = AppLockManager(pinStore: KeychainPinStore(keychain: KeychainService()), biometrics: BiometricAuthenticator())
         self.networkService = DefaultNetworkService(tokenStoring: tokenStorage)
         self.authRepository = authRepository
         self.storeRepository = storeRepository

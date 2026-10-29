@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1B5B63A8305F2E3500947F8C /* StockFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StockFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		1B5B63B5305F2E3600947F8C /* StockFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StockFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1B5B63BF305F2E3600947F8C /* StockFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StockFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B5B63A8305F2E3500947F8C /* StockFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = StockFlow.app; path = "/Users/sadiq/Desktop/My StockFlow app/StockFlowNew/build/Debug-iphoneos/StockFlow.app"; sourceTree = "<absolute>"; };
+		1B5B63B5305F2E3600947F8C /* StockFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = StockFlowTests.xctest; path = "/Users/sadiq/Desktop/My StockFlow app/StockFlowNew/build/Debug-iphoneos/StockFlow.app/PlugIns/StockFlowTests.xctest"; sourceTree = "<absolute>"; };
+		1B5B63BF305F2E3600947F8C /* StockFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = StockFlowUITests.xctest; path = "/Users/sadiq/Desktop/My StockFlow app/StockFlowNew/build/Debug-iphoneos/StockFlowUITests-Runner.app/PlugIns/StockFlowUITests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -91,18 +91,7 @@
 				1B5B63AA305F2E3500947F8C /* StockFlow */,
 				1B5B63B8305F2E3600947F8C /* StockFlowTests */,
 				1B5B63C2305F2E3600947F8C /* StockFlowUITests */,
-				1B5B63A9305F2E3500947F8C /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		1B5B63A9305F2E3500947F8C /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				1B5B63A8305F2E3500947F8C /* StockFlow.app */,
-				1B5B63B5305F2E3600947F8C /* StockFlowTests.xctest */,
-				1B5B63BF305F2E3600947F8C /* StockFlowUITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,7 +203,7 @@
 			mainGroup = 1B5B639F305F2E3500947F8C;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 1B5B63A9305F2E3500947F8C /* Products */;
+			productRefGroup = 1B5B639F305F2E3500947F8C;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (

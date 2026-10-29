@@ -14,6 +14,8 @@ struct LockView: View {
 
     @State private var pin = ""
     @State private var errorMessage: LocalizedStringKey?
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var didAutoPrompt = false
 
     var body: some View {
         ZStack {
@@ -39,7 +41,17 @@ struct LockView: View {
                 PINDotsView(filledCount: pin.count)
 
                 PINPadView(onDigit: append, onDelete: deleteLast)
-
+                
+                if appLockManager.isBiometricsEnabled {
+                    Button {
+                        Task { _ = await appLockManager.unlockWithBiometrics() }
+                    } label: {
+                        Image(systemName: "faceid")
+                            .font(.system(size: 30))
+                            .foregroundStyle(Color.primaryBlue)
+                    }
+                }
+                
                 Button("Forgot PIN? Log out") {
                     appStateManager.logout()
                 }
@@ -49,6 +61,11 @@ struct LockView: View {
                 Spacer()
             }
             .padding(24)
+            .task(id: scenePhase) {
+                guard scenePhase == .active, !didAutoPrompt else { return }
+                didAutoPrompt = true
+                _ = await appLockManager.unlockWithBiometrics()
+            }
         }
     }
 

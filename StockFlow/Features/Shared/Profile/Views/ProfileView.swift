@@ -10,6 +10,7 @@ import SwiftUI
 struct ProfileView: View {
     @State var viewModel: ProfileViewModel
     let appStateManager: AppStateManager
+    @Environment(AppLockManager.self) private var appLockManager
     
     var body: some View {
         ZStack {
@@ -78,7 +79,7 @@ struct ProfileView: View {
                     .multilineTextAlignment(.center)
             }
             
-            Text(user.role.rawValue)
+            Text(user.role.displayName)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Color.primaryBlue)
                 .padding(.horizontal, 14)
@@ -190,17 +191,20 @@ struct ProfileView: View {
             Text("Settings")
                 .font(.inter(.regular, size: 14))
                 .foregroundStyle(.textSecondary)
-            HStack(spacing: 14) {
-                Image(systemName: "globe")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(Color.blue)
-                    .frame(width: 40, height: 40)
-                    .background(Color.primaryBlue.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            VStack {
+                HStack(spacing: 14) {
+                    settingsIcon("globe")
+                    
+                    LanguagePickerView()
+                        .tint(.brandPrimary)
+                    
+                }
+                    if appLockManager.canUseBiometrics {
+                        Divider()
+                            .padding(.leading, 54)
+                        faceIDRow
+                    }
                 
-                LanguagePickerView()
-                    .tint(.brandPrimary)
-                Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -211,6 +215,36 @@ struct ProfileView: View {
                     .stroke(Color.border, lineWidth: 1)
             }
         }
+    }
+    
+    private var faceIDRow: some View {
+        HStack(spacing: 14) {
+            settingsIcon("faceid")
+            Toggle("Face ID", isOn: faceIDBinding)
+                .tint(.brandPrimary)
+        }
+        //.padding()
+    }
+    
+    private var faceIDBinding: Binding<Bool> {
+        Binding {
+            appLockManager.isBiometricsEnabled
+        } set: { isOn in
+            if isOn {
+                Task { await appLockManager.enableBiometrics()}
+            } else {
+                appLockManager.setBiometrics(false)
+            }
+        }
+
+    }
+    private func settingsIcon(_ name: String) -> some View {
+        Image(systemName: name)
+            .font(.system(size: 17, weight: .medium))
+            .foregroundStyle(Color.blue)
+            .frame(width: 40, height: 40)
+            .background(Color.primaryBlue.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
     }
     
     

@@ -10,14 +10,16 @@ struct LanguagePickerView: View {
     @Environment(LanguageManager.self) private var languageManager
     
     var body: some View {
-         @Bindable var languageManager = languageManager
-        
-        Picker("Language" , selection: $languageManager.language) {
-            ForEach(AppLanguage.allCases) { language in
-                Text(language.displayName).tag(language)
+        @Bindable var languageManager = languageManager
+        HStack {
+            Text("Language")
+            Spacer()
+            Picker("Language", selection: $languageManager.language) {
+                ForEach(AppLanguage.allCases) { language in
+                    Text(language.displayName).tag(language)
+                }
             }
+            .fixedSize()
         }
     }
 }
-
-
