@@ -43,7 +43,7 @@ final class AppDependencies {
         
         let languageManager = LanguageManager()
         
-        let networkService = DefaultNetworkService(tokenStoring: tokenStorage)
+        let networkService = DefaultNetworkService(tokenStoring: tokenStorage, tokenRefresher: TokenRefresher(tokenStorage: tokenStorage))
 
  
         let authRepository = DefaultAuthRepository(
@@ -107,7 +107,7 @@ final class AppDependencies {
     ) {
         self.tokenStorage = tokenStorage
         self.appLockManager = AppLockManager(pinStore: KeychainPinStore(keychain: KeychainService()), biometrics: BiometricAuthenticator())
-        self.networkService = DefaultNetworkService(tokenStoring: tokenStorage)
+        self.networkService = DefaultNetworkService(tokenStoring: tokenStorage, tokenRefresher: TokenRefresher(tokenStorage: tokenStorage))
         self.authRepository = authRepository
         self.storeRepository = storeRepository
         self.userRepository = userRepository

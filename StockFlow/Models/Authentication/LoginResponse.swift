@@ -10,4 +10,11 @@ import Foundation
 struct LoginResponse: Decodable {
     let user: User
     let token: String
+    let refreshToken: String
+    
+    enum CodingKeys: String, CodingKey {
+        case user
+        case token
+        case refreshToken = "refresh_token"
+    }
 }

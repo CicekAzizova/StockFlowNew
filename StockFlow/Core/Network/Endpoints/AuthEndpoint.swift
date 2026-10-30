@@ -10,17 +10,23 @@ import Foundation
 enum AuthEndpoint: Endpoint {
     
     case login(email: String,password: String)
+    case refresh(refreshToken: String)
+    case logout(refreshToken: String)
     
     var path: String {
         switch self {
         case .login:
             return "/auth/login"
+        case .refresh:
+            return "/auth/refresh"
+        case .logout:
+            return "/auth/logout"
         }
     }
     
     var method: HttpMethod {
         switch self {
-        case .login:
+        case .login, .refresh, .logout:
             return .post
         }
     }
@@ -36,6 +42,8 @@ enum AuthEndpoint: Endpoint {
                 email: email,
                 password: password
             )
+        case .refresh(let refreshToken), .logout(let refreshToken):
+            return RefreshRequest(refreshToken: refreshToken)
         }
     }
 }

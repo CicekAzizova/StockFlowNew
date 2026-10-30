@@ -23,6 +23,8 @@ final class DefaultStoreRepository: StoreRepository {
         let response: StoreResponse = try await networkService.request(StoreEndpoint.createStore(request))
         guard !response.token.isEmpty else { throw NetworkError.invalidResponse }
         try tokenStorage.saveToken(response.token)
+        guard !response.refreshToken.isEmpty else { throw NetworkError.invalidResponse }
+        try tokenStorage.saveRefreshToken(response.refreshToken)
         return response
     }
 }

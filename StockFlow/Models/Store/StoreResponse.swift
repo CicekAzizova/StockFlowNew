@@ -18,6 +18,7 @@ struct StoreResponse: Decodable {
     let storePhone: String
     let createdAt: String
     let token: String
+    let refreshToken: String
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -29,5 +30,6 @@ struct StoreResponse: Decodable {
         case storePhone = "store_phone"
         case createdAt = "created_at"
         case token
+        case refreshToken = "refresh_token"
     }
 }

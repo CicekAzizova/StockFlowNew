@@ -14,6 +14,7 @@ final class  AppStateManager {
     var user: User?
     
     var onLogout: (() -> Void)?
+    var onRevokeSession: ((String) -> Void)?
     
     private let tokenStorage: TokenStoring
     private let userRepository: UserRepository
@@ -52,14 +53,17 @@ final class  AppStateManager {
     func logout() {
         
         guard state == .authenticated else { return }
+        let refreshToken = try? tokenStorage.readRefreshToken()
         
-        do {
-            try tokenStorage.deleteToken()
-        } catch  {
-            
-        }
+        try? tokenStorage.deleteToken()
+        try? tokenStorage.deleteRefreshToken()
+        
         user = nil
         onLogout?()
         state = .unauthenticated
+        
+        if let refreshToken {
+           onRevokeSession?(refreshToken)
+        }
     }
 }

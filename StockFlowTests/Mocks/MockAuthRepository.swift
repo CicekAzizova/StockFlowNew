@@ -12,6 +12,7 @@ import Foundation
 final class MockAuthRepository: AuthRepository {
     var result: Result<LoginResponse, Error>
     private(set) var loginCallCount = 0
+    private(set) var logoutCalls: [String] = []
 
     init(result: Result<LoginResponse, Error>) {
         self.result = result
@@ -20,5 +21,9 @@ final class MockAuthRepository: AuthRepository {
     func login(email: String, password: String) async throws -> LoginResponse {
         loginCallCount += 1
         return try result.get()
+    }
+
+    func logout(refreshToken: String) async {
+        logoutCalls.append(refreshToken)
     }
 }

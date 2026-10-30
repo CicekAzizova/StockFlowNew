@@ -57,8 +57,13 @@ struct StockFlowApp: App {
             .environment(dependencies.languageManager)
             .environment(\.locale, dependencies.languageManager.locale)
             .onChange(of: scenePhase) { _, phase in
-                if phase == .background {
-                    dependencies.appLockManager.lockIfNeeded()
+                switch phase {
+                case .background:
+                    dependencies.appLockManager.appDidEnterBackground()
+                case .active:
+                    dependencies.appLockManager.appDidBecomeActive()
+                default:
+                    break
                 }
             }
             .task {
@@ -77,6 +82,12 @@ struct StockFlowApp: App {
             .task {
                 for await _ in NotificationCenter.default.notifications(named: .sessionExpired) {
                     appStateManager.logout()
+                    appStateManager.onRevokeSession = {
+                        refreshToken in
+                        Task {
+                            await dependencies.authRepository.logout(refreshToken: refreshToken)
+                        }
+                    }
                 }
             }
         }

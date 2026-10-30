@@ -15,7 +15,9 @@ final class AppLockManager {
     private(set) var failedAttempts: Int
     
     static let maxAttempts = 5
+    static let gracePeriod: Duration = .seconds(10)
     
+    private var backgroundedAt: ContinuousClock.Instant?
     private let pinStore: PinStoring
     private let biometrics: BiometricAuthenticating
     private let defaults: UserDefaults
@@ -99,6 +101,21 @@ final class AppLockManager {
         try pinStore.savePin(pin)
         resetAttempts()
         isPinEnabled = true
+    }
+    
+    func appDidEnterBackground() {
+        guard pinStore.hasPin, !isLocked else { return }
+        backgroundedAt = .now
+    }
+    
+    func appDidBecomeActive() {
+        defer { backgroundedAt = nil }
+        
+        guard let backgroundedAt, pinStore.hasPin else { return }
+        
+        if .now - backgroundedAt >= Self.gracePeriod {
+            isLocked = true
+        }
     }
     
     func disablePin() {

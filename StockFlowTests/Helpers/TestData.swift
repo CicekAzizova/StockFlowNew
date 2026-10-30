@@ -23,8 +23,7 @@ enum TestData {
         role: .owner,
         storeName: "Test Store"
     )
-
-    static let loginResponse = LoginResponse(user: owner, token: "test_token")
+    static let loginResponse = LoginResponse(user: owner, token: "test_token", refreshToken: "test_refresh_token")
 
     static func product(
         id: Int = 1,

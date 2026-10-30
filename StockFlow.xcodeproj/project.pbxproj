@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1B5B63A8305F2E3500947F8C /* StockFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = StockFlow.app; path = "/Users/sadiq/Desktop/My StockFlow app/StockFlowNew/build/Debug-iphoneos/StockFlow.app"; sourceTree = "<absolute>"; };
-		1B5B63B5305F2E3600947F8C /* StockFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = StockFlowTests.xctest; path = "/Users/sadiq/Desktop/My StockFlow app/StockFlowNew/build/Debug-iphoneos/StockFlow.app/PlugIns/StockFlowTests.xctest"; sourceTree = "<absolute>"; };
-		1B5B63BF305F2E3600947F8C /* StockFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = StockFlowUITests.xctest; path = "/Users/sadiq/Desktop/My StockFlow app/StockFlowNew/build/Debug-iphoneos/StockFlowUITests-Runner.app/PlugIns/StockFlowUITests.xctest"; sourceTree = "<absolute>"; };
+		1B98AF6430947343001BE769 /* StockFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StockFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B98AF6530947343001BE769 /* StockFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StockFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B98AF6630947343001BE769 /* StockFlowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StockFlowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -91,6 +91,9 @@
 				1B5B63AA305F2E3500947F8C /* StockFlow */,
 				1B5B63B8305F2E3600947F8C /* StockFlowTests */,
 				1B5B63C2305F2E3600947F8C /* StockFlowUITests */,
+				1B98AF6430947343001BE769 /* StockFlow.app */,
+				1B98AF6530947343001BE769 /* StockFlowTests.xctest */,
+				1B98AF6630947343001BE769 /* StockFlowUITests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -116,7 +119,7 @@
 			packageProductDependencies = (
 			);
 			productName = StockFlow;
-			productReference = 1B5B63A8305F2E3500947F8C /* StockFlow.app */;
+			productReference = 1B98AF6430947343001BE769 /* StockFlow.app */;
 			productType = "com.apple.product-type.application";
 		};
 		1B5B63B4305F2E3600947F8C /* StockFlowTests */ = {
@@ -139,7 +142,7 @@
 			packageProductDependencies = (
 			);
 			productName = StockFlowTests;
-			productReference = 1B5B63B5305F2E3600947F8C /* StockFlowTests.xctest */;
+			productReference = 1B98AF6530947343001BE769 /* StockFlowTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		1B5B63BE305F2E3600947F8C /* StockFlowUITests */ = {
@@ -162,7 +165,7 @@
 			packageProductDependencies = (
 			);
 			productName = StockFlowUITests;
-			productReference = 1B5B63BF305F2E3600947F8C /* StockFlowUITests.xctest */;
+			productReference = 1B98AF6630947343001BE769 /* StockFlowUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */

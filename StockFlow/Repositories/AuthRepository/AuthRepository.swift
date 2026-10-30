@@ -9,6 +9,7 @@ import Foundation
 
 protocol AuthRepository {
     func login(email: String, password: String) async throws -> LoginResponse
+    func logout(refreshToken: String) async
 }
 
 final class DefaultAuthRepository: AuthRepository {
@@ -25,6 +26,12 @@ final class DefaultAuthRepository: AuthRepository {
         let response: LoginResponse = try await networkService.request(AuthEndpoint.login(email: email, password: password))
         guard !response.token.isEmpty else { throw NetworkError.invalidResponse }
         try tokenStorage.saveToken(response.token)
+        guard !response.refreshToken.isEmpty else { throw NetworkError.invalidResponse }
+        try tokenStorage.saveRefreshToken(response.refreshToken)
         return response
+    }
+    
+    func logout(refreshToken: String) async {
+        try? await networkService.requestVoid(AuthEndpoint.logout(refreshToken: refreshToken))
     }
 }

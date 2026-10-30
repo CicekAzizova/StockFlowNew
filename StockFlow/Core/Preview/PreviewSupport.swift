@@ -130,6 +130,9 @@ struct PreviewTokenStorage: TokenStoring {
     func saveToken(_ token: String) throws {}
     func readToken() throws -> String? { nil }
     func deleteToken() throws {}
+    func saveRefreshToken(_ token: String) throws {}
+    func readRefreshToken() throws -> String? { nil }
+    func deleteRefreshToken() throws {}
 }
 
 struct PreviewUserRepository: UserRepository {
@@ -140,6 +143,7 @@ struct PreviewAuthRepository: AuthRepository {
     func login(email: String, password: String) async throws -> LoginResponse {
         throw PreviewError.failed
     }
+    func logout(refreshToken: String) async {}
 }
 
 struct PreviewStoreRepository: StoreRepository {
