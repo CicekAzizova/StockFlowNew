@@ -77,7 +77,11 @@ struct LockView: View {
 
         if !appLockManager.unlock(with: pin) {
             pin = ""
-            errorMessage = "Wrong PIN. Try again."
+            if appLockManager.attemptsLeft == 0 {
+                appStateManager.logout()
+            } else {
+                errorMessage = "Wrong PIN. Attempts left: \(appLockManager.attemptsLeft)"
+            }
         }
     }
 

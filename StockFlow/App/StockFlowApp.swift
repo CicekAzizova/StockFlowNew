@@ -21,6 +21,7 @@ struct StockFlowApp: App {
         if CommandLine.arguments.contains("-uitesting") {
             try? dependencies.tokenStorage.deleteToken()
             dependencies.appLockManager.disablePin()
+            dependencies.languageManager.language = .english
         }
         
         let appStateManager = AppStateManager(tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository)

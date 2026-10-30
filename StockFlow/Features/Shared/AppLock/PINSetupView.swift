@@ -162,7 +162,6 @@ struct PINSetupView: View {
         if await appLockManager.verifyBiometrics() {
             savePIN(confirmedPIN, useBiometrics: true)
         }
-        // Face ID alınmasa, ekranda qalır: yenidən cəhd edə və ya "Not now" seçə bilər.
     }
 
     private func savePIN(_ value: String, useBiometrics: Bool) {
@@ -171,7 +170,7 @@ struct PINSetupView: View {
             if useBiometrics {
                 appLockManager.setBiometrics(true)
             }
-            // isPinEnabled = true olur, AppRouter özü əsas ekrana keçir.
+        
         } catch {
             errorMessage = "Could not save the PIN. Please try again."
             resetToStart()

@@ -12,11 +12,16 @@ final class AppLockManager {
     private(set) var isLocked: Bool
     private(set) var isPinEnabled: Bool
     private(set) var isBiometricsEnabled: Bool
+    private(set) var failedAttempts: Int
+    
+    static let maxAttempts = 5
     
     private let pinStore: PinStoring
     private let biometrics: BiometricAuthenticating
     private let defaults: UserDefaults
     private let biometricKey = "biometrics_enabled"
+    private let attemptsKey = "pin_failed_attempts"
+
     
     init(
         pinStore: PinStoring,
@@ -29,10 +34,15 @@ final class AppLockManager {
         self.pinStore = pinStore
         self.biometrics = biometrics
         self.defaults = defaults
+        self.failedAttempts = defaults.integer(forKey: attemptsKey)
     }
     
     var canUseBiometrics: Bool {
         biometrics.isAvailable
+    }
+    
+    var attemptsLeft: Int {
+        max(Self.maxAttempts - failedAttempts, 0)
     }
     
     func setBiometrics(_ enabled: Bool) {
@@ -66,20 +76,36 @@ final class AppLockManager {
     }
     
     func unlock(with pin: String) -> Bool {
-        guard pinStore.verify(pin) else { return false }
+        guard pinStore.verify(pin) else {
+            registerFailedAttempt()
+            return false
+        }
+        resetAttempts()
         isLocked = false
         return true
     }
     
+    private func registerFailedAttempt() {
+        failedAttempts += 1
+        defaults.set(failedAttempts, forKey: attemptsKey)
+    }
+    
+    private func resetAttempts() {
+        failedAttempts = 0
+        defaults.removeObject(forKey: attemptsKey)
+    }
+    
     func enablePin(_ pin: String) throws {
         try pinStore.savePin(pin)
+        resetAttempts()
         isPinEnabled = true
     }
     
     func disablePin() {
         pinStore.deletePin()
-        setBiometrics(false)
+        resetAttempts()
         isLocked = false
         isPinEnabled = false
+        setBiometrics(false)
     }
 }
