@@ -11,7 +11,9 @@ protocol SalesAssociateRepository {
     func addSalesAssociate(request: SalesAssociateRequest) async throws -> SalesAssociateResponse
     func getSalesAssociates() async throws -> [SalesAssociateResponse]
 
-    func deleteSalesAssociate(id: Int) async throws 
+    func deleteSalesAssociate(id: Int) async throws
+    
+    func updateSalesAssociate(id: Int, request: UpdateSalesAssociateRequest) async throws -> SalesAssociateResponse
 }
 
 final class DefaultSalesAssociateRepository: SalesAssociateRepository {
@@ -32,5 +34,9 @@ final class DefaultSalesAssociateRepository: SalesAssociateRepository {
     
     func deleteSalesAssociate(id: Int) async throws  {
        try await networkService.requestVoid(SalesAssociateEndpoint.delete(id: id))
+    }
+    
+    func updateSalesAssociate(id: Int, request: UpdateSalesAssociateRequest) async throws -> SalesAssociateResponse {
+        try await networkService.request(SalesAssociateEndpoint.editSalesAssociate(id: id, request: request))
     }
 }

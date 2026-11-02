@@ -14,11 +14,4 @@ struct SalesAssociateRequest: Encodable {
     let phone: String
     let email: String
     let password:String
-    
-    enum CodingKeys: String, CodingKey {
-        case email, password, phone, fin
-        case name = "name"
-        case surname = "surname"
- 
-    }
 }

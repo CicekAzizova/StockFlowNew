@@ -58,7 +58,8 @@ extension Endpoint {
         
         request.httpMethod = method.rawValue
         
-        headers?.forEach { key , value in
+        headers?.forEach { key, value in
+            if key == HttpHeader.contentType && httpBody == nil { return }
             request.setValue(value, forHTTPHeaderField: key)
         }
         

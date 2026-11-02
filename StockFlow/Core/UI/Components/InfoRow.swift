@@ -20,6 +20,11 @@ struct InfoRow: View {
         self.title = title
         self.valueContent = AnyView(Text(localizedValue).foregroundStyle(.textPrimary))
     }
+    
+    init(title: LocalizedStringKey, date: Date) {
+        self.title = title
+        self.valueContent = AnyView(Text(date, format: .dateTime.day().month().year().hour().month()).foregroundStyle(.textPrimary))
+    }
 
     var body: some View {
         HStack {

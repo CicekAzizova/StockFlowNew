@@ -8,4 +8,6 @@
 enum TeamRoute: Hashable {
     case addSalesAssociate
     case salesAssociateDetail(SalesAssociateResponse)
+    case editSalesAssociate(SalesAssociateResponse)
+
 }

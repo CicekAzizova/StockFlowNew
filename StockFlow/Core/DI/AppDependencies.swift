@@ -164,8 +164,8 @@ final class AppDependencies {
     }
     
     @MainActor
-    func makeAddSalesAssociateViewModel() -> AddSalesAssociateViewModel {
-        AddSalesAssociateViewModel(repository: salesAssociateRepository)
+    func makeAddSalesAssociateViewModel(associate: SalesAssociateResponse? = nil) -> AddSalesAssociateViewModel {
+        AddSalesAssociateViewModel(repository: salesAssociateRepository, associate: associate)
     }
     
     @MainActor

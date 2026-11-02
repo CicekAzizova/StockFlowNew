@@ -159,10 +159,16 @@ struct PreviewImageUploadRepository: ImageUploadRepository {
 }
 
 struct PreviewSalesAssociateRepository: SalesAssociateRepository {
+    func updateSalesAssociate(id: Int, request: UpdateSalesAssociateRequest) async throws -> SalesAssociateResponse {
+        throw PreviewError.failed
+    }
+    
     func addSalesAssociate(request: SalesAssociateRequest) async throws -> SalesAssociateResponse {
         throw PreviewError.failed
     }
+    
     func getSalesAssociates() async throws -> [SalesAssociateResponse] { [] }
+    
     func deleteSalesAssociate(id: Int) async throws {}
 }
 

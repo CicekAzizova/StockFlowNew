@@ -73,8 +73,8 @@ struct SaleDetailView: View {
 
             InfoRow(
                 title: "Date",
-                value: sale.createdAt.formatted(date: .abbreviated, time: .shortened)
-            )
+                date: sale.createdAt)
+            
         }
         .font(.inter(.regular, size: 15))
         .padding()

@@ -15,12 +15,11 @@ final class SalesAssociateDetailViewModel {
     private let salesRepository: SalesRepository
     private let pageSize = 10
 
-    let associate: SalesAssociateResponse
+    private(set) var associate: SalesAssociateResponse
+    
 
-    // Delete
     var state: SalesAssociateDetailViewState = .idle
 
-    // Sales
     var salesState: AssociateSalesState = .idle
     var loadMoreError: String?
     private(set) var sales: [SaleResponse] = []
@@ -68,7 +67,17 @@ final class SalesAssociateDetailViewModel {
         }
     }
 
+
+    func reloadAssociate() async {
+        guard let updated = try? await repository
+            .getSalesAssociates()
+            .first(where: { $0.id == associate.id })
+        else { return }
+        associate = updated
+    }
+
     func refresh() async {
+        await reloadAssociate()
         await loadSales()
     }
 

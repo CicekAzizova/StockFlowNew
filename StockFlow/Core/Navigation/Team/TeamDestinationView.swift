@@ -23,6 +23,8 @@ struct TeamDestinationView: View {
             SalesAssociateDetailView(
                 viewModel: dependencies.makeSalesAssociateDetailViewModel(associate: associate), path: $path
             )
+        case .editSalesAssociate(let associate):
+            AddSalesAssociateView(viewModel: dependencies.makeAddSalesAssociateViewModel(associate: associate), path: $path)
         }
     }
 }

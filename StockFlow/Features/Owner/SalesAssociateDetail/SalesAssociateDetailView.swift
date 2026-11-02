@@ -32,13 +32,40 @@ struct SalesAssociateDetailView: View {
         }
         .navigationTitle("Sales Associate")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        path.append(TeamRoute.editSalesAssociate(viewModel.associate))
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .foregroundStyle(.textPrimary)
+                }
+                .disabled(viewModel.state.isDeleting)
+            }
+        }
         .task {
             await viewModel.loadSalesIfNeeded()
         }
-        .safeAreaInset(edge: .bottom) {
-            deleteButton
-                .padding()
-                .background(Color.background)
+        .task {
+            await viewModel.reloadAssociate()
+        }
+        .overlay {
+            if viewModel.state.isDeleting {
+                ProgressView("Deleting...")
+                    .padding()
+                    .background(.regularMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
         }
         .confirmationDialog(
             isPresented: $showingDeleteConfirmation,
@@ -153,29 +180,6 @@ struct SalesAssociateDetailView: View {
                     .foregroundStyle(.textSecondary)
             }
         }
-    }
-
-    // MARK: - Delete
-
-    private var deleteButton: some View {
-        Button(role: .destructive) {
-            showingDeleteConfirmation = true
-        } label: {
-            Group {
-                if viewModel.state.isDeleting {
-                    ProgressView().tint(.white)
-                } else {
-                    Text("Delete Sales Associate")
-                        .font(.inter(.semiBold, size: 16))
-                }
-            }
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(.red)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .disabled(viewModel.state.isDeleting)
     }
 
     private var initials: String {

@@ -12,6 +12,14 @@ extension String {
         trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
+    var trimmed: String {
+        trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var nilIfBlank: String? {
+        isBlank ? nil : trimmed
+    }
+    
     var isValidEmail: Bool {
         range(of: #"^[^\s@]+@[^\s@]+\.[^\s@]+$"# , options: .regularExpression) != nil
     }

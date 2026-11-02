@@ -9,6 +9,7 @@ enum SalesAssociateEndpoint: Endpoint {
    
     case addSalesAssociate(SalesAssociateRequest)
     case getSalesAssociates
+    case editSalesAssociate(id: Int, request: UpdateSalesAssociateRequest)
     case delete(id: Int)
     
     var path: String {
@@ -19,6 +20,8 @@ enum SalesAssociateEndpoint: Endpoint {
             "/users/\(id)"
         case .getSalesAssociates:
             "/users"
+        case .editSalesAssociate(let id, _):
+            "/users/sales-associate/\(id)"
         }
     }
     
@@ -34,6 +37,8 @@ enum SalesAssociateEndpoint: Endpoint {
                 .delete
         case .getSalesAssociates:
                 .get
+        case .editSalesAssociate:
+                .patch
         }
     }
     
@@ -45,6 +50,8 @@ enum SalesAssociateEndpoint: Endpoint {
             return nil
         case .getSalesAssociates:
             return nil
+        case .editSalesAssociate(_, let request):
+            return request
         }
     }
     

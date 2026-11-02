@@ -25,7 +25,7 @@ struct AddSalesAssociateView: View {
                 )
                 .padding(24)
         }
-        .navigationTitle("Add Sales Associate")
+        .navigationTitle(viewModel.isEdit ? LocalizedStringKey("Edit Sales Associate") : LocalizedStringKey("Add Sales Associate"))
         
     }
     
@@ -35,13 +35,13 @@ struct AddSalesAssociateView: View {
         case .idle:
             associateScreen
         case .loading:
-            ProgressView("Creating...")
+            ProgressView(viewModel.isEdit ? LocalizedStringKey("Saving...") : LocalizedStringKey("Creating..."))
         case .success(_):
-            ProgressView("Created successfully...")
+            ProgressView(viewModel.isEdit ? LocalizedStringKey("Saved successfully...") : LocalizedStringKey("Created successfully..."))
         case .error(let message):
             VStack(spacing: 12) {
                 associateScreen
-                
+
                 Text(message)
                     .foregroundStyle(.red)
                     .font(.footnote)
@@ -123,13 +123,13 @@ struct AddSalesAssociateView: View {
             )
             
             AppTextFieldView(
-                title: "Password",
-                placeholder: "Password",
+                title: viewModel.isEdit ? "New password" : "Password" ,
+                placeholder: viewModel.isEdit ? "Leave empty to keep current" : "Password",
                 icon: nil,
                 focusedField: .password,
                 errorMessage: viewModel.passwordError,
-                textContentType: .password,
-                submitLabel: .next,
+                textContentType: .newPassword,
+                submitLabel: .done,
                 text: $viewModel.password,
                 focusedFieldBinding: $focusedField
             )
@@ -137,13 +137,13 @@ struct AddSalesAssociateView: View {
         }
     }
     
-    var createSalesAssociateButton: some View  {
+    var salesAssociateButton: some View  {
         AppButtonView(
-            title: "Create Sales Associate",
+            title: viewModel.isEdit ? "Save Changes" : "Create Sales Associate",
             isLoading: viewModel.state.isLoading ,
             background: .brandPrimary) {
                 Task {
-                  await viewModel.createSalesAssociate()
+                  await viewModel.save()
                     
                     if case .success = viewModel.state {
                         if !path.isEmpty {
@@ -158,7 +158,7 @@ struct AddSalesAssociateView: View {
     var associateScreen: some View {
         ScrollView(showsIndicators: false) {
             associateForm
-            createSalesAssociateButton
+            salesAssociateButton
         }
         .scrollDismissesKeyboard(.interactively)
         .dismissKeyboardOnTap()

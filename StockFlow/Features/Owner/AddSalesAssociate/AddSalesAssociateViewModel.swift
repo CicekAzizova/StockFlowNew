@@ -16,6 +16,8 @@ final class AddSalesAssociateViewModel {
     
     var state: AddSalesAssociateViewState = .idle
     
+    let associate: SalesAssociateResponse?
+    
     var name: String = ""
     var surname: String = ""
     var fin: String = ""
@@ -28,8 +30,21 @@ final class AddSalesAssociateViewModel {
     var emailError: String?
     var passwordError: String?
     
-    init(repository: SalesAssociateRepository) {
+    init(repository: SalesAssociateRepository,associate: SalesAssociateResponse? = nil ) {
         self.repository = repository
+        self.associate = associate
+        
+        guard let associate else { return }
+        
+        name = associate.name
+        surname = associate.surname
+        fin = associate.fin
+        phone = associate.phone
+        email = associate.email
+        
+    }
+    var isEdit: Bool {
+        associate != nil
     }
     
     func createSalesAssociate() async {
@@ -51,6 +66,40 @@ final class AddSalesAssociateViewModel {
             state = .success(response)
         } catch {
             state = .error(error.localizedDescription)
+        }
+    }
+    
+    func updateSalesAssociate() async {
+        
+        guard let associate else { return }
+        
+        guard validateFields() else { return }
+        state = .loading
+        do {
+            let response = try  await repository.updateSalesAssociate(
+                id: associate.id,
+                request: UpdateSalesAssociateRequest(
+                    name: name.trimmed,
+                    surname: surname.trimmed,
+                    fin: fin.trimmed,
+                    phone: phone.trimmed,
+                    email: email.trimmed,
+                    password: password.nilIfBlank
+                )
+            )
+            state = .success(response)
+        } catch {
+            state = .error(error.localizedDescription)
+
+        }
+        
+    }
+    
+    func save() async {
+        if isEdit {
+            await updateSalesAssociate()
+        } else {
+            await createSalesAssociate()
         }
     }
     
@@ -76,10 +125,19 @@ final class AddSalesAssociateViewModel {
             emailError = "Enter a valid email."
         }
 
-        if password.isEmpty {
-            passwordError = "Password is required."
-        } else if password.count < 6 {
-            passwordError = "Password must contain at least 6 characters."
+        
+        if isEdit {
+            if !password.isEmpty {
+                if password.count < 6 {
+                    passwordError = "Password must contain at least 6 characters."
+                }
+            }
+        } else {
+            if password.isEmpty {
+                passwordError = "Password is required."
+            } else if password.count < 6 {
+                passwordError = "Password must contain at least 6 characters."
+            }
         }
         
         return nameError == nil &&
