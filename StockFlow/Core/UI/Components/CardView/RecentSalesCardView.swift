@@ -10,17 +10,16 @@ import SwiftUI
 struct RecentSalesCardView: View {
     let sale: SaleResponse
 
+    private var hasImage: Bool {
+        guard let url = sale.productImageUrl else { return false }
+        return !url.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         HStack(spacing: 12) {
 
-            Image(systemName: "bag")
-                .font(.system(size: 20))
-                .foregroundStyle(.brandPrimary)
-                .frame(width: 40, height: 40)
-                .background(.brandPrimary.opacity(0.1))
-                .clipShape(
-                    RoundedRectangle(cornerRadius: 10)
-                )
+            productImage
+
             VStack(alignment: .leading) {
                 Text(sale.productName)
                     .font(.inter(.medium, size: 16))
@@ -55,5 +54,26 @@ struct RecentSalesCardView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.primary.opacity(0.08), lineWidth: 1)
         )
+    }
+
+    @ViewBuilder
+    private var productImage: some View {
+        if hasImage {
+            RemoteImageView(
+                imageUrl: sale.productImageUrl,
+                width: 40,
+                height: 40,
+                cornerRadius: 10
+            )
+        } else {
+            Image(systemName: "bag")
+                .font(.system(size: 20))
+                .foregroundStyle(.brandPrimary)
+                .frame(width: 40, height: 40)
+                .background(.brandPrimary.opacity(0.1))
+                .clipShape(
+                    RoundedRectangle(cornerRadius: 10)
+                )
+        }
     }
 }

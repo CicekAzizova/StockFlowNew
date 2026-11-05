@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct HomeView: View {
-    
+
     @State var viewModel: HomeViewModel
     @Binding var path: NavigationPath
-    
+
     let user: User
-    
+
     init(
         viewModel: HomeViewModel,
         path: Binding<NavigationPath>,
@@ -23,39 +23,41 @@ struct HomeView: View {
         self._path = path
         self.user = user
     }
-    
+
     var homeView: some View {
-        VStack(alignment: .leading,spacing: 16) {
-            HomeHeaderView(
-                user: user,
-                subtitle: user.role == .owner
-                ? LocalizedStringKey("Owner access • Full store management")
-                : LocalizedStringKey("Sales Associate access • Sales operations")
-            )
-            ScrollView(showsIndicators: false) {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
                 HomeSummaryGrid(
                     todaySales: viewModel.todaySales,
                     totalSales: viewModel.revenue,
                     productsCount: viewModel.productsCount,
-                    lowStockCount: viewModel.lowStockCount
+                    lowStockCount: viewModel.lowStockCount,
+                    associatesCount: viewModel.associatesCount
                 )
-                .padding(.vertical,16)
+
                 RecentSalesSection(sales: viewModel.recentSales, onSeeAll: {
                     path.append(HomeRoute.salesHistory)
                 }, path: $path)
-                LowStockSection(products: viewModel.lowStockProducts, path: $path)
+
+                LowStockSection(products: viewModel.lowStockProducts, totalCount: viewModel.lowStockCount, path: $path)
             }
+            .padding(16)
         }
-        .padding()
     }
-    
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             Color.background
                 .ignoresSafeArea()
-            
-            content
+
+            VStack(spacing: 0) {
+                HomeHeaderView(user: user)
+
+                content
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             await viewModel.loadHome()
         }
@@ -63,7 +65,7 @@ struct HomeView: View {
             await viewModel.refresh()
         }
     }
-    
+
     @ViewBuilder
     var content: some View {
         switch viewModel.state {

@@ -17,6 +17,7 @@ struct SaleResponse: Decodable, Hashable {
     let soldBy: Int?
     let sellerName: String?
     let createdAt: Date
+    var productImageUrl: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -28,6 +29,8 @@ struct SaleResponse: Decodable, Hashable {
         case soldBy = "sold_by"
         case sellerName = "seller_name"
         case createdAt = "created_at"
+        case productImageUrl = "product_image_url"
+
     }
 }
 
