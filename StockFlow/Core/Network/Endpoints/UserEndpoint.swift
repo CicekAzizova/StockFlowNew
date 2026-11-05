@@ -17,6 +17,8 @@ enum UserEndpoint: Endpoint {
     case deleteProfileAvatar
     case changePassword(ChangePasswordRequest)
     case deleteAccount(DeleteAccountRequest)
+    case heartbeat
+
     
     var path: String {
         switch self {
@@ -26,6 +28,8 @@ enum UserEndpoint: Endpoint {
             "/users/me/avatar"
         case .changePassword:
             "/auth/change-password"
+        case .heartbeat:
+            "/users/me/heartbeat"
         }
     }
     
@@ -35,7 +39,7 @@ enum UserEndpoint: Endpoint {
                 .get
         case .editProfile:
                 .patch
-        case .uploadProfileAvatar, .changePassword:
+        case .uploadProfileAvatar, .changePassword, .heartbeat:
                 .post
         case .deleteProfileAvatar, .deleteAccount:
                 .delete
@@ -48,6 +52,11 @@ enum UserEndpoint: Endpoint {
         case .changePassword(let request): request
         case .deleteAccount(let request): request
         case .getProfile, .uploadProfileAvatar, .deleteProfileAvatar: nil
+        case .heartbeat:
+            EmptyBody()
         }
     }
 }
+
+/// Gövdəsi olmayan POST sorğuları üçün `{}` kimi göndərilir.
+private struct EmptyBody: Encodable {}

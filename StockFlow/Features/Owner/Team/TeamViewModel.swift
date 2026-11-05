@@ -11,52 +11,52 @@ import Foundation
 @MainActor
 final class TeamViewModel {
 
-    private let repository: SalesAssociateRepository
+    private let repository: SellerRepository
 
     var state: TeamViewState = .idle
 
     var searchText = ""
 
-    init(repository: SalesAssociateRepository) {
+    init(repository: SellerRepository) {
         self.repository = repository
     }
 
-    var filteredAssociates: [SalesAssociateResponse] {
+    var filteredSellers: [SellerResponse] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return salesAssociates }
+        guard !query.isEmpty else { return sellers }
 
-        return salesAssociates.filter {
+        return sellers.filter {
             "\($0.name) \($0.surname)".localizedStandardContains(query)
                 || $0.email.localizedStandardContains(query)
                 || $0.phone.contains(query)
         }
     }
 
-    var salesAssociates: [SalesAssociateResponse] = []
+    var sellers: [SellerResponse] = []
 
-    var salesAssociateCount: Int {
-        salesAssociates.count
+    var sellerCount: Int {
+        sellers.count
     }
 
     /// Hazırda onlayn olan satıcıların sayı (deaktivlər sayılmır).
     var onlineCount: Int {
-        salesAssociates.filter { $0.isCurrentlyOnline && !$0.isDeactivated }.count
+        sellers.filter { $0.isCurrentlyOnline && !$0.isDeactivated }.count
     }
 
     var totalSales: Double {
-        salesAssociates.first?.totalSalesThisMonth ?? 0
+        sellers.first?.totalSalesThisMonth ?? 0
     }
 
     var todayTotalSales: Double {
-        salesAssociates.reduce(0) { $0 + $1.todaySales }
+        sellers.reduce(0) { $0 + $1.todaySales }
     }
 
-    func loadSalesAssociates() async {
+    func loadSellers() async {
         let previousState = state
         if !state.isLoaded { state = .loading }
 
         do {
-            salesAssociates = try await repository.getSalesAssociates()
+            sellers = try await repository.getSellers()
             state = .loaded
         }
         catch is CancellationError {
@@ -68,6 +68,6 @@ final class TeamViewModel {
     }
 
     func refresh() async {
-        await loadSalesAssociates()
+        await loadSellers()
     }
 }

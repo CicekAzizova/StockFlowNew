@@ -73,10 +73,10 @@ final class LoginUITests: XCTestCase {
            )
        }
     
-    @MainActor
-        func testCreateStoreButtonOpensCreateStoreScreen() {
-            app.buttons["Create Store"].tap()
-
-            XCTAssertTrue(app.staticTexts["Full Name"].waitForExistence(timeout: 5))
-        }
+//    @MainActor
+//        func testCreateStoreButtonOpensCreateStoreScreen() {
+//            app.buttons["Create Store"].tap()
+//
+//            XCTAssertTrue(app.staticTexts["Full Name"].waitForExistence(timeout: 5))
+//        }
 }

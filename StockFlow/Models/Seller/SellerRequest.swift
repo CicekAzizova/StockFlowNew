@@ -1,5 +1,5 @@
 //
-//  SalesAssociateRequest.swift
+//  SellerRequest.swift
 //  StockFlow
 //
 //  Created by Cicek on 05.10.26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SalesAssociateRequest: Encodable {
+struct SellerRequest: Encodable {
     let name: String
     let surname: String
     let fin: String

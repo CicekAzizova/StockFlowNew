@@ -29,7 +29,7 @@ final class AppDependencies {
     
     let productsStore: ProductsStore
     
-    let salesAssociateRepository: SalesAssociateRepository
+    let sellerRepository: SellerRepository
     
     let salesStore: SalesStore
     let salesRepository: SalesRepository
@@ -70,7 +70,7 @@ final class AppDependencies {
         
         let productsStore = ProductsStore(productRepository: productRepository)
         
-        let salesAssociateRepository = DefaultSalesAssociateRepository(networkService: networkService)
+        let sellerRepository = DefaultSellerRepository(networkService: networkService)
  
         let salesRepository = DefaultSalesRepository(networkService: networkService)
         let salesStore = SalesStore(salesRepository: salesRepository)
@@ -93,7 +93,7 @@ final class AppDependencies {
         
         self.productsStore = productsStore
         
-        self.salesAssociateRepository = salesAssociateRepository
+        self.sellerRepository = sellerRepository
         
         self.salesRepository = salesRepository
         self.salesStore = salesStore
@@ -107,7 +107,7 @@ final class AppDependencies {
         userRepository: UserRepository,
         productRepository: ProductRepository,
         imageUploadRepository: ImageUploadRepository,
-        salesAssociateRepository: SalesAssociateRepository,
+        sellerRepository: SellerRepository,
         salesRepository: SalesRepository
     ) {
         self.tokenStorage = tokenStorage
@@ -119,7 +119,7 @@ final class AppDependencies {
         self.productRepository = productRepository
         self.imageUploadRepository = imageUploadRepository
         self.productsStore = ProductsStore(productRepository: productRepository)
-        self.salesAssociateRepository = salesAssociateRepository
+        self.sellerRepository = sellerRepository
         self.salesRepository = salesRepository
         self.salesStore = SalesStore(salesRepository: salesRepository)
         self.languageManager = LanguageManager()
@@ -168,30 +168,32 @@ final class AppDependencies {
     }
     
     @MainActor
-    func makeHomeViewModel() -> HomeViewModel {
+    func makeHomeViewModel(includesTeam: Bool = false) -> HomeViewModel {
         HomeViewModel(
-            productStore: productsStore, salesStore: salesStore
+            productStore: productsStore,
+            salesStore: salesStore,
+            sellerRepository: includesTeam ? sellerRepository : nil
         )
     }
     
     @MainActor
-    func makeAddSalesAssociateViewModel(associate: SalesAssociateResponse? = nil) -> AddSalesAssociateViewModel {
-        AddSalesAssociateViewModel(repository: salesAssociateRepository, associate: associate)
+    func makeAddSellerViewModel(seller: SellerResponse? = nil) -> AddSellerViewModel {
+        AddSellerViewModel(repository: sellerRepository, associate: seller)
     }
     
     @MainActor
     func makeTeamViewModel() -> TeamViewModel {
-        TeamViewModel(repository: salesAssociateRepository)
+        TeamViewModel(repository: sellerRepository)
     }
     
     @MainActor
-    func makeSalesAssociateDetailViewModel(associate: SalesAssociateResponse) -> SalesAssociateDetailViewModel {
-        SalesAssociateDetailViewModel(repository: salesAssociateRepository, salesRepository: salesRepository, associate: associate)
+    func makeSellerDetailViewModel(seller: SellerResponse) -> SellerDetailViewModel {
+        SellerDetailViewModel(repository: sellerRepository, salesRepository: salesRepository, associate: seller)
     }
     
     @MainActor
-    func makeSalesAssociateSalesViewModel() -> SalesAssociateSalesViewModel {
-        SalesAssociateSalesViewModel(salesStore: salesStore)
+    func makeSellerSalesViewModel() -> SellerSalesViewModel {
+        SellerSalesViewModel(salesStore: salesStore)
     }
     
     @MainActor

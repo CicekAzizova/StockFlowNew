@@ -1,5 +1,5 @@
 //
-//  SalesAssociateActionsCard.swift
+//  SellerActionsCard.swift
 //  StockFlow
 //
 //  Created by Cicek on 04.11.26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SalesAssociateActionsCard: View {
+struct SellerActionsCard: View {
     let isDeactivated: Bool
     let isBusy: Bool
     let onToggleActiveTap: () -> Void

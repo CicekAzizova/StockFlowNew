@@ -1,5 +1,5 @@
 //
-//  SalesAssociateDetailView.swift
+//  SellerDetailView.swift
 //  StockFlow
 //
 //  Created by Cicek on 14.10.26.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct SalesAssociateDetailView: View {
-    @State var viewModel: SalesAssociateDetailViewModel
+struct SellerDetailView: View {
+    @State var viewModel: SellerDetailViewModel
     @State private var showingDeleteConfirmation = false
     @State private var showingDeactivateConfirmation = false
     @Environment(\.dismiss) private var dismiss
@@ -30,7 +30,7 @@ struct SalesAssociateDetailView: View {
                     VStack(spacing: 20) {
                         infoCard
                         salesSection
-                        SalesAssociateActionsCard(
+                        SellerActionsCard(
                             isDeactivated: viewModel.associate.isDeactivated,
                             isBusy: isBusy,
                             onToggleActiveTap: toggleActive,
@@ -59,16 +59,20 @@ struct SalesAssociateDetailView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
-        .confirmationDialog(
-            isPresented: $showingDeleteConfirmation,
-            title: "Delete Sales Associate?",
-            message: "This team member will be removed permanently.",
-            confirmTitle: "Delete"
-        ) {
-            Task {
-                await viewModel.deleteSalesAssociate()
-                if case .deleted = viewModel.state { dismiss() }
-            }
+        .sheet(isPresented: $showingDeleteConfirmation) {
+            DeleteAssociateSheet(
+                associate: viewModel.associate,
+                salesCount: viewModel.salesCount,
+                onConfirm: {
+                    Task {
+                        await viewModel.deleteSeller()
+                        if case .deleted = viewModel.state { dismiss() }
+                    }
+                },
+                onDeactivate: viewModel.associate.isDeactivated
+                    ? nil
+                    : { Task { await viewModel.deactivate() } }
+            )
         }
         .confirmationDialog(
             isPresented: $showingDeactivateConfirmation,
@@ -132,14 +136,14 @@ struct SalesAssociateDetailView: View {
             systemImage: "pencil",
             accessibilityLabel: "Edit"
         ) {
-            path.append(TeamRoute.editSalesAssociate(viewModel.associate))
+            path.append(TeamRoute.editSeller(viewModel.associate))
         }
         .disabled(isBusy)
     }
 
     private var profile: some View {
         HStack(spacing: 14) {
-            SalesAssociateAvatar(associate: viewModel.associate, size: 64)
+            SellerAvatar(associate: viewModel.associate, size: 64)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(viewModel.associate.name) \(viewModel.associate.surname)")

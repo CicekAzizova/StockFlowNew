@@ -1,5 +1,5 @@
 //
-//  AddSalesAssociateViewModel.swift
+//  AddSellerViewModel.swift
 //  StockFlow
 //
 //  Created by Cicek on 05.10.26.
@@ -10,13 +10,13 @@ import Foundation
 @Observable
 @MainActor
 
-final class AddSalesAssociateViewModel {
+final class AddSellerViewModel {
     
-    private let repository: SalesAssociateRepository
+    private let repository: SellerRepository
     
-    var state: AddSalesAssociateViewState = .idle
+    var state: AddSellerViewState = .idle
     
-    let associate: SalesAssociateResponse?
+    let associate: SellerResponse?
     
     var name: String = ""
     var surname: String = ""
@@ -30,7 +30,7 @@ final class AddSalesAssociateViewModel {
     var emailError: String?
     var passwordError: String?
     
-    init(repository: SalesAssociateRepository,associate: SalesAssociateResponse? = nil ) {
+    init(repository: SellerRepository,associate: SellerResponse? = nil ) {
         self.repository = repository
         self.associate = associate
         
@@ -47,14 +47,14 @@ final class AddSalesAssociateViewModel {
         associate != nil
     }
     
-    func createSalesAssociate() async {
+    func createSeller() async {
         guard validateFields() else { return }
         
         state = .loading
         
         do {
-            let response = try await repository.addSalesAssociate(
-                request: SalesAssociateRequest(
+            let response = try await repository.addSeller(
+                request: SellerRequest(
                     name: name,
                     surname: surname,
                     fin: fin,
@@ -69,16 +69,16 @@ final class AddSalesAssociateViewModel {
         }
     }
     
-    func updateSalesAssociate() async {
+    func updateSeller() async {
         
         guard let associate else { return }
         
         guard validateFields() else { return }
         state = .loading
         do {
-            let response = try  await repository.updateSalesAssociate(
+            let response = try  await repository.updateSeller(
                 id: associate.id,
-                request: UpdateSalesAssociateRequest(
+                request: UpdateSellerRequest(
                     name: name.trimmed,
                     surname: surname.trimmed,
                     fin: fin.trimmed,
@@ -97,9 +97,9 @@ final class AddSalesAssociateViewModel {
     
     func save() async {
         if isEdit {
-            await updateSalesAssociate()
+            await updateSeller()
         } else {
-            await createSalesAssociate()
+            await createSeller()
         }
     }
     

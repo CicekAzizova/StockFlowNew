@@ -1,5 +1,5 @@
 //
-//  SalesAssociateDetailViewModel.swift
+//  SellerDetailViewModel.swift
 //  StockFlow
 //
 //  Created by Cicek on 14.10.26.
@@ -9,15 +9,15 @@ import Foundation
 
 @Observable
 @MainActor
-final class SalesAssociateDetailViewModel {
+final class SellerDetailViewModel {
 
-    private let repository: SalesAssociateRepository
+    private let repository: SellerRepository
     private let salesRepository: SalesRepository
     private let pageSize = 10
 
-    private(set) var associate: SalesAssociateResponse
+    private(set) var associate: SellerResponse
 
-    var state: SalesAssociateDetailViewState = .idle
+    var state: SellerDetailViewState = .idle
 
     /// Deaktiv/aktiv etmə zamanı true olur.
     private(set) var isChangingStatus = false
@@ -32,9 +32,9 @@ final class SalesAssociateDetailViewModel {
     private var isLoadingMore = false
 
     init(
-        repository: SalesAssociateRepository,
+        repository: SellerRepository,
         salesRepository: SalesRepository,
-        associate: SalesAssociateResponse
+        associate: SellerResponse
     ) {
         self.repository = repository
         self.salesRepository = salesRepository
@@ -83,7 +83,7 @@ final class SalesAssociateDetailViewModel {
 
     func reloadAssociate() async {
         guard let updated = try? await repository
-            .getSalesAssociates()
+            .getSellers()
             .first(where: { $0.id == associate.id })
         else { return }
         associate = updated
@@ -118,10 +118,10 @@ final class SalesAssociateDetailViewModel {
 
     // MARK: - Delete
 
-    func deleteSalesAssociate() async {
+    func deleteSeller() async {
         state = .deleting
         do {
-            try await repository.deleteSalesAssociate(id: associate.id)
+            try await repository.deleteSeller(id: associate.id)
             state = .deleted
         } catch {
             state = .error(error.localizedDescription)
@@ -131,15 +131,15 @@ final class SalesAssociateDetailViewModel {
     // MARK: - Deactivate / activate
 
     func deactivate() async {
-        await changeStatus { try await repository.deactivateSalesAssociate(id: associate.id) }
+        await changeStatus { try await repository.deactivateSeller(id: associate.id) }
     }
 
     func activate() async {
-        await changeStatus { try await repository.activateSalesAssociate(id: associate.id) }
+        await changeStatus { try await repository.activateSeller(id: associate.id) }
     }
 
     private func changeStatus(
-        _ action: () async throws -> SalesAssociateResponse
+        _ action: () async throws -> SellerResponse
     ) async {
         guard !isChangingStatus else { return }
         isChangingStatus = true

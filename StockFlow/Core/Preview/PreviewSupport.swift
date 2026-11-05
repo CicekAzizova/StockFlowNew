@@ -25,11 +25,11 @@ enum PreviewData {
         storeName: "Demo Store"
     )
 
-    static let salesAssociate = User(
+    static let seller = User(
         id: 2,
         email: "seller@stockflow.com",
         name: "Seller",
-        role: .salesAssociate,
+        role: .seller,
         storeName: "Demo Store"
     )
 
@@ -174,26 +174,26 @@ struct PreviewImageUploadRepository: ImageUploadRepository {
     }
 }
 
-struct PreviewSalesAssociateRepository: SalesAssociateRepository {
-    func deactivateSalesAssociate(id: Int) async throws -> SalesAssociateResponse {
+struct PreviewSellerRepository: SellerRepository {
+    func deactivateSeller(id: Int) async throws -> SellerResponse {
         throw PreviewError.failed
     }
     
-    func activateSalesAssociate(id: Int) async throws -> SalesAssociateResponse {
+    func activateSeller(id: Int) async throws -> SellerResponse {
         throw PreviewError.failed
     }
     
-    func updateSalesAssociate(id: Int, request: UpdateSalesAssociateRequest) async throws -> SalesAssociateResponse {
+    func updateSeller(id: Int, request: UpdateSellerRequest) async throws -> SellerResponse {
         throw PreviewError.failed
     }
     
-    func addSalesAssociate(request: SalesAssociateRequest) async throws -> SalesAssociateResponse {
+    func addSeller(request: SellerRequest) async throws -> SellerResponse {
         throw PreviewError.failed
     }
     
-    func getSalesAssociates() async throws -> [SalesAssociateResponse] { [] }
+    func getSellers() async throws -> [SellerResponse] { [] }
     
-    func deleteSalesAssociate(id: Int) async throws {}
+    func deleteSeller(id: Int) async throws {}
 }
 
 // MARK: - Preview AppDependencies
@@ -212,7 +212,7 @@ extension AppDependencies {
             userRepository: PreviewUserRepository(),
             productRepository: PreviewProductRepository(result: productResult ?? .success(PreviewData.products)),
             imageUploadRepository: PreviewImageUploadRepository(),
-            salesAssociateRepository: PreviewSalesAssociateRepository(),
+            sellerRepository: PreviewSellerRepository(),
             salesRepository: PreviewSalesRepository(fails: salesFails, empty: salesEmpty)
         )
     }

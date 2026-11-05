@@ -1,28 +1,28 @@
 //
-//  SalesAssociateEndpoint.swift
+//  SellerEndpoint.swift
 //  StockFlow
 //
 //  Created by Cicek on 05.10.26.
 //
 
-enum SalesAssociateEndpoint: Endpoint {
+enum SellerEndpoint: Endpoint {
 
-    case addSalesAssociate(SalesAssociateRequest)
-    case getSalesAssociates
-    case editSalesAssociate(id: Int, request: UpdateSalesAssociateRequest)
+    case addSeller(SellerRequest)
+    case getSellers
+    case editSeller(id: Int, request: UpdateSellerRequest)
     case delete(id: Int)
     case deactivate(id: Int)
     case activate(id: Int)
 
     var path: String {
         switch self {
-        case .addSalesAssociate:
+        case .addSeller:
             "/users/sales-associate"
         case .delete(let id):
             "/users/\(id)"
-        case .getSalesAssociates:
+        case .getSellers:
             "/users"
-        case .editSalesAssociate(let id, _):
+        case .editSeller(let id, _):
             "/users/sales-associate/\(id)"
         case .deactivate(let id):
             "/users/sales-associate/\(id)/deactivate"
@@ -37,27 +37,27 @@ enum SalesAssociateEndpoint: Endpoint {
 
     var method: HttpMethod {
         switch self {
-        case .addSalesAssociate, .deactivate, .activate:
+        case .addSeller, .deactivate, .activate:
             .post
         case .delete:
             .delete
-        case .getSalesAssociates:
+        case .getSellers:
             .get
-        case .editSalesAssociate:
+        case .editSeller:
             .patch
         }
     }
 
     var httpBody: (any Encodable)? {
         switch self {
-        case .addSalesAssociate(let request):
+        case .addSeller(let request):
             return request
-        case .editSalesAssociate(_, let request):
+        case .editSeller(_, let request):
             return request
         case .deactivate, .activate:
             // Backend POST sorğusunda JSON gözləyir, ona görə boş obyekt: {}
             return EmptyBody()
-        case .delete, .getSalesAssociates:
+        case .delete, .getSellers:
             return nil
         }
     }

@@ -1,11 +1,11 @@
 //
-//  SalesAssociateDetailViewState.swift
+//  SellerDetailViewState.swift
 //  StockFlow
 //
 //  Created by Cicek on 14.10.26.
 //
 
-enum SalesAssociateDetailViewState {
+enum SellerDetailViewState {
     case idle
     case deleting
     case deleted

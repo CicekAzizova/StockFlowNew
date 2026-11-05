@@ -14,6 +14,12 @@ protocol UserRepository {
     func deleteAvatar() async throws -> User
     func changePassword(current: String, new: String) async throws
     func deleteAccount(password: String) async throws
+    /// Satıcının onlayn göründüyünü bildirən yüngül ping.
+    func sendHeartbeat() async throws
+}
+extension UserRepository {
+    /// Mock və Preview repository-lər bunu yazmaq məcburiyyətində qalmasın.
+        func sendHeartbeat() async throws {}
 }
 
 final class DefaultUserRepository: UserRepository {
@@ -66,4 +72,9 @@ final class DefaultUserRepository: UserRepository {
             UserEndpoint.deleteAccount(DeleteAccountRequest(password: password))
         )
     }
+    
+    func sendHeartbeat() async throws {
+        try await networkService.requestVoid(UserEndpoint.heartbeat)
+    }
 }
+ 

@@ -1,5 +1,5 @@
 //
-//  SalesView.swift
+//  SellerSalesView.swift
 //  StockFlow
 //
 //  Created by Cicek on 06.10.26.
@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct SalesAssociateSalesView: View {
+struct SellerSalesView: View {
     
-    @State var viewModel: SalesAssociateSalesViewModel
+    @State var viewModel: SellerSalesViewModel
     
     @Binding var path: NavigationPath
     var body: some View {

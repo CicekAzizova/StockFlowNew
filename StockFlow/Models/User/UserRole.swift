@@ -9,12 +9,12 @@ import SwiftUI
 
 enum UserRole: String, Decodable {
     case owner = "OWNER"
-    case salesAssociate = "SALES_ASSOCIATE"
+    case seller = "SALES_ASSOCIATE"
     
     var displayName: LocalizedStringKey {
         switch self {
         case .owner: "Owner"
-        case .salesAssociate: "Sales Associate"
+        case .seller: "Sales Associate"
         }
     }
 }

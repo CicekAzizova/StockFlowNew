@@ -28,7 +28,7 @@ struct TeamView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .task {
-            await viewModel.loadSalesAssociates()
+            await viewModel.loadSellers()
         }
     }
 
@@ -49,7 +49,7 @@ struct TeamView: View {
                         systemImage: "plus",
                         accessibilityLabel: "Add Sales Associate"
                     ) {
-                        path.append(TeamRoute.addSalesAssociate)
+                        path.append(TeamRoute.addSeller)
                     }
                 }
             }
@@ -74,7 +74,7 @@ struct TeamView: View {
 
     private var statsCard: some View {
         StatsRow(items: [
-            StatItem(value: viewModel.salesAssociateCount.formatted(), title: "Sales Associates"),
+            StatItem(value: viewModel.sellerCount.formatted(), title: "Sales Associates"),
             StatItem(value: viewModel.onlineCount.formatted(), title: "Online now"),
             StatItem(value: viewModel.todayTotalSales.asCurrency, title: "Today")
         ])
@@ -102,16 +102,16 @@ struct TeamView: View {
             ProgressView("Loading team...")
 
         case .loaded:
-            if viewModel.salesAssociates.isEmpty {
+            if viewModel.sellers.isEmpty {
                 ContentUnavailableView(
                     "No Team Members",
                     systemImage: "person.2",
                     description: Text("Add your first sales associate.")
                 )
-            } else if viewModel.filteredAssociates.isEmpty {
+            } else if viewModel.filteredSellers.isEmpty {
                 ContentUnavailableView.search(text: viewModel.searchText)
             } else {
-                associatesList
+                sellersList
             }
 
         case .error(let message):
@@ -123,7 +123,7 @@ struct TeamView: View {
         }
     }
 
-    private var associatesList: some View {
+    private var sellersList: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Sales Associates")
@@ -132,11 +132,11 @@ struct TeamView: View {
                     .textCase(.uppercase)
                     .padding(.horizontal, 6)
 
-                ForEach(viewModel.filteredAssociates, id: \.id) { associate in
+                ForEach(viewModel.filteredSellers, id: \.id) { seller in
                     Button {
-                        path.append(TeamRoute.salesAssociateDetail(associate))
+                        path.append(TeamRoute.sellerDetail(seller))
                     } label: {
-                        SalesAssociateInfoCardView(associate: associate)
+                        SellerInfoCardView(associate: seller)
                     }
                     .buttonStyle(.plain)
                 }

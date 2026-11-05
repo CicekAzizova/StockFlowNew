@@ -1,5 +1,5 @@
 //
-//  SalesAssociateResponse.swift
+//  SellerResponse.swift
 //  StockFlow
 //
 //  Created by Cicek on 05.10.26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SalesAssociateResponse: Decodable, Hashable {
+struct SellerResponse: Decodable, Hashable {
     let id: Int
     let name: String
     let surname: String

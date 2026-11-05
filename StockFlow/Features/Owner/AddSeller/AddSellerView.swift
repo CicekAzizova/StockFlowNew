@@ -1,14 +1,14 @@
 //
-//  AddSalesAssociateView.swift
+//  AddSellerView.swift
 //  StockFlow
 //
 //  Created by Cicek on 05.10.26.
 //
 import SwiftUI
 
-struct AddSalesAssociateView: View {
+struct AddSellerView: View {
     
-    @State var viewModel: AddSalesAssociateViewModel
+    @State var viewModel: AddSellerViewModel
     @FocusState private var focusedField: AddSalesFocusedField?
     @Binding var path: NavigationPath
     
@@ -16,18 +16,37 @@ struct AddSalesAssociateView: View {
         ZStack {
             Color.background
                 .ignoresSafeArea()
-            
-            content
-                .frame(
-                    maxWidth: .infinity,
-                    maxHeight: .infinity,
-                    alignment: .topLeading
-                )
-                .padding(24)
+            VStack {
+                header
+                content
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .topLeading
+                    )
+                    .padding(.horizontal, 24)
+                    .padding(.top, 24)
+            }
         }
-        .navigationTitle(viewModel.isEdit ? LocalizedStringKey("Edit Sales Associate") : LocalizedStringKey("Add Sales Associate"))
-        
+        .toolbar(.hidden, for: .navigationBar)
+
     }
+    
+    
+    // MARK: - Header
+
+    private var header: some View {
+        BrandScreenHeader(
+            title: viewModel.isEdit
+                ? LocalizedStringKey("Edit Sales Associate")
+                : LocalizedStringKey("Add Sales Associate"),
+            showsBackButton: true
+        )
+        .padding(.bottom, 16)
+        .brandHeaderBackground()
+    }
+
+    // MARK: - Content
     
     @ViewBuilder
     var content: some View {
@@ -137,7 +156,7 @@ struct AddSalesAssociateView: View {
         }
     }
     
-    var salesAssociateButton: some View  {
+    var sellerButton: some View  {
         AppButtonView(
             title: viewModel.isEdit ? "Save Changes" : "Create Sales Associate",
             isLoading: viewModel.state.isLoading ,
@@ -158,7 +177,7 @@ struct AddSalesAssociateView: View {
     var associateScreen: some View {
         ScrollView(showsIndicators: false) {
             associateForm
-            salesAssociateButton
+            sellerButton
         }
         .scrollDismissesKeyboard(.interactively)
         .dismissKeyboardOnTap()

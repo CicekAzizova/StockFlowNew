@@ -1,5 +1,5 @@
 //
-//  SalesAssociateCardView.swift
+//  SellerInfoCardView.swift
 //  StockFlow
 //
 //  Created by Cicek on 05.10.26.
@@ -8,9 +8,9 @@
 import SwiftUI
 
 /// Komanda siyahısında bir satıcı sətri.
-struct SalesAssociateInfoCardView: View {
+struct SellerInfoCardView: View {
 
-    let associate: SalesAssociateResponse
+    let associate: SellerResponse
 
     private var isDeactivated: Bool { associate.isDeactivated }
 
@@ -52,7 +52,7 @@ struct SalesAssociateInfoCardView: View {
     // MARK: - Avatar
 
     private var avatar: some View {
-        SalesAssociateAvatar(associate: associate, size: 44)
+        SellerAvatar(associate: associate, size: 44)
             .grayscale(isDeactivated ? 1 : 0)
             .overlay(alignment: .bottomTrailing) {
                 Circle()
@@ -70,19 +70,26 @@ struct SalesAssociateInfoCardView: View {
     // MARK: - Subtitle
 
     /// "Onlayn · telefon", "2 saat əvvəl · telefon" və ya "Deaktivdir · telefon".
-    private var subtitle: Text {
-        let phone = Text(verbatim: " · \(associate.phone)")
+    @ViewBuilder
+    private var subtitle: some View {
+        HStack(spacing: 0) {
+            if isDeactivated {
+                Text("Deactivated")
+                separator
+            } else if associate.isCurrentlyOnline {
+                Text("Online")
+                separator
+            } else if let date = associate.lastActiveDate {
+                Text(date, format: .relative(presentation: .numeric, unitsStyle: .wide))
+                separator
+            }
 
-        if isDeactivated {
-            return Text("Deactivated") + phone
+            Text(verbatim: associate.phone)
         }
-        if associate.isCurrentlyOnline {
-            return Text("Online") + phone
-        }
-        if let date = associate.lastActiveDate {
-            return Text(date, format: .relative(presentation: .numeric, unitsStyle: .wide)) + phone
-        }
-        return Text(verbatim: associate.phone)
+    }
+
+    private var separator: some View {
+        Text(verbatim: " · ")
     }
 
     // MARK: - Trailing

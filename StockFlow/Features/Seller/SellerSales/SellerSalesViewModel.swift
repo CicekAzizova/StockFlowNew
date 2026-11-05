@@ -1,5 +1,5 @@
 //
-//  SalesAssociateSalesViewModel.swift
+//  SellerSalesViewModel.swift
 //  StockFlow
 //
 //  Created by Cicek on 09.10.26.
@@ -10,7 +10,7 @@ import Foundation
 @Observable
 @MainActor
 
-final class SalesAssociateSalesViewModel {
+final class SellerSalesViewModel {
     private let salesStore: SalesStore
     
     var state: SalesViewState = .idle

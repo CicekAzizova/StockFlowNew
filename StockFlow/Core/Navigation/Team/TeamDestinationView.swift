@@ -14,17 +14,17 @@ struct TeamDestinationView: View {
 
     var body: some View {
         switch route {
-        case .addSalesAssociate:
-            AddSalesAssociateView(
-                viewModel: dependencies.makeAddSalesAssociateViewModel(),
+        case .addSeller:
+            AddSellerView(
+                viewModel: dependencies.makeAddSellerViewModel(),
                 path: $path
             )
-        case .salesAssociateDetail(let associate):
-            SalesAssociateDetailView(
-                viewModel: dependencies.makeSalesAssociateDetailViewModel(associate: associate), path: $path
+        case .sellerDetail(let seller):
+            SellerDetailView(
+                viewModel: dependencies.makeSellerDetailViewModel(seller: seller), path: $path
             )
-        case .editSalesAssociate(let associate):
-            AddSalesAssociateView(viewModel: dependencies.makeAddSalesAssociateViewModel(associate: associate), path: $path)
+        case .editSeller(let seller):
+            AddSellerView(viewModel: dependencies.makeAddSellerViewModel(seller: seller), path: $path)
         }
     }
 }

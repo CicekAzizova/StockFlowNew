@@ -36,8 +36,8 @@ struct AppRouter: View {
                         appStateManager: appStateManager,
                         user: appStateManager.user
                     )
-                case .salesAssociate:
-                    SaleAssociateTabView(
+                case .seller:
+                    SellerTabView(
                         dependencies: dependencies,
                         appStateManager: appStateManager,
                         user: appStateManager.user

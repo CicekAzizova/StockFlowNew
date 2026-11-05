@@ -1,14 +1,14 @@
 //
-//  AddSalesAssociateViewState.swift
+//  AddSellerViewState.swift
 //  StockFlow
 //
 //  Created by Cicek on 05.10.26.
 //
 
-enum AddSalesAssociateViewState {
+enum AddSellerViewState {
     case idle
     case loading
-    case success(SalesAssociateResponse)
+    case success(SellerResponse)
     case error(String)
     
     var isLoading: Bool {

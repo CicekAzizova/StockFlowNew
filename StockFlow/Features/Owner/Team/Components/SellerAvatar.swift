@@ -1,14 +1,14 @@
 //
-//  SalesAssociateAvatar.swift
+//  SellerAvatar.swift
 //  StockFlow
 //
 //  Created by Cicek on 04.11.26.
 //
 import SwiftUI
 
-struct SalesAssociateAvatar: View {
+struct SellerAvatar: View {
 
-    let associate: SalesAssociateResponse
+    let associate: SellerResponse
     var size: CGFloat = 44
 
     private static let colors: [Color] = [.blue, .brandTeal, .brandCoral, .purple, .brandGreen]

@@ -1,5 +1,5 @@
 //
-//  Sale.swift
+//  SellerTabView.swift
 //  StockFlow
 //
 //  Created by Cicek on 06.10.26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SaleAssociateTabView: View {
+struct SellerTabView: View {
     
     let dependencies: AppDependencies
     let appStateManager: AppStateManager
@@ -16,6 +16,7 @@ struct SaleAssociateTabView: View {
     @State private var productPath = NavigationPath()
     @State private var salesPath = NavigationPath()
     @State private var profilePath = NavigationPath()
+    @Environment(\.scenePhase) private var scenePhase
 
     
     let user: User?
@@ -84,7 +85,7 @@ struct SaleAssociateTabView: View {
             //MARK: - Sales
             Tab {
                 NavigationStack(path: $salesPath) {
-                    SalesAssociateSalesView(viewModel: dependencies.makeSalesAssociateSalesViewModel(), path: $salesPath)
+                    SellerSalesView(viewModel: dependencies.makeSellerSalesViewModel(), path: $salesPath)
                     
                         .navigationDestination(for: SalesRoute.self) { route in
                             SalesDestinationView(route: route, dependencies: dependencies)
@@ -123,6 +124,20 @@ struct SaleAssociateTabView: View {
                     .renderingMode(.template)
                 Text("Profile")
             }
+            
+        }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            await sendHeartbeats()
+        }
+    }
+    
+    /// Tətbiq açıq olanda hər 90 saniyədən bir "mən onlaynam" siqnalı göndərir.
+    /// scenePhase dəyişəndə (arxa plana keçəndə) task avtomatik dayanır.
+    private func sendHeartbeats() async {
+        while !Task.isCancelled {
+            try? await dependencies.userRepository.sendHeartbeat()
+            try? await Task.sleep(for: .seconds(90))
         }
     }
 }
@@ -134,10 +149,10 @@ struct SaleAssociateTabView: View {
         tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
     )
 
-    SaleAssociateTabView(
+    SellerTabView(
         dependencies: dependencies,
         appStateManager: appStateManager,
-        user: PreviewData.salesAssociate
+        user: PreviewData.seller
     )
 }
 
@@ -147,10 +162,10 @@ struct SaleAssociateTabView: View {
         tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
     )
 
-    SaleAssociateTabView(
+    SellerTabView(
         dependencies: dependencies,
         appStateManager: appStateManager,
-        user: PreviewData.salesAssociate
+        user: PreviewData.seller
     )
 }
 
@@ -163,10 +178,10 @@ struct SaleAssociateTabView: View {
         tokenStorage: dependencies.tokenStorage, userRepository: dependencies.userRepository
     )
 
-    SaleAssociateTabView(
+    SellerTabView(
         dependencies: dependencies,
         appStateManager: appStateManager,
-        user: PreviewData.salesAssociate
+        user: PreviewData.seller
     )
 }
 #endif

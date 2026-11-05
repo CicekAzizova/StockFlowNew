@@ -1,11 +1,11 @@
 //
-//  UpdateSalesAssociateRequest.swift
+//  UpdateSellerRequest.swift
 //  StockFlow
 //
 //  Created by Cicek on 02.11.26.
 //
 
-struct UpdateSalesAssociateRequest: Encodable {
+struct UpdateSellerRequest: Encodable {
     let name: String?
     let surname: String?
     let fin: String?

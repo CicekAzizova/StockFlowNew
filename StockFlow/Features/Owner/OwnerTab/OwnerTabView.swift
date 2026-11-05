@@ -27,7 +27,7 @@ struct OwnerTabView: View {
                 NavigationStack(path: $homePath) {
                     if let user {
                         HomeView(
-                            viewModel: dependencies.makeHomeViewModel(),
+                            viewModel: dependencies.makeHomeViewModel(includesTeam: true),
                             path: $homePath,
                             user: user
                         )
