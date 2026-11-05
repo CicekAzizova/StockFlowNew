@@ -9,6 +9,7 @@ import Foundation
 
 enum CreateStoreFocusedField: Hashable, CaseIterable {
     case name
+    case surname
     case email
     case password
     case phone

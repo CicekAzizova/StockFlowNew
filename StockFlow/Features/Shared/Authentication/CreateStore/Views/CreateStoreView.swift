@@ -93,19 +93,33 @@ struct CreateStoreView: View {
     var form: some View {
 
         AppTextFieldView(
-            title: "Full Name",
+            title: "Name",
             placeholder: "Your name",
             icon: nil,
             focusedField: .name,
             errorMessage: viewModel.fieldErrors[.name],
             submitLabel: .next,
             onSubmit: {
-                focusedField = .email
+                focusedField = .surname
             },
             text: $viewModel.name,
             focusedFieldBinding: $focusedField
         )
 
+        AppTextFieldView(
+            title: "Surname",
+            placeholder: "Your surname",
+            icon: nil,
+            focusedField: .surname,
+            errorMessage: viewModel.fieldErrors[.surname],
+            submitLabel: .next,
+            onSubmit: {
+                focusedField = .email
+            },
+            text: $viewModel.surname,
+            focusedFieldBinding: $focusedField
+        )
+        
         AppTextFieldView(
             title: "Email",
             placeholder: "you@example.com",

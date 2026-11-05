@@ -15,6 +15,7 @@ final class CreateStoreViewModel {
     var state: CreateStoreViewState = .idle
     
     var name: String = ""
+    var surname: String = ""
     var email: String = ""
     var password: String = ""
     var phone: String = ""
@@ -38,6 +39,7 @@ final class CreateStoreViewModel {
         state = .loading
         let request = StoreRequest(
                 name: name,
+                surname: surname,
                 email: email,
                 password: password,
                 phone: phone,

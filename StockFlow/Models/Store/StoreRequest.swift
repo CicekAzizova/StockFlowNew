@@ -9,6 +9,7 @@ import Foundation
 
 struct StoreRequest: Encodable {
     let name: String
+    let surname: String
     let email: String
     let password:String
     let phone: String
@@ -17,7 +18,7 @@ struct StoreRequest: Encodable {
     let storePhone: String
     
     enum CodingKeys: String, CodingKey {
-        case name, email, password, phone
+        case name, email, password, phone, surname
         case storeName = "store_name"
         case storeAddress = "store_address"
         case storePhone = "store_phone"
