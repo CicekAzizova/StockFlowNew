@@ -15,6 +15,8 @@ final class AppDependencies {
     
     let languageManager: LanguageManager
     
+    let appPreferences: AppPreferences
+    
     let authRepository: AuthRepository
     
     let storeRepository: StoreRepository
@@ -43,6 +45,8 @@ final class AppDependencies {
         
         let languageManager = LanguageManager()
         
+        let appPreferences = AppPreferences()
+        
         let networkService = DefaultNetworkService(tokenStoring: tokenStorage, tokenRefresher: TokenRefresher(tokenStorage: tokenStorage))
 
  
@@ -57,7 +61,7 @@ final class AppDependencies {
         )
         
         let userRepository = DefaultUserRepository(
-            networkService: networkService
+            networkService: networkService, tokenStorage: tokenStorage
         )
         
         let productRepository = DefaultProductRepository(networkService: networkService)
@@ -75,6 +79,7 @@ final class AppDependencies {
         self.networkService = networkService
         self.appLockManager = appLockManager
         self.languageManager = languageManager
+        self.appPreferences = appPreferences
 
         self.authRepository = authRepository
         
@@ -118,6 +123,7 @@ final class AppDependencies {
         self.salesRepository = salesRepository
         self.salesStore = SalesStore(salesRepository: salesRepository)
         self.languageManager = LanguageManager()
+        self.appPreferences = AppPreferences()
     }
     #endif
 
@@ -136,8 +142,13 @@ final class AppDependencies {
     }
     
     @MainActor
-    func makeProfileViewModel() -> ProfileViewModel {
-        ProfileViewModel(userRepository: userRepository)
+    func makeProfileViewModel(appStateManager: AppStateManager) -> ProfileViewModel {
+        ProfileViewModel(
+            userRepository: userRepository,
+            appStateManager: appStateManager,
+            productsStore: productsStore,
+            salesStore: salesStore
+        )
     }
     
     @MainActor

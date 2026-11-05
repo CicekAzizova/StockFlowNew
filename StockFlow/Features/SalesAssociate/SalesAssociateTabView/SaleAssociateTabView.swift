@@ -15,6 +15,8 @@ struct SaleAssociateTabView: View {
     @State private var homePath = NavigationPath()
     @State private var productPath = NavigationPath()
     @State private var salesPath = NavigationPath()
+    @State private var profilePath = NavigationPath()
+
     
     let user: User?
     
@@ -100,8 +102,20 @@ struct SaleAssociateTabView: View {
             //MARK: - Profile
             
             Tab {
-                NavigationStack {
-                    ProfileView(viewModel: dependencies.makeProfileViewModel(), appStateManager: appStateManager)
+                NavigationStack(path: $profilePath) {
+                    ProfileView(
+                        viewModel: dependencies.makeProfileViewModel(appStateManager: appStateManager),
+                        appStateManager: appStateManager,
+                        path: $profilePath
+                    )
+                    .navigationDestination(for: ProfileRoute.self) { route in
+                        ProfileDestinationView(
+                            route: route,
+                            user: user,
+                            dependencies: dependencies,
+                            path: $profilePath,
+                        )
+                    }
                 }
                 .id(languageManager.language)
             }label: {

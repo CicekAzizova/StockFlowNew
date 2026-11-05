@@ -12,6 +12,13 @@ struct User: Decodable {
     let name: String
     let role: UserRole
     let storeName: String?
+    var surname: String?
+    var phone: String?
+    var avatarUrl: String?
+    
+    var fullName: String {
+            [name, surname].compactMap { $0?.nilIfBlank }.joined(separator: " ")
+        }
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -19,5 +26,8 @@ struct User: Decodable {
         case name
         case role
         case storeName = "store_name"
+        case surname
+        case phone
+        case avatarUrl = "avatar_url"
     }
 }

@@ -137,6 +137,22 @@ struct PreviewTokenStorage: TokenStoring {
 
 struct PreviewUserRepository: UserRepository {
     func getUser() async throws -> User { PreviewData.owner }
+
+    func updateProfile(name: String, surname: String, phone: String) async throws -> User {
+        PreviewData.owner
+    }
+
+    func uploadAvatar(_ imageData: Data) async throws -> User {
+        PreviewData.owner
+    }
+
+    func deleteAvatar() async throws -> User {
+        PreviewData.owner
+    }
+
+    func changePassword(current: String, new: String) async throws {}
+
+    func deleteAccount(password: String) async throws {}
 }
 
 struct PreviewAuthRepository: AuthRepository {
@@ -159,6 +175,14 @@ struct PreviewImageUploadRepository: ImageUploadRepository {
 }
 
 struct PreviewSalesAssociateRepository: SalesAssociateRepository {
+    func deactivateSalesAssociate(id: Int) async throws -> SalesAssociateResponse {
+        throw PreviewError.failed
+    }
+    
+    func activateSalesAssociate(id: Int) async throws -> SalesAssociateResponse {
+        throw PreviewError.failed
+    }
+    
     func updateSalesAssociate(id: Int, request: UpdateSalesAssociateRequest) async throws -> SalesAssociateResponse {
         throw PreviewError.failed
     }

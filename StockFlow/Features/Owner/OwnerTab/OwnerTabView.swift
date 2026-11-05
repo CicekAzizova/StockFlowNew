@@ -15,7 +15,8 @@ struct OwnerTabView: View {
     @Environment(LanguageManager.self) private var languageManager
     @State private var homePath = NavigationPath()
     @State private var productPath = NavigationPath()
-    @State private var teamPath = NavigationPath()
+   // @State private var teamPath = NavigationPath()
+    @State private var profilePath = NavigationPath()
     
     var body: some View {
         TabView {
@@ -89,31 +90,33 @@ struct OwnerTabView: View {
             
             //MARK: - Team
             
-            Tab {
-                NavigationStack(path: $teamPath) {
-                    TeamView(path: $teamPath, viewModel: dependencies.makeTeamViewModel())
-                        .navigationDestination(for: TeamRoute.self) { route in
-                            TeamDestinationView(route: route, dependencies: dependencies, path: $teamPath)                        }
-                        .navigationDestination(for: SalesRoute.self) { route in
-                            SalesDestinationView(route: route, dependencies: dependencies)
-                        }
-                }
-                .id(languageManager.language)
-            } label: {
-                Image(.teamIcon)
-                    .renderingMode(.template)
-                Text("Team")
-            }
+           
             
             //MARK: - Profile
             
             Tab {
-                NavigationStack {
+                NavigationStack(path: $profilePath) {
                     ProfileView(
-                        viewModel: dependencies
-                            .makeProfileViewModel(),
-                        appStateManager: appStateManager
+                        viewModel: dependencies.makeProfileViewModel(appStateManager: appStateManager),
+                        appStateManager: appStateManager,
+                        path: $profilePath
                     )
+                    .navigationDestination(for: ProfileRoute.self) { route in
+                        ProfileDestinationView(
+                            route: route,
+                            user: user,
+                            dependencies: dependencies,
+                            path: $profilePath,
+                            canManageTeam: true
+                        )
+                    }
+                    .navigationDestination(for: TeamRoute.self) { route in
+                        TeamDestinationView(route: route, dependencies: dependencies, path: $profilePath)
+                    }
+                    .navigationDestination(for: SalesRoute.self) { route in
+                        SalesDestinationView(route: route, dependencies: dependencies)
+                    }
+                    
                 }
                 .id(languageManager.language)
             } label: {

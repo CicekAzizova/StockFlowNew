@@ -54,6 +54,8 @@ struct StockFlowApp: App {
             }
             .environment(appStateManager)
             .environment(dependencies.appLockManager)
+            .environment(dependencies.appPreferences)
+            .preferredColorScheme(dependencies.appPreferences.colorSchemeOverride)
             .environment(dependencies.languageManager)
             .environment(\.locale, dependencies.languageManager.locale)
             .onChange(of: scenePhase) { _, phase in

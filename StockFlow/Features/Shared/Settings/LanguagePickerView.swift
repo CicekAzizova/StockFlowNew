@@ -20,6 +20,7 @@ struct LanguagePickerView: View {
                 }
             }
             .fixedSize()
+            .tint(.primaryBlue)
         }
     }
 }
