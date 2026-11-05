@@ -16,9 +16,12 @@ final class SalesAssociateDetailViewModel {
     private let pageSize = 10
 
     private(set) var associate: SalesAssociateResponse
-    
 
     var state: SalesAssociateDetailViewState = .idle
+
+    /// Deaktiv/aktiv etmə zamanı true olur.
+    private(set) var isChangingStatus = false
+    var statusError: String?
 
     var salesState: AssociateSalesState = .idle
     var loadMoreError: String?
@@ -36,6 +39,17 @@ final class SalesAssociateDetailViewModel {
         self.repository = repository
         self.salesRepository = salesRepository
         self.associate = associate
+    }
+
+    var memberSince: String? {
+        let withFraction = ISO8601DateFormatter()
+        withFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let plain = ISO8601DateFormatter()
+
+        guard let date = withFraction.date(from: associate.createdAt)
+            ?? plain.date(from: associate.createdAt) else { return nil }
+
+        return date.formatted(.dateTime.day().month(.wide).year())
     }
 
     // MARK: - Sales
@@ -66,7 +80,6 @@ final class SalesAssociateDetailViewModel {
             salesState = .error(error.localizedDescription)
         }
     }
-
 
     func reloadAssociate() async {
         guard let updated = try? await repository
@@ -112,6 +125,33 @@ final class SalesAssociateDetailViewModel {
             state = .deleted
         } catch {
             state = .error(error.localizedDescription)
+        }
+    }
+
+    // MARK: - Deactivate / activate
+
+    func deactivate() async {
+        await changeStatus { try await repository.deactivateSalesAssociate(id: associate.id) }
+    }
+
+    func activate() async {
+        await changeStatus { try await repository.activateSalesAssociate(id: associate.id) }
+    }
+
+    private func changeStatus(
+        _ action: () async throws -> SalesAssociateResponse
+    ) async {
+        guard !isChangingStatus else { return }
+        isChangingStatus = true
+        statusError = nil
+        defer { isChangingStatus = false }
+
+        do {
+            associate = try await action()
+        } catch is CancellationError {
+            return
+        } catch {
+            statusError = error.localizedDescription
         }
     }
 }

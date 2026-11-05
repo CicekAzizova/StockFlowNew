@@ -8,37 +8,99 @@
 import SwiftUI
 
 struct TeamView: View {
-    
-    @Binding  var path: NavigationPath
+
+    @Binding var path: NavigationPath
     @State var viewModel: TeamViewModel
-    
+    @State private var isSearchPresented = false
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             Color.background
                 .ignoresSafeArea()
-            VStack {
-                header
+
+            VStack(spacing: 0) {
+                headerBlock
+
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                
+                    .padding(.horizontal, 16)
             }
-            .padding()
         }
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             await viewModel.loadSalesAssociates()
         }
     }
-    
+
+    // MARK: - Header
+
+    private var headerBlock: some View {
+        VStack(spacing: 0) {
+            BrandScreenHeader(title: "Team", showsBackButton: true) {
+                HStack(spacing: 8) {
+                    BrandHeaderIconButton(
+                        systemImage: isSearchPresented ? "xmark" : "magnifyingglass",
+                        accessibilityLabel: "Search"
+                    ) {
+                        toggleSearch()
+                    }
+
+                    BrandHeaderIconButton(
+                        systemImage: "plus",
+                        accessibilityLabel: "Add Sales Associate"
+                    ) {
+                        path.append(TeamRoute.addSalesAssociate)
+                    }
+                }
+            }
+
+            if isSearchPresented {
+                BrandSearchField(
+                    placeholder: "Search by name, phone or email",
+                    text: $viewModel.searchText
+                )
+                .padding(.horizontal, 16)
+                .padding(.bottom, 10)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
+            if viewModel.state.isLoaded {
+                statsCard
+            }
+        }
+        .padding(.bottom, 14)
+        .brandHeaderBackground()
+    }
+
+    private var statsCard: some View {
+        StatsRow(items: [
+            StatItem(value: viewModel.salesAssociateCount.formatted(), title: "Sales Associates"),
+            StatItem(value: viewModel.onlineCount.formatted(), title: "Online now"),
+            StatItem(value: viewModel.todayTotalSales.asCurrency, title: "Today")
+        ])
+        .brandCard()
+        .padding(.horizontal, 16)
+    }
+    private func toggleSearch() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            isSearchPresented.toggle()
+        }
+        if !isSearchPresented {
+            viewModel.searchText = ""
+        }
+    }
+
+    // MARK: - Content
+
     @ViewBuilder
-    var content: some View {
+    private var content: some View {
         switch viewModel.state {
         case .idle:
             EmptyView()
-            
+
         case .loading:
             ProgressView("Loading team...")
-            
+
         case .loaded:
             if viewModel.salesAssociates.isEmpty {
                 ContentUnavailableView(
@@ -46,40 +108,12 @@ struct TeamView: View {
                     systemImage: "person.2",
                     description: Text("Add your first sales associate.")
                 )
+            } else if viewModel.filteredAssociates.isEmpty {
+                ContentUnavailableView.search(text: viewModel.searchText)
             } else {
-                List {
-                    teamStatsView
-                        .listRowInsets(
-                            EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0)
-                        )
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
-                    
-                    Section {
-                        ForEach(viewModel.salesAssociates, id: \.id) { associate in
-                            
-                            Button {
-                                path.append(TeamRoute.salesAssociateDetail(associate))
-                            } label: {
-                                SalesAssociateInfoCardView(
-                                    name: associate.name,
-                                    surname: associate.surname,
-                                    todaySalesText: "Today's sales",
-                                    price: associate.todaySales
-                                )
-                            }
-                            .listRowInsets(
-                                EdgeInsets(top: 0, leading: 0, bottom: 10, trailing: 0)
-                            )
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                        }
-                    }
-                }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
+                associatesList
             }
-            
+
         case .error(let message):
             ContentUnavailableView(
                 "Something went wrong",
@@ -88,53 +122,30 @@ struct TeamView: View {
             )
         }
     }
-    
-    private var header: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text("Team")
-                    .font(.inter(.bold, size: 24))
-                    .foregroundStyle(.textPrimary)
-            }
-            Spacer()
-            Button {
-                path.append(TeamRoute.addSalesAssociate)
-            } label: {
-                ZStack {
-                    Circle()
-                        .frame(width: 44, height: 44)
-                        .foregroundStyle(.brandPrimary)
-                    Image(systemName: "plus")
-                        .font(.inter(.extraBold, size: 18))
-                        .foregroundStyle(.white)
+
+    private var associatesList: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Sales Associates")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.textSecondary)
+                    .textCase(.uppercase)
+                    .padding(.horizontal, 6)
+
+                ForEach(viewModel.filteredAssociates, id: \.id) { associate in
+                    Button {
+                        path.append(TeamRoute.salesAssociateDetail(associate))
+                    } label: {
+                        SalesAssociateInfoCardView(associate: associate)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(.top, 16)
+            .padding(.bottom, 24)
+        }
+        .refreshable {
+            await viewModel.refresh()
         }
     }
-    
-    private var teamStatsView: some View {
-        HStack {
-            VStack {
-                Text("\(viewModel.salesAssociateCount)")
-                Text("Sales Associates")
-            }
-            .frame(maxWidth: .infinity)
-            
-            Divider()
-                .background(.divider)
-            
-            VStack {
-                Text(viewModel.totalSales.asCurrency)
-                Text("Total Sales")
-                Text("(this month)")
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .foregroundStyle(.textPrimary)
-        .padding()
-        .frame(maxWidth: .infinity)
-        .background(.success.opacity(0.2))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-    
 }

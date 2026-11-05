@@ -10,49 +10,41 @@ import SwiftUI
 struct SalesAssociateDetailView: View {
     @State var viewModel: SalesAssociateDetailViewModel
     @State private var showingDeleteConfirmation = false
+    @State private var showingDeactivateConfirmation = false
     @Environment(\.dismiss) private var dismiss
     @Binding var path: NavigationPath
 
+    private var isBusy: Bool {
+        viewModel.state.isDeleting || viewModel.isChangingStatus
+    }
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             Color.background
                 .ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: 20) {
-                    header
-                    infoCard
-                    salesSection
-                }
-                .padding()
-            }
-            .refreshable {
-                await viewModel.refresh()
-            }
-        }
-        .navigationTitle("Sales Associate")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        path.append(TeamRoute.editSalesAssociate(viewModel.associate))
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
-                    }
+            VStack(spacing: 0) {
+                headerBlock
 
-                    Button(role: .destructive) {
-                        showingDeleteConfirmation = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        infoCard
+                        salesSection
+                        SalesAssociateActionsCard(
+                            isDeactivated: viewModel.associate.isDeactivated,
+                            isBusy: isBusy,
+                            onToggleActiveTap: toggleActive,
+                            onDeleteTap: { showingDeleteConfirmation = true }
+                        )
                     }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                        .foregroundStyle(.textPrimary)
+                    .padding(16)
                 }
-                .disabled(viewModel.state.isDeleting)
+                .refreshable {
+                    await viewModel.refresh()
+                }
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             await viewModel.loadSalesIfNeeded()
         }
@@ -60,8 +52,8 @@ struct SalesAssociateDetailView: View {
             await viewModel.reloadAssociate()
         }
         .overlay {
-            if viewModel.state.isDeleting {
-                ProgressView("Deleting...")
+            if viewModel.state.isDeleting || viewModel.isChangingStatus {
+                ProgressView()
                     .padding()
                     .background(.regularMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -78,6 +70,14 @@ struct SalesAssociateDetailView: View {
                 if case .deleted = viewModel.state { dismiss() }
             }
         }
+        .confirmationDialog(
+            isPresented: $showingDeactivateConfirmation,
+            title: "Deactivate Sales Associate?",
+            message: "They won't be able to sign in. Their account and sales history are kept.",
+            confirmTitle: "Deactivate"
+        ) {
+            Task { await viewModel.deactivate() }
+        }
         .alert(
             "Couldn't delete",
             isPresented: Binding(
@@ -89,34 +89,156 @@ struct SalesAssociateDetailView: View {
         } message: {
             Text(viewModel.state.errorMessage ?? "")
         }
+        .alert(
+            "Couldn't update",
+            isPresented: Binding(
+                get: { viewModel.statusError != nil },
+                set: { if !$0 { viewModel.statusError = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.statusError ?? "")
+        }
     }
 
-    private var header: some View {
-        VStack(spacing: 12) {
-            Text(initials)
-                .font(.inter(.bold, size: 28))
-                .foregroundStyle(.brandPrimary)
-                .frame(width: 80, height: 80)
-                .background(.brandPrimary.opacity(0.1))
-                .clipShape(Circle())
+    private func toggleActive() {
+        if viewModel.associate.isDeactivated {
+            Task { await viewModel.activate() }
+        } else {
+            showingDeactivateConfirmation = true
+        }
+    }
 
-            Text("\(viewModel.associate.name) \(viewModel.associate.surname)")
-                .font(.inter(.bold, size: 22))
-                .foregroundStyle(.textPrimary)
+    // MARK: - Header
+
+    private var headerBlock: some View {
+        VStack(spacing: 0) {
+            BrandScreenHeader(title: "Sales Associate", showsBackButton: true) {
+                editButton
+            }
+
+            profile
+                .padding(.bottom, 16)
+
+            statsCard
+        }
+        .padding(.bottom, 14)
+        .brandHeaderBackground()
+    }
+
+    private var editButton: some View {
+        BrandHeaderIconButton(
+            systemImage: "pencil",
+            accessibilityLabel: "Edit"
+        ) {
+            path.append(TeamRoute.editSalesAssociate(viewModel.associate))
+        }
+        .disabled(isBusy)
+    }
+
+    private var profile: some View {
+        HStack(spacing: 14) {
+            SalesAssociateAvatar(associate: viewModel.associate, size: 64)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(viewModel.associate.name) \(viewModel.associate.surname)")
+                    .font(.title3.bold())
+                    .foregroundStyle(.white)
+
+                Text(viewModel.associate.fin)
+                    .font(.inter(.regular, size: 16))
+                    .foregroundStyle(.white)
+
+                if viewModel.associate.isDeactivated {
+                    Text("Deactivated")
+                        .font(.caption.bold())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(.white.opacity(0.2), in: Capsule())
+                } else if let since = viewModel.memberSince {
+                    Text("Sales Associate · since \(since)")
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.75))
+                }
+            }
+            .lineLimit(1)
         }
         .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
     }
 
-    private var infoCard: some View {
-        VStack(spacing: 12) {
-            InfoRow(title: "Email", value: viewModel.associate.email)
-            InfoRow(title: "FIN", value: viewModel.associate.fin)
-            InfoRow(title: "Phone", value: viewModel.associate.phone)
-            InfoRow(title: "Today's sales", value: viewModel.associate.todaySales.asCurrency)
+    private var statsCard: some View {
+        var items = [
+            StatItem(value: viewModel.associate.todaySales.asCurrency, title: "Today")
+        ]
+        if let monthSales = viewModel.associate.monthSales {
+            items.append(StatItem(value: monthSales.asCurrency, title: "This month"))
         }
-        .padding()
-        .background(.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        items.append(StatItem(value: viewModel.salesCount.formatted(), title: "Sales"))
+
+        return StatsRow(items: items)
+            .brandCard()
+            .padding(.horizontal, 16)
+    }
+
+    // MARK: - Info
+
+    private var infoCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Contact")
+                .font(.headline)
+                .foregroundStyle(.textPrimary)
+
+            AppSectionView {
+                if let phoneURL {
+                    Link(destination: phoneURL) {
+                        phoneRow
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    phoneRow
+                }
+
+                if let emailURL {
+                    Link(destination: emailURL) {
+                        emailRow
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    emailRow
+                }
+            }
+        }
+    }
+
+    private var phoneRow: some View {
+        AppRowView(icon: "phone", tint: .brandGreen, title: "Phone") {
+            Text(verbatim: viewModel.associate.phone)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var emailRow: some View {
+        AppRowView(icon: "envelope", tint: .brandCoral, title: "Email") {
+            Text(verbatim: viewModel.associate.email)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .truncationMode(.middle)
+        }
+    }
+
+    private var phoneURL: URL? {
+        let allowed = Set("+0123456789")
+        let digits = viewModel.associate.phone.filter { allowed.contains($0) }
+        return digits.isEmpty ? nil : URL(string: "tel:\(digits)")
+    }
+
+    private var emailURL: URL? {
+        let email = viewModel.associate.email.trimmingCharacters(in: .whitespaces)
+        return email.isEmpty ? nil : URL(string: "mailto:\(email)")
     }
 
     // MARK: - Sales
@@ -180,11 +302,5 @@ struct SalesAssociateDetailView: View {
                     .foregroundStyle(.textSecondary)
             }
         }
-    }
-
-    private var initials: String {
-        let name = viewModel.associate.name.prefix(1)
-        let surname = viewModel.associate.surname.prefix(1)
-        return "\(name)\(surname)".uppercased()
     }
 }
