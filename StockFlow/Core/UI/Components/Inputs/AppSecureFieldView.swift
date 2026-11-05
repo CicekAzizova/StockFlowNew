@@ -9,9 +9,11 @@ import SwiftUI
 
 struct AppSecureFieldView<FocusedField: Hashable>: View {
     
+    var title: LocalizedStringKey = "Password"
     let placeholder: LocalizedStringKey
     let focusedField: FocusedField?
     var errorMessage: String? = nil
+    var textContentType: UITextContentType = .password
     var submitLabel: SubmitLabel = .done
     var onSubmit: (() -> Void)? = nil
     
@@ -24,7 +26,7 @@ struct AppSecureFieldView<FocusedField: Hashable>: View {
     @State private var isAppear = false
     
     var body: some View {
-        Section("Password") {
+        Section(title) {
             
             HStack(spacing: 8) {
                 
@@ -41,8 +43,7 @@ struct AppSecureFieldView<FocusedField: Hashable>: View {
                     focusedFieldBinding,
                     equals: focusedField
                 )
-                .textContentType(.password)
-                .submitLabel(submitLabel)
+                .textContentType(textContentType)             .submitLabel(submitLabel)
                 .onSubmit {
                     onSubmit?()
                 }
@@ -65,7 +66,7 @@ struct AppSecureFieldView<FocusedField: Hashable>: View {
             .background(.border)
             .overlay {
                 RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.gray, lineWidth: 1)
+                    .stroke(Color.gray, lineWidth: 1)
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
                         focusedFieldBinding.wrappedValue == focusedField
