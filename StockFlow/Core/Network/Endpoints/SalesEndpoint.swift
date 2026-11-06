@@ -9,6 +9,7 @@ import Foundation
 enum SalesEndpoint: Endpoint {
     
     case summary
+    case daily(days: Int)
     case recentSales(page: Int,limit: Int)
     case sellerSales(sellerId: Int, page: Int, limit: Int)
     case createSale(CreateSaleRequest)
@@ -17,6 +18,8 @@ enum SalesEndpoint: Endpoint {
         switch self {
         case .summary:
             "/sales/summary"
+        case .daily:
+            "/sales/daily"
         case .recentSales, .createSale, .sellerSales:
             "/sales"
         }
@@ -26,7 +29,7 @@ enum SalesEndpoint: Endpoint {
         switch self {
         case .createSale:
             return .post
-        case .summary, .recentSales, .sellerSales:
+        case .summary,.daily, .recentSales, .sellerSales:
             return .get
         }
     }
@@ -39,7 +42,7 @@ enum SalesEndpoint: Endpoint {
         switch self {
         case .createSale(let request):
             return request
-        case .summary, .recentSales, .sellerSales:
+        case .summary, .daily, .recentSales, .sellerSales:
             return nil
         }
     }
@@ -47,6 +50,8 @@ enum SalesEndpoint: Endpoint {
         switch self {
         case .summary, .createSale:
             nil
+        case .daily(let days):
+            [URLQueryItem(name: "days", value: String(days))]
             
         case .recentSales(let page, let limit):
             [

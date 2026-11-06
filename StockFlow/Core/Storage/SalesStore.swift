@@ -24,6 +24,8 @@ final class SalesStore {
     
     var salesSummary: SalesSummaryResponse?
     
+    var dailySales: DailySalesResponse?
+    
     init(salesRepository: SalesRepository) {
         self.salesRepository = salesRepository
     }
@@ -31,6 +33,7 @@ final class SalesStore {
     func reset() {
         recentSales = []
         salesSummary = nil
+        dailySales = nil
         totalSales = 0
         currentSalesPage = 1
         hasMoreSales = true
@@ -88,12 +91,17 @@ final class SalesStore {
         salesSummary = try await salesRepository.getSalesSummary()
     }
     
+    func loadDailySales(days: Int = 7) async throws {
+            dailySales = try await salesRepository.getDailySales(days: days)
+        }
+    
     func createSale(productId: Int, quantity: Int) async throws -> CreateSaleResponse {
         let response = try await salesRepository.createSale(
             CreateSaleRequest(productId: productId, quantity: quantity)
         )
         try? await loadRecentSales(limit: salesPageSize)
         try? await loadSalesSummary()
+        try? await loadDailySales()
 
         return response
     }

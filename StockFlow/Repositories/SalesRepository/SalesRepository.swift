@@ -15,8 +15,10 @@ protocol SalesRepository {
         ) async throws -> PaginationResponse<SaleResponse>
     func createSale(_ request: CreateSaleRequest) async throws -> CreateSaleResponse
     func getSales(sellerId: Int, page: Int, limit: Int) async throws -> PaginationResponse<SaleResponse>
+    func getDailySales(days: Int) async throws -> DailySalesResponse
 
 }
+
 final class DefaultSalesRepository: SalesRepository {
     
     private let networkService: NetworkService
@@ -38,5 +40,9 @@ final class DefaultSalesRepository: SalesRepository {
         try await networkService.request(
             SalesEndpoint.sellerSales(sellerId: sellerId, page: page, limit: limit)
         )
+    }
+    
+    func getDailySales(days: Int) async throws -> DailySalesResponse {
+        try await networkService.request(SalesEndpoint.daily(days: days))
     }
 }

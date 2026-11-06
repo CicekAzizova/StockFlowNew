@@ -100,6 +100,24 @@ struct PreviewProductRepository: ProductRepository {
 }
 
 struct PreviewSalesRepository: SalesRepository {
+    func getDailySales(days: Int) async throws -> DailySalesResponse {
+        if fails { throw PreviewError.failed }
+        if empty { return DailySalesResponse(days: [], total: 0, orders: 0) }
+        return DailySalesResponse(
+            days: [
+                DailySales(date: "2026-10-30", total: 320, orders: 5),
+                DailySales(date: "2026-10-31", total: 540, orders: 8),
+                DailySales(date: "2026-11-01", total: 210, orders: 3),
+                DailySales(date: "2026-11-02", total: 760, orders: 11),
+                DailySales(date: "2026-11-03", total: 430, orders: 6),
+                DailySales(date: "2026-11-04", total: 980, orders: 12),
+                DailySales(date: "2026-11-05", total: 1125, orders: 14)
+            ],
+            total: 4365,
+            orders: 59
+        )
+    }
+    
     var fails = false
     var empty = false
 
