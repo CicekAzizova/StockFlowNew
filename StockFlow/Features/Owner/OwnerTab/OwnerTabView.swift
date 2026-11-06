@@ -36,6 +36,7 @@ struct OwnerTabView: View {
                                 route: route,
                                 dependencies: dependencies,
                                 path: $homePath,
+                                canRestock: true
                             )
                         }
                         .navigationDestination(for: ProductRoute.self) { route in
