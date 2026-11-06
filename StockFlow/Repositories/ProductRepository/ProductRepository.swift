@@ -13,6 +13,7 @@ protocol ProductRepository {
     func updateProduct(id: Int, request: ProductRequest) async throws -> ProductsResponse
     func deleteProduct(id: Int) async throws
     func getLowStockProducts(page: Int, limit: Int) async throws -> PaginationResponse<ProductsResponse>
+    func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse
 }
 
 final class DefaultProductRepository: ProductRepository {
@@ -45,5 +46,10 @@ final class DefaultProductRepository: ProductRepository {
     
     func getLowStockProducts(page: Int, limit: Int) async throws -> PaginationResponse<ProductsResponse> {
         try await networkService.request(ProductsEndpoint.getLowStockProducts(page: page, limit: limit))
+    }
+    func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse {
+        try await networkService.request(
+            ProductsEndpoint.restockProduct(id: id, request: RestockRequest(quantity: quantity))
+        )
     }
 }

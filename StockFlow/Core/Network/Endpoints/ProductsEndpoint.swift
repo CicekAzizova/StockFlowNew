@@ -15,6 +15,7 @@ enum ProductsEndpoint: Endpoint {
     case productBySku(String)
     case editProduct(id: Int, request: ProductRequest)
     case deleteProduct(id: Int)
+    case restockProduct(id: Int, request: RestockRequest)
     
     var path: String {
         switch self {
@@ -30,12 +31,14 @@ enum ProductsEndpoint: Endpoint {
             "/products/\(id)"
         case .getLowStockProducts:
             "/products/low-stock"
+        case .restockProduct(let id, _):
+            "/products/\(id)/restock"
         }
     }
     
     var method: HttpMethod {
         switch self {
-        case .createProduct:
+        case .createProduct, .restockProduct:
             return .post
         case .getProducts, .getLowStockProducts, .productBySku:
             return .get
@@ -56,6 +59,8 @@ enum ProductsEndpoint: Endpoint {
             return request
         case .editProduct(_, let request):
             return request
+        case .restockProduct(_, let request):
+            return request
         case .getProducts, .getLowStockProducts, .productBySku, .deleteProduct:
             return nil
         }
@@ -71,7 +76,7 @@ enum ProductsEndpoint: Endpoint {
             ]
         case .productBySku(let sku):
             return [URLQueryItem(name: "sku", value: sku)]
-        case .createProduct, .editProduct, .deleteProduct:
+        case .createProduct, .editProduct, .deleteProduct, .restockProduct:
             return nil
         }
     }

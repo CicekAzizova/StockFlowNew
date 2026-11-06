@@ -84,7 +84,8 @@ final class ProductsStore {
         let response = try await productRepository.getProducts(page: nextPage, limit: productsPageSize)
         
         currentProductPage = response.page
-        products.append(contentsOf: response.items)
+        let existingProductIds = Set(products.map(\.id))
+        products.append(contentsOf: response.items.filter { !existingProductIds.contains($0.id) })
         totalProducts = response.total
         hasMoreProducts = response.hasNext
     }
@@ -119,7 +120,9 @@ final class ProductsStore {
             page: nextPage,
             limit: lowStockPageSize
         )
-        lowStockProducts.append(contentsOf: response.items)
+        // Eyni məhsulu ikinci dəfə əlavə etmə (səhifələr üst-üstə düşə bilər).
+        let existingIds = Set(lowStockProducts.map(\.id))
+        lowStockProducts.append(contentsOf: response.items.filter { !existingIds.contains($0.id) })
         
         currentLowStockPage = response.page
         totalLowProducts = response.total
@@ -140,6 +143,17 @@ final class ProductsStore {
             products[index] = response
         }
         if let index = lowStockProducts.firstIndex(where: { $0.id == id }) {
+            lowStockProducts[index] = response
+        }
+        
+        await refreshLowStock()
+        return response
+    }
+    
+    func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse {
+        let response = try await productRepository.restockProduct(id: id, quantity: quantity)
+        
+        if let index = products.firstIndex(where: { $0.id == id }) {
             lowStockProducts[index] = response
         }
         

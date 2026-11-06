@@ -20,6 +20,7 @@ struct ProductsResponse: Decodable, Hashable {
     let lowStockLimit: Int
     let imageUrls: [String]?
     let createdAt: String
+    var soldThisMonth: Int = 0
     
     enum CodingKeys: String, CodingKey {
         case id, name, sku, category, description, price, discount, quantity
@@ -27,6 +28,7 @@ struct ProductsResponse: Decodable, Hashable {
         case lowStockLimit = "low_stock_limit"
         case createdAt = "created_at"
         case imageUrls = "image_urls"
+        case soldThisMonth = "sold_this_month"
     }
 }
 
