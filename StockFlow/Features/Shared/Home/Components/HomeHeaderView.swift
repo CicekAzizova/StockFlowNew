@@ -7,13 +7,30 @@
 
 import SwiftUI
 
-/// Panelin gradient başlığı: salam, mağaza adı və bildiriş zəngi.
+/// Panelin gradient başlığı: salam, mağaza adı, bildiriş zəngi
+/// və bu günkü satış (dünənlə müqayisə ilə).
 struct HomeHeaderView: View {
 
     let user: User
+    let todaySales: Double
+    let todayOrders: Int
+    /// Bu gün − dünən. nil olsa müqayisə göstərilmir.
+    let differenceFromYesterday: Double?
     var onNotificationsTap: () -> Void = {}
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            topRow
+            salesBlock
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 24)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .brandHeaderBackground()
+    }
+
+    private var topRow: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Hello, \(user.name)")
@@ -35,10 +52,49 @@ struct HomeHeaderView: View {
                 action: onNotificationsTap
             )
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-        .padding(.bottom, 24)
-        .frame(maxWidth: .infinity)
-        .brandHeaderBackground()
+    }
+
+    private var salesBlock: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Today's sales")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.8))
+
+            Text("\(formatted(todaySales)) AZN")
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
+                .minimumScaleFactor(0.6)
+                .lineLimit(1)
+
+            HStack(spacing: 8) {
+                if let differenceFromYesterday {
+                    comparisonBadge(differenceFromYesterday)
+                }
+
+                Text("\(todayOrders) sales")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+        }
+    }
+
+    private func comparisonBadge(_ difference: Double) -> some View {
+        let isUp = difference >= 0
+        let arrow = isUp ? "▲" : "▼"
+
+        return HStack(spacing: 4) {
+            Text(arrow)
+            Text("\(formatted(abs(difference))) AZN")
+            Text("vs yesterday")
+        }
+        .font(.footnote.weight(.semibold))
+        .foregroundStyle(isUp ? Color.success : Color.error)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(Capsule().fill(.white.opacity(0.9)))
+    }
+
+    private func formatted(_ value: Double) -> String {
+        value.formatted(.number.precision(.fractionLength(0...2)))
     }
 }

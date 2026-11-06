@@ -11,14 +11,13 @@ struct LowStockSection: View {
 
     let products: [ProductsResponse]
     /// Bütün az qalan məhsulların sayı (siyahıda yalnız ilk bir neçəsi göstərilir).
-    let totalCount: Int
 
     @Binding var path: NavigationPath
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Low stock products (\(totalCount))")
+                Text("Low stock products")
                     .font(.inter(.bold, size: 18))
                     .foregroundStyle(.textPrimary)
                 Spacer()

@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct HomeView: View {
-
+    
     @State var viewModel: HomeViewModel
     @Binding var path: NavigationPath
-
+    
     let user: User
-
+    
     init(
         viewModel: HomeViewModel,
         path: Binding<NavigationPath>,
@@ -23,36 +23,39 @@ struct HomeView: View {
         self._path = path
         self.user = user
     }
-
+    
     var homeView: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
+                
+                if !viewModel.weeklySales.isEmpty {
+                    WeeklySalesChartView(days: viewModel.weeklySales)
+                }
                 HomeSummaryGrid(
-                    todaySales: viewModel.todaySales,
-                    totalSales: viewModel.revenue,
                     productsCount: viewModel.productsCount,
                     lowStockCount: viewModel.lowStockCount,
                     associatesCount: viewModel.associatesCount
                 )
-
-                RecentSalesSection(sales: viewModel.recentSales, onSeeAll: {
-                    path.append(HomeRoute.salesHistory)
-                }, path: $path)
-
-                LowStockSection(products: viewModel.lowStockProducts, totalCount: viewModel.lowStockCount, path: $path)
+                
+                LowStockSection(products: viewModel.lowStockProducts, path: $path)
             }
             .padding(16)
         }
     }
-
+    
     var body: some View {
         ZStack(alignment: .top) {
             Color.background
                 .ignoresSafeArea()
-
+            
             VStack(spacing: 0) {
-                HomeHeaderView(user: user)
-
+                HomeHeaderView(
+                    user: user,
+                    todaySales: viewModel.todaySales,
+                    todayOrders: viewModel.todayOrders,
+                    differenceFromYesterday: viewModel.differenceFromYesterday
+                )
+                
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -65,16 +68,16 @@ struct HomeView: View {
             await viewModel.refresh()
         }
     }
-
+    
     @ViewBuilder
     var content: some View {
         switch viewModel.state {
         case .idle, .loading:
             ProgressView()
-
+            
         case .loaded:
             homeView
-
+            
         case .error(let error):
             ContentUnavailableView {
                 Label(
