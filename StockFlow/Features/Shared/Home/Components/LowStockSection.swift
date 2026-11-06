@@ -18,15 +18,16 @@ struct LowStockSection: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Low stock products")
-                    .font(.inter(.bold, size: 18))
-                    .foregroundStyle(.textPrimary)
+                    .font(.inter(.bold, size: 14))
+                    .textCase(.uppercase)
+                    .foregroundStyle(.textSecondary)
                 Spacer()
 
                 if !products.isEmpty {
                     Button("See All") {
                         path.append(HomeRoute.lowStock)
                     }
-                    .font(.inter(.medium, size: 13))
+                    .font(.inter(.medium, size: 14))
                     .foregroundStyle(.seeAllButton)
                 }
             }

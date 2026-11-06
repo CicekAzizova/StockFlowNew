@@ -24,7 +24,7 @@ struct WeeklySalesChartView: View {
         max(days.map(\.total).max() ?? 0, 1)
     }
 
-    /// Seçilməyibsə, sonuncu gün (bu gün) göstərilir.
+    /// Seçilməyibsə, sonuncu gün (bu gün) tünd göstərilir.
     private var selected: DailySales? {
         days.first { $0.id == selectedId } ?? days.last
     }
@@ -33,27 +33,34 @@ struct WeeklySalesChartView: View {
         VStack(alignment: .leading, spacing: 10) {
             header
             bars
-            if let selected {
-                detail(for: selected)
-            }
         }
-        .padding(8)
+        .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .brandCard()
     }
 
     private var header: some View {
-        HStack {
+        HStack(alignment: .top) {
             Text("Last 7 days")
-                .font(.headline)
-            Spacer()
+                .font(.subheadline.weight(.bold))
+
+            Spacer(minLength: 8)
+
             VStack(alignment: .trailing, spacing: 2) {
-                Text("Weekly")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text("\(Self.money(weekTotal)) AZN")
-                    .font(.subheadline.weight(.semibold))
+                // Üstdə: həftəlik cəm, sabit.
+                Text("Weekly: \(Self.money(weekTotal)) AZN")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+
+                // Altda: seçilmiş gün (seçim yoxdursa bu gün).
+                if let day = selected {
+                    Text("\(Self.shortWeekday(day.date)) · \(Self.money(day.total)) AZN · \(day.orders) sales")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
         }
     }
 
@@ -66,14 +73,15 @@ struct WeeklySalesChartView: View {
                     selectedId = day.id
                 } label: {
                     VStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(isSelected ? Color.brandPrimary : Color.brandPrimary.opacity(0.3))
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(barStyle(isSelected: isSelected))
                             .frame(height: max(4, chartHeight * day.total / maxTotal))
                             .frame(height: chartHeight, alignment: .bottom)
 
                         Text(Self.shortWeekday(day.date))
                             .font(.caption2)
-                            .foregroundStyle(isSelected ? Color.primary : Color.secondary)
+                            .foregroundStyle(isSelected ? Color.brandTeal : Color.secondary)
+                            .fontWeight(isSelected ? .bold : .regular)
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -82,11 +90,18 @@ struct WeeklySalesChartView: View {
         }
     }
 
-    private func detail(for day: DailySales) -> some View {
-        Text("\(Self.fullWeekday(day.date)) · \(Self.money(day.total)) AZN · \(day.orders) sales")
-            .font(.footnote.weight(.medium))
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .center)
+    private func barStyle(isSelected: Bool) -> AnyShapeStyle {
+        if isSelected {
+            AnyShapeStyle(
+                LinearGradient(
+                    colors: [.brandGreen, .brandDark],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+        } else {
+            AnyShapeStyle(Color.brandTeal.opacity(0.15))
+        }
     }
 
     // MARK: - Helpers

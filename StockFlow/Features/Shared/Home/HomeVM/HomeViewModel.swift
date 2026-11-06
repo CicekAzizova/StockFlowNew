@@ -107,7 +107,7 @@ final class HomeViewModel {
     }
     
     var lowStockProducts: [ProductsResponse] {
-        productStore.lowStockProducts
+        Array(productStore.lowStockProducts.prefix(5))
     }
     
     var recentSales: [SaleResponse] {

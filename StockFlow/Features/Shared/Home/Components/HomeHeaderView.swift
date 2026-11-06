@@ -17,17 +17,28 @@ struct HomeHeaderView: View {
     /// Bu gün − dünən. nil olsa müqayisə göstərilmir.
     let differenceFromYesterday: Double?
     var onNotificationsTap: () -> Void = {}
+    let weeklySales: [DailySales]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            topRow
-            salesBlock
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 20) {
+                topRow
+                salesBlock
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            // Qrafik üçün aşağıda yer qalır (kart bu hissəyə girir).
+            .padding(.bottom, weeklySales.isEmpty ? 24 : 120)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .brandHeaderBackground()
+
+            if !weeklySales.isEmpty {
+                WeeklySalesChartView(days: weeklySales)
+                    .padding(.horizontal, 16)
+                    .padding(.top, -110)
+                    .padding(.bottom, 8)
+            }
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-        .padding(.bottom, 24)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .brandHeaderBackground()
     }
 
     private var topRow: some View {

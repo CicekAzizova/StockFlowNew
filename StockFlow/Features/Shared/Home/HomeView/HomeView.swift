@@ -27,10 +27,7 @@ struct HomeView: View {
     var homeView: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
-                
-                if !viewModel.weeklySales.isEmpty {
-                    WeeklySalesChartView(days: viewModel.weeklySales)
-                }
+               
                 HomeSummaryGrid(
                     productsCount: viewModel.productsCount,
                     lowStockCount: viewModel.lowStockCount,
@@ -53,7 +50,8 @@ struct HomeView: View {
                     user: user,
                     todaySales: viewModel.todaySales,
                     todayOrders: viewModel.todayOrders,
-                    differenceFromYesterday: viewModel.differenceFromYesterday
+                    differenceFromYesterday: viewModel.differenceFromYesterday,
+                    weeklySales: viewModel.weeklySales
                 )
                 
                 content
