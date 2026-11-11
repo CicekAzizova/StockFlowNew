@@ -48,13 +48,13 @@ struct WeeklySalesChartView: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 // Üstdə: həftəlik cəm, sabit.
-                Text("Weekly: \(Self.money(weekTotal)) AZN")
+                Text("Weekly: \(weekTotal.asCurrency)")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.primary)
 
                 // Altda: seçilmiş gün (seçim yoxdursa bu gün).
                 if let day = selected {
-                    Text("\(Self.shortWeekday(day.date)) · \(Self.money(day.total)) AZN · \(day.orders) sales")
+                    Text("\(Self.shortWeekday(day.date)) · \(day.total.asCurrency) · \(day.orders) sales")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -105,11 +105,6 @@ struct WeeklySalesChartView: View {
     }
 
     // MARK: - Helpers
-
-    private static func money(_ value: Double) -> String {
-        value.formatted(.number.precision(.fractionLength(0...2)))
-    }
-
     private static let parser: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")

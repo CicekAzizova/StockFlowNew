@@ -11,7 +11,11 @@ import Observation
 @Observable
 final class  AppStateManager {
     var state: AppState = .loading
-    var user: User?
+    var user: User? {
+        didSet {
+            AppCurrency.code = user?.currency ?? "US"
+        }
+    }
     
     var onLogout: (() -> Void)?
     var onRevokeSession: ((String) -> Void)?

@@ -71,7 +71,7 @@ struct HomeHeaderView: View {
                 .font(.subheadline)
                 .foregroundStyle(.white.opacity(0.8))
 
-            Text("\(formatted(todaySales)) AZN")
+            Text(todaySales.asCurrency)
                 .font(.system(size: 36, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
                 .minimumScaleFactor(0.6)
@@ -95,7 +95,7 @@ struct HomeHeaderView: View {
 
         return HStack(spacing: 4) {
             Text(arrow)
-            Text("\(formatted(abs(difference))) AZN")
+            Text(abs(difference).asCurrency)
             Text("vs yesterday")
         }
         .font(.footnote.weight(.semibold))
@@ -105,7 +105,4 @@ struct HomeHeaderView: View {
         .background(Capsule().fill(.white.opacity(0.9)))
     }
 
-    private func formatted(_ value: Double) -> String {
-        value.formatted(.number.precision(.fractionLength(0...2)))
-    }
 }

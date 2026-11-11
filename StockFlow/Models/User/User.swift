@@ -15,6 +15,7 @@ struct User: Decodable {
     var surname: String?
     var phone: String?
     var avatarUrl: String?
+    var currency: String? = nil
     
     var fullName: String {
             [name, surname].compactMap { $0?.nilIfBlank }.joined(separator: " ")
@@ -25,6 +26,7 @@ struct User: Decodable {
         case email
         case name
         case role
+        case currency
         case storeName = "store_name"
         case surname
         case phone
