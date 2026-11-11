@@ -16,9 +16,10 @@ struct StoreRequest: Encodable {
     let storeName: String
     let storeAddress: String
     let storePhone: String
+    var currency: String = "USD"
     
     enum CodingKeys: String, CodingKey {
-        case name, email, password, phone, surname
+        case name, email, password, phone, surname, currency
         case storeName = "store_name"
         case storeAddress = "store_address"
         case storePhone = "store_phone"

@@ -205,7 +205,27 @@ struct CreateStoreView: View {
             text: $viewModel.storePhone,
             focusedFieldBinding: $focusedField
         )
+        Section("Currency") {
+            Picker("Currency", selection: $viewModel.currency) {
+                ForEach(CurrencyOption.allCases) { option in
+                    Text(option.displayName).tag(option)
+                }
+            }
+            .pickerStyle(.menu)
+            .tint(Color.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 12)
+            .frame(height: 44)
+            .background(.border)
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.gray, lineWidth: 1)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
     }
+    
+    
 
     // MARK: - Create Store Button
 
@@ -216,12 +236,6 @@ struct CreateStoreView: View {
         ) {
             Task {
                 await viewModel.createStore()
-                
-                if case .success = viewModel.state {
-                    Task {
-                        await viewModel.createStore()
-                    }
-                }
             }
         }
         .padding(.top, 32)

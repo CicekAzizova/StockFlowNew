@@ -22,6 +22,7 @@ final class CreateStoreViewModel {
     var storeName: String = ""
     var storePhone: String = ""
     var storeAddress: String = ""
+    var currency: CurrencyOption = CurrencyOption(rawValue: Locale.current.currency?.identifier ?? "") ?? .usd
     
     var fieldErrors: [CreateStoreFocusedField: String] = [:]
     
@@ -45,7 +46,8 @@ final class CreateStoreViewModel {
                 phone: phone,
                 storeName: storeName,
                 storeAddress: storeAddress,
-                storePhone: storePhone
+                storePhone: storePhone,
+                currency: currency.rawValue
             )
         do {
             let response = try await storeRepository.createStore(request)
