@@ -147,7 +147,8 @@ final class AppDependencies {
             userRepository: userRepository,
             appStateManager: appStateManager,
             productsStore: productsStore,
-            salesStore: salesStore
+            salesStore: salesStore,
+            storeRepository: storeRepository
         )
     }
     

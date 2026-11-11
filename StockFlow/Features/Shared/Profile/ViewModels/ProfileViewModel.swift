@@ -16,6 +16,7 @@ final class ProfileViewModel {
     private let appStateManager: AppStateManager
     private let productsStore: ProductsStore
     private let salesStore: SalesStore
+    private let storeRepository: StoreRepository
     
     var isUploadingAvatar = false
 
@@ -24,11 +25,13 @@ final class ProfileViewModel {
     
     init(userRepository: UserRepository,   appStateManager: AppStateManager,
          productsStore: ProductsStore,
-         salesStore: SalesStore) {
+         salesStore: SalesStore,
+         storeRepository: StoreRepository) {
         self.userRepository = userRepository
         self.appStateManager = appStateManager
         self.productsStore = productsStore
         self.salesStore = salesStore
+        self.storeRepository = storeRepository
     }
     
     // MARK: - Stats
@@ -94,6 +97,18 @@ final class ProfileViewModel {
                 surname: surname.trimmed,
                 phone: phone.trimmed
             )
+            apply(user)
+            return nil
+        } catch {
+            return error.localizedDescription
+        }
+    }
+    
+    func updateCurrency(_ code: String) async -> String? {
+        guard var user = appStateManager.user, user.currency != code else { return nil }
+        do {
+            let store = try await storeRepository.updateCurrency(code)
+            user.currency = store.currency
             apply(user)
             return nil
         } catch {

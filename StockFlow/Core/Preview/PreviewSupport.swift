@@ -188,6 +188,10 @@ struct PreviewStoreRepository: StoreRepository {
     func createStore(_ request: StoreRequest) async throws -> StoreResponse {
         throw PreviewError.failed
     }
+    
+    func updateCurrency(_ currency: String) async throws -> StoreDetailsResponse {
+        throw PreviewError.failed
+    }
 }
 
 struct PreviewImageUploadRepository: ImageUploadRepository {

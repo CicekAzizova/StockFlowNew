@@ -7,6 +7,7 @@
 
 protocol StoreRepository {
     func createStore(_ request: StoreRequest) async throws -> StoreResponse
+    func updateCurrency(_ currency: String) async throws -> StoreDetailsResponse
 }
 
 final class DefaultStoreRepository: StoreRepository {
@@ -26,5 +27,9 @@ final class DefaultStoreRepository: StoreRepository {
         guard !response.refreshToken.isEmpty else { throw NetworkError.invalidResponse }
         try tokenStorage.saveRefreshToken(response.refreshToken)
         return response
+    }
+    
+    func updateCurrency(_ currency: String) async throws -> StoreDetailsResponse {
+        try await networkService.request(StoreEndpoint.updateCurrency(currency))
     }
 }
