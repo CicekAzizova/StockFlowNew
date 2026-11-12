@@ -130,24 +130,12 @@ struct CreateStoreView: View {
             keyboardType: .emailAddress,
             submitLabel: .next,
             onSubmit: {
-                focusedField = .password
+                focusedField = .phone
             },
             text: $viewModel.email,
             focusedFieldBinding: $focusedField
         )
-
-        AppSecureFieldView(
-            placeholder: "Password",
-            focusedField: .password,
-            errorMessage: viewModel.fieldErrors[.password],
-            submitLabel: .next,
-            onSubmit: {
-                focusedField = .phone
-            },
-            text: $viewModel.password,
-            focusedFieldBinding: $focusedField
-        )
-
+        
         AppTextFieldView(
             title: "Phone",
             placeholder: "+994",
@@ -157,72 +145,24 @@ struct CreateStoreView: View {
             keyboardType: .phonePad,
             submitLabel: .next,
             onSubmit: {
-                focusedField = .storeName
+                focusedField = .password
             },
             text: $viewModel.phone,
             focusedFieldBinding: $focusedField
         )
 
-        AppTextFieldView(
-            title: "Store Name",
-            placeholder: "Your store name",
-            icon: nil,
-            focusedField: .storeName,
-            errorMessage: viewModel.fieldErrors[.storeName],
-            submitLabel: .next,
-            onSubmit: {
-                focusedField = .storeAddress
-            },
-            text: $viewModel.storeName,
-            focusedFieldBinding: $focusedField
-        )
 
-        AppTextFieldView(
-            title: "Store Address",
-            placeholder: "Store address",
-            icon: nil,
-            focusedField: .storeAddress,
-            errorMessage: viewModel.fieldErrors[.storeAddress],
+        AppSecureFieldView(
+            placeholder: "Password",
+            focusedField: .password,
+            errorMessage: viewModel.fieldErrors[.password],
             submitLabel: .next,
-            onSubmit: {
-                focusedField = .storePhone
-            },
-            text: $viewModel.storeAddress,
-            focusedFieldBinding: $focusedField
-        )
-
-        AppTextFieldView(
-            title: "Store Phone",
-            placeholder: "+994",
-            icon: nil,
-            focusedField: .storePhone,
-            errorMessage: viewModel.fieldErrors[.storePhone],
-            keyboardType: .phonePad,
-            submitLabel: .done,
             onSubmit: {
                 focusedField = nil
             },
-            text: $viewModel.storePhone,
+            text: $viewModel.password,
             focusedFieldBinding: $focusedField
         )
-        Section("Currency") {
-            Picker("Currency", selection: $viewModel.currency) {
-                ForEach(CurrencyOption.allCases) { option in
-                    Text(option.displayName).tag(option)
-                }
-            }
-            .pickerStyle(.menu)
-            .tint(Color.textPrimary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 12)
-            .frame(height: 44)
-            .background(.border)
-            .overlay {
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.gray, lineWidth: 1)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
     }
     
     

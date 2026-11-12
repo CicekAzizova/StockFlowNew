@@ -23,6 +23,8 @@ final class CreateStoreViewModel {
     var storePhone: String = ""
     var storeAddress: String = ""
     var currency: CurrencyOption = CurrencyOption(rawValue: Locale.current.currency?.identifier ?? "") ?? .usd
+    var selectedCategories: [String] = []
+    static let maxCategories = 5
     
     var fieldErrors: [CreateStoreFocusedField: String] = [:]
     
@@ -43,11 +45,7 @@ final class CreateStoreViewModel {
                 surname: surname,
                 email: email,
                 password: password,
-                phone: phone,
-                storeName: storeName,
-                storeAddress: storeAddress,
-                storePhone: storePhone,
-                currency: currency.rawValue
+                phone: phone
             )
         do {
             let response = try await storeRepository.createStore(request)
@@ -56,6 +54,14 @@ final class CreateStoreViewModel {
             await appStateManager.readToken()
         } catch  {
             state = .error(error.localizedDescription)
+        }
+    }
+    
+    func toggleCategory(_ code: String) {
+        if let index = selectedCategories.firstIndex(of: code) {
+            selectedCategories.remove(at: index)
+        } else if selectedCategories.count < Self.maxCategories {
+            selectedCategories.append(code)
         }
     }
     
@@ -82,19 +88,7 @@ final class CreateStoreViewModel {
         if phone.isBlank {
             fieldErrors[.phone] = "Phone is required."
         }
-
-        if storeName.isBlank {
-            fieldErrors[.storeName] = "Store name is required."
-        }
-
-        if storeAddress.isBlank {
-            fieldErrors[.storeAddress] = "Store address is required."
-        }
-
-        if storePhone.isBlank {
-            fieldErrors[.storePhone] = "Store phone is required."
-        }
-
+        
         return fieldErrors.isEmpty
     }
 }

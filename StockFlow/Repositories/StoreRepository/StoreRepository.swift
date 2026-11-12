@@ -8,6 +8,7 @@
 protocol StoreRepository {
     func createStore(_ request: StoreRequest) async throws -> StoreResponse
     func updateCurrency(_ currency: String) async throws -> StoreDetailsResponse
+    func updateStore(_ request: UpdateStoreRequest) async throws -> StoreDetailsResponse
 }
 
 final class DefaultStoreRepository: StoreRepository {
@@ -31,5 +32,9 @@ final class DefaultStoreRepository: StoreRepository {
     
     func updateCurrency(_ currency: String) async throws -> StoreDetailsResponse {
         try await networkService.request(StoreEndpoint.updateCurrency(currency))
+    }
+    
+    func updateStore(_ request: UpdateStoreRequest) async throws -> StoreDetailsResponse {
+        try await networkService.request(StoreEndpoint.updateStore(request))
     }
 }

@@ -11,13 +11,14 @@ enum StoreEndpoint: Endpoint {
     
     case createStore(StoreRequest)
     case updateCurrency(String)
+    case updateStore(UpdateStoreRequest)
     
     
     var path: String {
         switch self {
         case .createStore:
             "/auth/register"
-        case .updateCurrency:
+        case .updateCurrency, .updateStore:
             "/stores/current"
         }
     }
@@ -26,7 +27,7 @@ enum StoreEndpoint: Endpoint {
         switch self {
         case .createStore:
                 .post
-        case .updateCurrency:
+        case .updateCurrency, .updateStore:
                 .patch
         }
     }
@@ -34,7 +35,7 @@ enum StoreEndpoint: Endpoint {
         switch self {
         case .createStore:
             false
-        case .updateCurrency:
+        case .updateCurrency, .updateStore:
             true
         }
     }
@@ -45,6 +46,8 @@ enum StoreEndpoint: Endpoint {
             return request
         case .updateCurrency(let currency):
             return UpdateStoreRequest(currency: currency)
+        case .updateStore(let request):
+                    return request
         }
     }
 }

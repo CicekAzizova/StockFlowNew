@@ -13,15 +13,12 @@ struct StoreRequest: Encodable {
     let email: String
     let password:String
     let phone: String
-    let storeName: String
-    let storeAddress: String
-    let storePhone: String
-    var currency: String = "USD"
+    
+    var timezone: String = TimeZone.current.identifier
+
+   
     
     enum CodingKeys: String, CodingKey {
-        case name, email, password, phone, surname, currency
-        case storeName = "store_name"
-        case storeAddress = "store_address"
-        case storePhone = "store_phone"
+        case name, email, password, phone, surname, timezone
     }
 }

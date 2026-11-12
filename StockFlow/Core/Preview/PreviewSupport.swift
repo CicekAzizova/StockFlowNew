@@ -185,6 +185,10 @@ struct PreviewAuthRepository: AuthRepository {
 }
 
 struct PreviewStoreRepository: StoreRepository {
+    func updateStore(_ request: UpdateStoreRequest) async throws -> StoreDetailsResponse {
+        throw PreviewError.failed
+    }
+    
     func createStore(_ request: StoreRequest) async throws -> StoreResponse {
         throw PreviewError.failed
     }
@@ -196,6 +200,12 @@ struct PreviewStoreRepository: StoreRepository {
 
 struct PreviewImageUploadRepository: ImageUploadRepository {
     func uploadImage(_ imageData: Data) async throws -> String {
+        throw PreviewError.failed
+    }
+}
+
+struct PreviewCatalogRepository: CatalogRepository {
+    func getCategories() async throws -> [CatalogCategory] {
         throw PreviewError.failed
     }
 }

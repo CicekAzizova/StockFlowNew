@@ -34,6 +34,9 @@ final class AppDependencies {
     let salesStore: SalesStore
     let salesRepository: SalesRepository
     
+    let catalogRepository: CatalogRepository
+    
+    let catalogStore: CatalogStore
     
 
     init() {
@@ -74,6 +77,8 @@ final class AppDependencies {
  
         let salesRepository = DefaultSalesRepository(networkService: networkService)
         let salesStore = SalesStore(salesRepository: salesRepository)
+        let catalogRepository = DefaultCatalogRepository(networkService: networkService)
+        let catalogStore = CatalogStore(catalogRepository: catalogRepository)
         
         self.tokenStorage = tokenStorage
         self.networkService = networkService
@@ -97,6 +102,8 @@ final class AppDependencies {
         
         self.salesRepository = salesRepository
         self.salesStore = salesStore
+        self.catalogRepository = catalogRepository
+        self.catalogStore = catalogStore
     }
 
     #if DEBUG
@@ -108,7 +115,9 @@ final class AppDependencies {
         productRepository: ProductRepository,
         imageUploadRepository: ImageUploadRepository,
         sellerRepository: SellerRepository,
-        salesRepository: SalesRepository
+        salesRepository: SalesRepository,
+        catalogRepository: CatalogRepository = PreviewCatalogRepository()
+
     ) {
         self.tokenStorage = tokenStorage
         self.appLockManager = AppLockManager(pinStore: KeychainPinStore(keychain: KeychainService()), biometrics: BiometricAuthenticator())
@@ -124,6 +133,8 @@ final class AppDependencies {
         self.salesStore = SalesStore(salesRepository: salesRepository)
         self.languageManager = LanguageManager()
         self.appPreferences = AppPreferences()
+        self.catalogRepository = catalogRepository
+        self.catalogStore = CatalogStore(catalogRepository: catalogRepository)
     }
     #endif
 
@@ -139,6 +150,11 @@ final class AppDependencies {
         CreateStoreViewModel(
             storeRepository: storeRepository, appStateManager: appStateManager
         )
+    }
+    
+    @MainActor
+    func makeOnboardingViewModel(appStateManager: AppStateManager) -> OnboardingViewModel {
+        OnboardingViewModel(storeRepository: storeRepository, appStateManager: appStateManager)
     }
     
     @MainActor

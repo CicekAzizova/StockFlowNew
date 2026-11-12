@@ -31,11 +31,17 @@ struct AppRouter: View {
             } else {
                 switch appStateManager.user?.role {
                 case .owner:
-                    OwnerTabView(
-                        dependencies: dependencies,
-                        appStateManager: appStateManager,
-                        user: appStateManager.user
-                    )
+                    if appStateManager.user?.onboardingCompleted == false {
+                        OnboardingView(
+                            viewModel: dependencies.makeOnboardingViewModel(appStateManager: appStateManager)
+                        )
+                    } else {
+                        OwnerTabView(
+                            dependencies: dependencies,
+                            appStateManager: appStateManager,
+                            user: appStateManager.user
+                        )
+                    }
                 case .seller:
                     SellerTabView(
                         dependencies: dependencies,
