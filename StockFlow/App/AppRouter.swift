@@ -26,31 +26,36 @@ struct AppRouter: View {
         case .unauthenticated:
             LoginView(viewModel: dependencies.makeLoginViewModel(appStateManager: appStateManager), dependencies: dependencies, appStateManager: appStateManager)
         case .authenticated:
-            if !appLockManager.isPinEnabled {
-                PINSetupView()
-            } else {
-                switch appStateManager.user?.role {
-                case .owner:
-                    if appStateManager.user?.onboardingCompleted == false {
-                        OnboardingView(
-                            viewModel: dependencies.makeOnboardingViewModel(appStateManager: appStateManager)
-                        )
-                    } else {
-                        OwnerTabView(
-                            dependencies: dependencies,
-                            appStateManager: appStateManager,
-                            user: appStateManager.user
-                        )
-                    }
-                case .seller:
-                    SellerTabView(
-                        dependencies: dependencies,
-                        appStateManager: appStateManager,
-                        user: appStateManager.user
-                    )
-                case .none:
-                    ProgressView()
-                }
+            authenticatedContent
+        }
+    }
+
+    /// Ardıcıllıq: (yeni owner) mağaza wizard-ı → PIN → Panel.
+    @ViewBuilder
+    private var authenticatedContent: some View {
+        if appStateManager.user?.role == .owner,
+           appStateManager.user?.onboardingCompleted == false {
+            OnboardingView(
+                viewModel: dependencies.makeOnboardingViewModel(appStateManager: appStateManager)
+            )
+        } else if !appLockManager.isPinEnabled {
+            PINSetupView()
+        } else {
+            switch appStateManager.user?.role {
+            case .owner:
+                OwnerTabView(
+                    dependencies: dependencies,
+                    appStateManager: appStateManager,
+                    user: appStateManager.user
+                )
+            case .seller:
+                SellerTabView(
+                    dependencies: dependencies,
+                    appStateManager: appStateManager,
+                    user: appStateManager.user
+                )
+            case .none:
+                ProgressView()
             }
         }
     }

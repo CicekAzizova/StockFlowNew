@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 @MainActor
 @Observable
@@ -14,6 +15,22 @@ final class OnboardingViewModel {
     enum Step: Int, CaseIterable {
         case store
         case categories
+
+        /// Başlıqdakı böyük ad.
+        var title: LocalizedStringKey {
+            switch self {
+            case .store: "Create store"
+            case .categories: "Categories"
+            }
+        }
+
+        /// Proqres zolağının altındakı qısa ad.
+        var shortTitle: LocalizedStringKey {
+            switch self {
+            case .store: "Info"
+            case .categories: "Categories"
+            }
+        }
     }
 
     var step: Step = .store
@@ -28,6 +45,10 @@ final class OnboardingViewModel {
     // Addım 2: kateqoriyalar
     var selectedCategories: [String] = []
 
+    var userName: String {
+        appStateManager.user?.name ?? ""
+    }
+    
     var isSaving = false
     var nameError: String?
     var errorMessage: String?
