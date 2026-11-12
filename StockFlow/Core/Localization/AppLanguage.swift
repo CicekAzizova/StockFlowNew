@@ -28,3 +28,16 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
 }
+
+extension AppLanguage {
+    /// Telefonun dili dəstəklənirsə o, deyilsə ingilis dili.
+    static var deviceDefault: AppLanguage {
+        let code = Locale.preferredLanguages.first?.prefix(2).lowercased() ?? ""
+        switch code {
+        case "az": return .azerbaijani
+        case "ru": return .russian
+        case "tr": return .turkish
+        default: return .english
+        }
+    }
+}

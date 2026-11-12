@@ -26,7 +26,7 @@ final class LanguageManager {
            let lang = AppLanguage(rawValue: code) {
             language = lang
         } else {
-            language = .english
+            language = AppLanguage.deviceDefault
         }
     }
 }
