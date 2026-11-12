@@ -92,9 +92,12 @@ struct ProfileView: View {
                         onChangePasswordTap: { isChangePasswordPresented = true }
                     )
 
-                    ProfileSettingsSection(user: user) { code in
-                        await viewModel.updateCurrency(code)
-                    }
+                    ProfileSettingsSection(
+                        user: user,
+                        onCurrencyChange: { code in await viewModel.updateCurrency(code) },
+                        onCategoriesChange: { codes in await
+                            viewModel.updateCategories(codes) }
+                    )
 
                     ProfileAccountActionsSection(
                         user: user,

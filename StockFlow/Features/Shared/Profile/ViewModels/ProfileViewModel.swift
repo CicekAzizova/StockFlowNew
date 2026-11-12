@@ -115,6 +115,18 @@ final class ProfileViewModel {
             return error.localizedDescription
         }
     }
+    
+    func updateCategories(_ codes: [String]) async -> String? {
+        guard var user = appStateManager.user else { return nil }
+        do {
+            let store = try await storeRepository.updateStore(UpdateStoreRequest(mainCategories: codes))
+            user.mainCategories = store.mainCategories
+            apply(user)
+            return nil
+        } catch {
+            return error.localizedDescription
+        }
+    }
 
     func changePassword(current: String, new: String) async -> String? {
         do {

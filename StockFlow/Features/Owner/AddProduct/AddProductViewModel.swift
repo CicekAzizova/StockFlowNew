@@ -28,7 +28,7 @@ final class AddProductViewModel {
 
     var name = ""
     var sku = ""
-    var category = ""
+    var subcategory: String?
     var description = ""
     var price = ""
     var discount = ""
@@ -56,7 +56,7 @@ final class AddProductViewModel {
 
         name = product.name
         sku = product.sku
-        category = product.category
+        subcategory = product.subcategory
         description = product.description
         price = String(product.price)
         discount = String(product.discount)
@@ -108,7 +108,6 @@ final class AddProductViewModel {
         let fields = [
             name,
             sku,
-            category,
             description,
             price,
             discount,
@@ -146,13 +145,13 @@ final class AddProductViewModel {
         return ProductRequest(
             name: name,
             sku: sku,
-            category: category,
             description: description,
             price: price,
             discount: discount,
             costPrice: costPrice,
             quantity: quantity,
             lowStockLimit: lowStockLimit,
+            subcategory: subcategory,
             imageUrls: imageUrls
         )
     }

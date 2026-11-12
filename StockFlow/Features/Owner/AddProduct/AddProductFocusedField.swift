@@ -10,7 +10,6 @@ import Foundation
 enum AddProductFocusedField: Hashable, CaseIterable {
     case name
     case sku
-    case category
     case description
     case price
     case discount

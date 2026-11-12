@@ -122,12 +122,12 @@ struct AddProductView: View {
     private var form: some View {
         field("Product name", "e.g. Wireless Mouse", .name, next: .sku, text: $viewModel.name)
         field(
-            "SKU", "Unique code, e.g. WM-1001", .sku, next: .category,
+            "SKU", "Unique code, e.g. WM-1001", .sku, next: .description,
             icon: "barcode.viewfinder",
             iconAction: { showScanner = true },
             text: $viewModel.sku
         )
-        field("Category", "e.g. Electronics", .category, next: .description, text: $viewModel.category)
+        SubcategoryPicker(selected: $viewModel.subcategory)
         field("Description", "Short product description", .description, next: .price, text: $viewModel.description)
         field("Price ($)", "Selling price, e.g. 19.99", .price, next: .discount, keyboard: .decimalPad, text: $viewModel.price)
         field("Discount (%)", "0–100, enter 0 for none", .discount, next: .costPrice, keyboard: .decimalPad, text: $viewModel.discount)

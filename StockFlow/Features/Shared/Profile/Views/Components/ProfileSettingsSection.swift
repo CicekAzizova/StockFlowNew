@@ -13,13 +13,18 @@ struct ProfileSettingsSection: View {
     @Environment(AppLockManager.self) private var appLockManager
     @Environment(LanguageManager.self) private var languageManager
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(CatalogStore.self) private var catalogStore
+    @State private var isCategoriesPresented = false
     
     let user: User
     let onCurrencyChange: (String) async -> String?
+    let onCategoriesChange: ([String]) async -> String?
 
     @State private var pendingCurrency: CurrencyOption?
     @State private var currencyError: String?
-
+    @State private var draftCategories: [String] = []
+    @State private var initialCategories: [String] = []
+    
     var body: some View {
         @Bindable var preferences = preferences
         @Bindable var languageManager = languageManager
@@ -48,6 +53,22 @@ struct ProfileSettingsSection: View {
                     .fixedSize()
                     .tint(Color.textSecondary)
                 }
+                AppRowView(icon: "square.grid.2x2", tint: .blue, title: "Categories") {
+                    Button {
+                        initialCategories = user.mainCategories ?? ["other"]
+                                                draftCategories = initialCategories
+                                                isCategoriesPresented = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(categoriesSummary)
+                                .lineLimit(1)
+                            Image(systemName: "chevron.right")
+                                .font(.caption2)
+                        }
+                        .foregroundStyle(Color.textSecondary)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
 
             
@@ -69,6 +90,13 @@ struct ProfileSettingsSection: View {
                         .labelsHidden()
                         .tint(.brandGreen)
                 }
+            }
+        }
+        .task { await catalogStore.loadIfNeeded()
+        }
+        .sheet(isPresented: $isCategoriesPresented) {
+            CategorySelectionSheet(selected: $draftCategories, initial: initialCategories) {
+                await onCategoriesChange(draftCategories)
             }
         }
         .confirmationDialog(
@@ -102,6 +130,14 @@ struct ProfileSettingsSection: View {
     }
 
     // MARK: - Bindings
+    /// "Ərzaq +2" kimi qısa xülasə.
+    private var categoriesSummary: String {
+        let names = (user.mainCategories ?? []).compactMap {
+            catalogStore.category(code: $0)?.names.value(for: languageManager.language)
+        }
+        guard let first = names.first else { return "" }
+        return names.count == 1 ? first : "\(first) +\(names.count - 1)"
+    }
     
     /// Picker cari valyutanı göstərir. Dəyişəndə dərhal tətbiq olunmur, əvvəl təsdiq soruşulur.
     private var currencyBinding: Binding<CurrencyOption> {
