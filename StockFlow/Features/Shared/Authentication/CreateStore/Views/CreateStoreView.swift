@@ -11,11 +11,15 @@ struct CreateStoreView: View {
 
     @State var viewModel: CreateStoreViewModel
     @FocusState private var focusedField: CreateStoreFocusedField?
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-            ZStack {
-                Color.background
-                    .ignoresSafeArea()
+        ZStack {
+            Color.background
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                screenHeader
 
                 content
                     .frame(
@@ -24,6 +28,8 @@ struct CreateStoreView: View {
                         alignment: .topLeading
                     )
             }
+        }
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     // MARK: - Content
@@ -55,36 +61,82 @@ struct CreateStoreView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
-                    header
                     form
+                    sellerNote
                 }
                 .padding(24)
             }
             .scrollDismissesKeyboard(.interactively)
-            
-            .scrollDismissesKeyboard(.interactively)
             .dismissKeyboardOnTap()
-            
+
             createStoreButton
+            signInLink
         }
     }
 
     // MARK: - Header
 
-    var header: some View {
-        HStack(alignment: .top, spacing: 8) {
-            Image(.roleIcon)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 16, height: 16)
-                .padding(.top, 12)
-            Text(
-                "Your account is automatically assigned the OWNER role with full management access."
-            )
-            .font(.inter(.regular, size: 15))
-            .foregroundStyle(.textSecondary)
-            .padding(.bottom, 32)
+    private var screenHeader: some View {
+        HStack(spacing: 12) {
+            BrandHeaderIconButton(
+                systemImage: "chevron.left",
+                accessibilityLabel: "Back"
+            ) {
+                dismiss()
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("As a store owner")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .lineLimit(1)
+
+                Text("Create account")
+                    .font(.title2.bold())
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 0)
+
+            LanguageMenuButton()
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
+        .padding(.bottom, 20)
+        .brandHeaderBackground()
+    }
+
+    // MARK: - Seller note
+
+    private var sellerNote: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "info.circle")
+                .foregroundStyle(Color.brandTeal)
+            Text("Are you a seller? The store owner creates your account, just sign in.")
+                .font(.inter(.regular, size: 13))
+                .foregroundStyle(.textSecondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.brandTeal.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.top, 16)
+    }
+
+    // MARK: - Sign in link
+
+    private var signInLink: some View {
+        HStack(spacing: 4) {
+            Text("Already have an account?")
+                .foregroundStyle(.textSecondary)
+            Button("Sign in") { dismiss() }
+                .fontWeight(.bold)
+                .foregroundStyle(Color.brandTeal)
+        }
+        .font(.inter(.regular, size: 14))
+        .padding(.bottom, 16)
+        .background(Color.background)
     }
 
     // MARK: - Form
@@ -171,7 +223,7 @@ struct CreateStoreView: View {
 
     var createStoreButton: some View {
         AppButtonView(
-            title: "Create Store",
+            title: "Create account",
             isLoading: viewModel.state.isLoading, background: .brandPrimary
         ) {
             Task {

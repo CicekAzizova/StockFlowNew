@@ -27,6 +27,16 @@ enum AppLanguage: String, CaseIterable, Identifiable {
             "Türkçe"
         }
     }
+    
+    /// Dil menyusunda göstərilən qısa kod.
+    var shortCode: String {
+        switch self {
+        case .english: "EN"
+        case .azerbaijani: "AZ"
+        case .russian: "RU"
+        case .turkish: "TR"
+        }
+    }
 }
 
 extension AppLanguage {
