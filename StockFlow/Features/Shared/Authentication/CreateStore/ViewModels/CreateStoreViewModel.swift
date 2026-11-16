@@ -23,8 +23,6 @@ final class CreateStoreViewModel {
     var storePhone: String = ""
     var storeAddress: String = ""
     var currency: CurrencyOption = CurrencyOption(rawValue: Locale.current.currency?.identifier ?? "") ?? .usd
-    var selectedCategories: [String] = []
-    static let maxCategories = 5
     
     var fieldErrors: [CreateStoreFocusedField: String] = [:]
     
@@ -56,15 +54,6 @@ final class CreateStoreViewModel {
             state = .error(error.localizedDescription)
         }
     }
-    
-    func toggleCategory(_ code: String) {
-        if let index = selectedCategories.firstIndex(of: code) {
-            selectedCategories.remove(at: index)
-        } else if selectedCategories.count < Self.maxCategories {
-            selectedCategories.append(code)
-        }
-    }
-    
     
     private func validateFields() -> Bool {
         fieldErrors.removeAll()
