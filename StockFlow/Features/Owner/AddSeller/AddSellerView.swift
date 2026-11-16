@@ -160,7 +160,7 @@ struct AddSellerView: View {
         AppButtonView(
             title: viewModel.isEdit ? "Save Changes" : "Create Sales Associate",
             isLoading: viewModel.state.isLoading ,
-            background: .brandPrimary) {
+            usesBrandGradient: true) {
                 Task {
                   await viewModel.save()
                     

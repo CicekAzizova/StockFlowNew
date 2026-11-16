@@ -69,7 +69,7 @@ struct SellerSalesView: View {
                 )
                 AppButtonView(
                     title: "Scan Product",
-                    background: .brandPrimary) {
+                    usesBrandGradient: true) {
                         path.append(SalesRoute.scanner)
                     }
                 

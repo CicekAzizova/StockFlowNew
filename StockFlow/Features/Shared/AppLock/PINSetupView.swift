@@ -147,7 +147,7 @@ struct PINSetupView: View {
             AppButtonView(
                 title: "Enable Face ID",
                 isLoading: isSaving,
-                background: .brandPrimary
+                usesBrandGradient: true
             ) {
                 Task { await enableFaceID() }
             }

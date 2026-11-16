@@ -121,7 +121,7 @@ struct EmailVerificationView: View {
             AppButtonView(
                 title: "Verify",
                 isLoading: viewModel.isVerifying,
-                background: .brandPrimary
+                usesBrandGradient: true
             ) {
                 Task { await viewModel.verify() }
             }

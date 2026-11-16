@@ -224,7 +224,7 @@ struct CreateStoreView: View {
     var createStoreButton: some View {
         AppButtonView(
             title: "Create account",
-            isLoading: viewModel.state.isLoading, background: .brandPrimary
+            isLoading: viewModel.state.isLoading, usesBrandGradient: true
         ) {
             Task {
                 await viewModel.createStore()

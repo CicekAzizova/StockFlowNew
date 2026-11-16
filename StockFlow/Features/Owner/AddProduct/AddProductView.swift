@@ -158,7 +158,7 @@ struct AddProductView: View {
             AppButtonView(
                 title: isEditMode ? LocalizedStringKey("Save Product") : LocalizedStringKey("Add Product"),
                 isLoading: viewModel.state.isLoading,
-                background: .brandPrimary
+                usesBrandGradient: true
             ) {
                 Task {
                     await submitProduct()

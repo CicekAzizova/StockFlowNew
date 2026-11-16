@@ -201,7 +201,7 @@ struct OnboardingView: View {
             AppButtonView(
                 title: viewModel.step == .store ? LocalizedStringKey("Continue") : LocalizedStringKey("Finish"),
                 isLoading: viewModel.isSaving,
-                background: .brandPrimary
+                usesBrandGradient: true
             ) {
                 focusedField = nil
                 Task {
