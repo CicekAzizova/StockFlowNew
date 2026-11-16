@@ -13,6 +13,7 @@ final class AppLockManager {
     private(set) var isPinEnabled: Bool
     private(set) var isBiometricsEnabled: Bool
     private(set) var failedAttempts: Int
+    private(set) var hasSkippedPinSetup: Bool
     
     static let maxAttempts = 5
     static let gracePeriod: Duration = .seconds(10)
@@ -23,6 +24,7 @@ final class AppLockManager {
     private let defaults: UserDefaults
     private let biometricKey = "biometrics_enabled"
     private let attemptsKey = "pin_failed_attempts"
+    private let skipKey = "pin_setup_skipped"
 
     
     init(
@@ -37,6 +39,7 @@ final class AppLockManager {
         self.biometrics = biometrics
         self.defaults = defaults
         self.failedAttempts = defaults.integer(forKey: attemptsKey)
+        self.hasSkippedPinSetup = defaults.bool(forKey: skipKey)
     }
     
     var canUseBiometrics: Bool {
@@ -68,12 +71,6 @@ final class AppLockManager {
         guard isPinEnabled else { return }
         if await verifyBiometrics() {
             setBiometrics(true)
-        }
-    }
-    
-    func lockIfNeeded() {
-        if pinStore.hasPin {
-            isLocked = true
         }
     }
     
@@ -124,5 +121,15 @@ final class AppLockManager {
         isLocked = false
         isPinEnabled = false
         setBiometrics(false)
+    }
+    
+    func skipPinSetup() {
+        hasSkippedPinSetup = true
+        defaults.set(true, forKey: skipKey)
+    }
+
+    func resetPinSetupSkip() {
+        hasSkippedPinSetup = false
+        defaults.removeObject(forKey: skipKey)
     }
 }

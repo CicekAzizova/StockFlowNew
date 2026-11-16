@@ -13,12 +13,17 @@ struct PINDotsView: View {
         HStack(spacing: 18) {
             ForEach(0..<total, id: \.self) { index in
                 Circle()
-                    .fill(index < filledCount ? Color.primaryBlue : Color.clear)
-                    .overlay(Circle().stroke(Color.primaryBlue, lineWidth: 1.5))
-                    .frame(width: 16, height: 16)
-                
+                    .fill(index < filledCount ? Color.brandTeal : Color.clear)
+                    .overlay(
+                        Circle().stroke(
+                            index < filledCount ? Color.brandTeal : Color.gray.opacity(0.5),
+                            lineWidth: 1.5
+                        )
+                    )
+                    .frame(width: 18, height: 18)
             }
         }
+        .animation(.easeOut(duration: 0.15), value: filledCount)
     }
 }
 #Preview {

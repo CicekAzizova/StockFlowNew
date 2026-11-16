@@ -21,102 +21,193 @@ struct PINSetupView: View {
     @State private var firstPIN = ""
     @State private var confirmedPIN = ""
     @State private var pin = ""
+    @State private var isSaving = false
     @State private var errorMessage: LocalizedStringKey?
 
     var body: some View {
         ZStack {
             Color.background.ignoresSafeArea()
 
-            if step == .biometrics {
-                biometricOffer
-            } else {
-                pinEntry
+            VStack(spacing: 0) {
+                header
+
+                if step == .biometrics {
+                    biometricActions
+                } else {
+                    pinEntry
+                }
             }
         }
+    }
+
+    // MARK: - Header (üç mərhələ üçün eyni gradient)
+
+    private var header: some View {
+        VStack(spacing: 12) {
+            HStack {
+                if step == .confirm {
+                    BrandHeaderIconButton(
+                        systemImage: "chevron.left",
+                        accessibilityLabel: "Back"
+                    ) {
+                        goBack()
+                    }
+                } else {
+                    Color.clear.frame(width: 44, height: 44)
+                }
+
+                Spacer()
+
+                if step == .enter {
+                    Button("Skip") {
+                        appLockManager.skipPinSetup()
+                    }
+                    .font(.inter(.bold, size: 15))
+                    .foregroundStyle(.white.opacity(0.9))
+                }
+            }
+
+            Image(systemName: step == .biometrics ? "faceid" : "lock.fill")
+                .font(.system(size: 26))
+                .foregroundStyle(Color.brandTeal)
+                .frame(width: 64, height: 64)
+                .background(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+            Text(title)
+                .font(.title2.bold())
+                .foregroundStyle(.white)
+
+            Text(subtitle)
+                .font(.footnote)
+                .foregroundStyle(.white.opacity(0.8))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
+        .padding(.bottom, 24)
+        .frame(maxWidth: .infinity)
+        .brandHeaderBackground()
     }
 
     // MARK: - PIN yazma
 
     private var pinEntry: some View {
-        VStack(spacing: 28) {
+        VStack(spacing: 24) {
             Spacer()
-
-            Image(systemName: "lock.shield.fill")
-                .font(.system(size: 40))
-                .foregroundStyle(Color.primaryBlue)
-
-            VStack(spacing: 8) {
-                Text(step == .enter ? LocalizedStringKey("Create a PIN") : LocalizedStringKey("Confirm your PIN"))
-                    .font(.title2.bold())
-                    .foregroundStyle(Color.primaryBlue)
-
-                Text(errorMessage ?? subtitle)
+            
+            PINDotsView(filledCount: pin.count)
+            
+            if let errorMessage {
+                Text(errorMessage)
                     .font(.footnote)
-                    .foregroundStyle(errorMessage == nil ? Color.secondary : Color.red)
+                    .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
+            } else {
+                Text("You'll use this PIN every time you open the app")
+                    .font(.footnote)
+                    .foregroundStyle(.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
             }
 
-            PINDotsView(filledCount: pin.count)
+            Spacer()
 
             PINPadView(onDigit: append, onDelete: deleteLast)
-
-            Spacer()
         }
-        .padding(24)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 16)
     }
 
     // MARK: - Face ID təklifi
 
-    private var biometricOffer: some View {
-        VStack(spacing: 28) {
-            Spacer()
-
-            Image(systemName: "faceid")
-                .font(.system(size: 56))
-                .foregroundStyle(Color.primaryBlue)
-
-            VStack(spacing: 8) {
-                Text("Use Face ID?")
-                    .font(.title2.bold())
-                    .foregroundStyle(Color.primaryBlue)
-
-                Text("Unlock the app with your face instead of typing your PIN.")
-                    .font(.footnote)
-                    .foregroundStyle(Color.secondary)
-                    .multilineTextAlignment(.center)
-            }
-
-            Spacer()
-
+    private var biometricActions: some View {
+        VStack(spacing: 12) {
             VStack(spacing: 12) {
-                Button {
-                    Task { await enableFaceID() }
-                } label: {
-                    Text("Enable Face ID")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Color.primaryBlue)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
-
-                Button("Not now") {
-                    savePIN(confirmedPIN, useBiometrics: false)
-                }
-                .foregroundStyle(Color.primaryBlue)
+                benefitRow(
+                    icon: "bolt.fill",
+                    title: "Faster sign in",
+                    text: "Open the app with a glance"
+                )
+                benefitRow(
+                    icon: "lock.shield.fill",
+                    title: "Still secure",
+                    text: "Your face data never leaves your iPhone"
+                )
+                benefitRow(
+                    icon: "key.fill",
+                    title: "PIN as backup",
+                    text: "You can always use your PIN instead"
+                )
             }
+            .padding(.top, 28)
+
+            Spacer()
+
+            AppButtonView(
+                title: "Enable Face ID",
+                isLoading: isSaving,
+                background: .brandPrimary
+            ) {
+                Task { await enableFaceID() }
+            }
+
+            Button("Not now") {
+                savePIN(confirmedPIN, useBiometrics: false)
+            }
+            .font(.inter(.bold, size: 15))
+            .foregroundStyle(.textSecondary)
+            .padding(.vertical, 8)
+            .disabled(isSaving)
         }
-        .padding(24)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 16)
+    }
+
+    private func benefitRow(icon: String, title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundStyle(Color.brandTeal)
+                .frame(width: 40, height: 40)
+                .background(Color.brandTeal.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.inter(.bold, size: 15))
+                    .foregroundStyle(.textPrimary)
+                Text(text)
+                    .font(.footnote)
+                    .foregroundStyle(.textSecondary)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity)
+        .background(.border)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+    // MARK: - Mətnlər
+
+    private var title: LocalizedStringKey {
+        switch step {
+        case .enter: "Create a PIN"
+        case .confirm: "Confirm your PIN"
+        case .biometrics: "Use Face ID?"
+        }
+    }
+
+    private var subtitle: LocalizedStringKey {
+        switch step {
+        case .enter: "Choose a 4-digit PIN to protect the app"
+        case .confirm: "Enter the same PIN again"
+        case .biometrics: "Unlock the app with your face instead of typing your PIN."
+        }
     }
 
     // MARK: - Məntiq
-
-    private var subtitle: LocalizedStringKey {
-        step == .enter
-            ? "Choose a 4-digit PIN to protect the app"
-            : "Enter the same PIN again"
-    }
 
     private func append(_ digit: String) {
         guard pin.count < 4 else { return }
@@ -153,12 +244,18 @@ struct PINSetupView: View {
     }
 
     private func deleteLast() {
-        if !pin.isEmpty {
-            pin.removeLast()
-        }
+        guard !pin.isEmpty else { return }
+        pin.removeLast()
+    }
+
+    private func goBack() {
+        errorMessage = nil
+        resetToStart()
     }
 
     private func enableFaceID() async {
+        isSaving = true
+        defer { isSaving = false }
         if await appLockManager.verifyBiometrics() {
             savePIN(confirmedPIN, useBiometrics: true)
         }
@@ -170,7 +267,6 @@ struct PINSetupView: View {
             if useBiometrics {
                 appLockManager.setBiometrics(true)
             }
-        
         } catch {
             errorMessage = "Could not save the PIN. Please try again."
             resetToStart()
