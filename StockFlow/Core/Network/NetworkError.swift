@@ -41,3 +41,24 @@ enum NetworkError: Error, LocalizedError {
         }
     }
 }
+extension NetworkError {
+    /// Xəta internet və ya server əlçatmazlığındandırsa true (istifadəçi günahkar deyil, yenidən cəhd kifayətdir).
+    var isConnectionIssue: Bool {
+        switch self {
+        case .unknown(let error):
+            guard let urlError = error as? URLError else { return false }
+            switch urlError.code {
+            case .notConnectedToInternet, .networkConnectionLost, .timedOut,
+                 .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed,
+                 .dataNotAllowed, .internationalRoamingOff:
+                return true
+            default:
+                return false
+            }
+        case .serverError(let statusCode, _):
+            return statusCode >= 500
+        default:
+            return false
+        }
+    }
+}

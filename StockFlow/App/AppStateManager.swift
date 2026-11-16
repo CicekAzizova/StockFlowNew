@@ -50,8 +50,11 @@ final class  AppStateManager {
             setUser(currentUser)
             
         } catch  {
-            state = .unauthenticated
-        }
+            if (error as? NetworkError)?.isConnectionIssue == true {
+                   state = .connectionError
+               } else {
+                   state = .unauthenticated
+               }        }
     }
     
     func logout() {

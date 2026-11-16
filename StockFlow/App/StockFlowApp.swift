@@ -36,23 +36,36 @@ struct StockFlowApp: App {
         
         _appStateManager = State(initialValue: appStateManager)
     }
+    
+    private var showsSplash: Bool {
+        isSplashVisible
+            || appStateManager.state == .loading
+            || appStateManager.state == .connectionError
+    }
+    
     var body: some Scene {
         WindowGroup {
             ZStack {
                 AppRouter(dependencies: dependencies, appStateManager: appStateManager)
                 
-                if  isSplashVisible {
-                    SplashView()
-                        .transition(.opacity)
-                        .zIndex(1)
+                if showsSplash {
+                    SplashView(
+                        connectionError: appStateManager.state == .connectionError,
+                        onRetry: {
+                            Task { await appStateManager.readToken() }
+                        }
+                    )
+                    .transition(.opacity)
+                    .zIndex(1)
                 }
                 
-                if appStateManager.state == .authenticated && dependencies.appLockManager.isLocked {
+                if !isSplashVisible && appStateManager.state == .authenticated && dependencies.appLockManager.isLocked {
                     LockView()
                         .transition(.opacity)
                         .zIndex(2)
                 }
             }
+            .animation(.easeOut(duration: 0.3), value: showsSplash)
             .environment(appStateManager)
             .environment(dependencies.appLockManager)
             .environment(dependencies.appPreferences)
@@ -73,7 +86,7 @@ struct StockFlowApp: App {
             .task {
                 let startedAt = ContinuousClock.now
                 await appStateManager.readToken()
-                let minimumDuration = Duration.seconds(1.2)
+                let minimumDuration = Duration.seconds(1.8)
                 let elapsed = ContinuousClock.now - startedAt
                 if !CommandLine.arguments.contains("-uitesting"), elapsed < minimumDuration {
                     try? await Task.sleep(for: minimumDuration - elapsed)

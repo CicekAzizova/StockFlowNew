@@ -9,4 +9,5 @@ enum AppState {
     case loading
     case unauthenticated
     case authenticated
+    case connectionError
 }

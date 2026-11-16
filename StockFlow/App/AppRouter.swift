@@ -30,7 +30,7 @@ struct AppRouter: View {
     var content: some View {
         switch appStateManager.state {
         case .loading:
-            SplashView()
+            Color.clear
         case .unauthenticated:
             if hasSeenWelcome {
                 LoginView(
@@ -54,6 +54,8 @@ struct AppRouter: View {
             }
         case .authenticated:
             authenticatedContent
+        case .connectionError:
+            Color.clear
         }
     }
 
