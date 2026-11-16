@@ -29,7 +29,7 @@ struct SubcategoryPicker: View {
                 isPresented = true
             } label: {
                 HStack {
-                    Text(selectedName ?? "Select category")
+                    Text(selectedName ?? String(localized: "Select category"))
                         .font(.inter(.regular, size: 16))
                         .foregroundStyle(selected == nil ? Color.textSecondary : Color.textPrimary)
                         .lineLimit(1)

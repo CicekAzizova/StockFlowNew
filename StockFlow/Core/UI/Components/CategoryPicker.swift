@@ -58,7 +58,7 @@ struct CategoryPicker: View {
         let names = selected.compactMap {
             catalogStore.category(code: $0)?.names.value(for: languageManager.language)
         }
-        guard let first = names.first else { return "Select categories" }
+        guard let first = names.first else { return String(localized: "Select categories") }
         return names.count == 1 ? first : "\(first) +\(names.count - 1)"
     }
 }
