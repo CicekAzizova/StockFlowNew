@@ -13,9 +13,17 @@ struct AppRouter: View {
     var dependencies: AppDependencies
     let appStateManager: AppStateManager
     @Environment(AppLockManager.self) private var appLockManager
+    @State private var skippedVerification = false
+    @AppStorage("has_seen_welcome") private var hasSeenWelcome = false
+    @State private var isRegistering = false
     
     var body: some View {
          content
+            .onChange(of: appStateManager.state) { _, newState in
+                        if newState == .authenticated {
+                            hasSeenWelcome = true
+                        }
+                    }
     }
     
     @ViewBuilder
@@ -24,7 +32,26 @@ struct AppRouter: View {
         case .loading:
             SplashView()
         case .unauthenticated:
-            LoginView(viewModel: dependencies.makeLoginViewModel(appStateManager: appStateManager), dependencies: dependencies, appStateManager: appStateManager)
+            if hasSeenWelcome {
+                LoginView(
+                    viewModel: dependencies.makeLoginViewModel(appStateManager: appStateManager),
+                    dependencies: dependencies,
+                    appStateManager: appStateManager
+                )
+            } else {
+                NavigationStack {
+                    WelcomeView(
+                        onRegister: { isRegistering = true },
+                        onSignIn: { hasSeenWelcome = true }
+                    )
+                    .toolbar(.hidden, for: .navigationBar)
+                    .navigationDestination(isPresented: $isRegistering) {
+                        CreateStoreView(
+                            viewModel: dependencies.makeCreateStoreViewModel(appStateManager: appStateManager)
+                        )
+                    }
+                }
+            }
         case .authenticated:
             authenticatedContent
         }
@@ -34,11 +61,21 @@ struct AppRouter: View {
     @ViewBuilder
     private var authenticatedContent: some View {
         if appStateManager.user?.role == .owner,
-           appStateManager.user?.onboardingCompleted == false {
-            OnboardingView(
-                viewModel: dependencies.makeOnboardingViewModel(appStateManager: appStateManager)
-            )
-        } else if !appLockManager.isPinEnabled {
+               appStateManager.user?.emailVerified == false,
+               appStateManager.user?.onboardingCompleted == false,
+               !skippedVerification {
+                EmailVerificationView(
+                    viewModel: dependencies.makeEmailVerificationViewModel(appStateManager: appStateManager),
+                    onSkip: { skippedVerification = true },
+                    onSignOut: { appStateManager.logout() }
+                )
+            } else if appStateManager.user?.role == .owner,
+                      appStateManager.user?.onboardingCompleted == false {
+                OnboardingView(
+                    viewModel: dependencies.makeOnboardingViewModel(appStateManager: appStateManager),
+                    onSignOut: { appStateManager.logout() }
+                )
+            } else if !appLockManager.isPinEnabled && !appLockManager.hasSkippedPinSetup {
             PINSetupView()
         } else {
             switch appStateManager.user?.role {

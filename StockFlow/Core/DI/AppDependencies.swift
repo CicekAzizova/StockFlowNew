@@ -158,6 +158,11 @@ final class AppDependencies {
     }
     
     @MainActor
+    func makeEmailVerificationViewModel(appStateManager: AppStateManager) -> EmailVerificationViewModel {
+        EmailVerificationViewModel(authRepository: authRepository, appStateManager: appStateManager)
+    }
+    
+    @MainActor
     func makeProfileViewModel(appStateManager: AppStateManager) -> ProfileViewModel {
         ProfileViewModel(
             userRepository: userRepository,

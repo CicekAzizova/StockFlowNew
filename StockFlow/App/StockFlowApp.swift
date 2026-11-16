@@ -30,6 +30,7 @@ struct StockFlowApp: App {
             dependencies.productsStore.reset()
             dependencies.salesStore.reset()
             dependencies.appLockManager.disablePin()
+            dependencies.appLockManager.resetPinSetupSkip()
             
         }
         

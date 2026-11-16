@@ -10,6 +10,8 @@ import Foundation
 protocol AuthRepository {
     func login(email: String, password: String) async throws -> LoginResponse
     func logout(refreshToken: String) async
+    func verifyEmail(code: String) async throws
+    func resendVerification() async throws
 }
 
 final class DefaultAuthRepository: AuthRepository {
@@ -33,5 +35,13 @@ final class DefaultAuthRepository: AuthRepository {
     
     func logout(refreshToken: String) async {
         try? await networkService.requestVoid(AuthEndpoint.logout(refreshToken: refreshToken))
+    }
+    
+    func verifyEmail(code: String) async throws {
+        try await networkService.requestVoid(AuthEndpoint.verifyEmail(code: code))
+    }
+
+    func resendVerification() async throws {
+        try await networkService.requestVoid(AuthEndpoint.resendVerification)
     }
 }

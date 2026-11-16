@@ -14,8 +14,10 @@ enum OnboardingField: Hashable {
 struct OnboardingView: View {
 
     @State var viewModel: OnboardingViewModel
+    let onSignOut: () -> Void
     @FocusState private var focusedField: OnboardingField?
     @Environment(\.locale) private var locale
+    @State private var isBackOptionsPresented = false
 
     var body: some View {
         ZStack {
@@ -48,20 +50,56 @@ struct OnboardingView: View {
                 footer
             }
         }
+        .confirmationDialog(
+            "Go back?",
+            isPresented: $isBackOptionsPresented,
+            titleVisibility: .visible
+        ) {
+            Button("Sign out", role: .destructive) {
+                onSignOut()
+            }
+            Button("Cancel", role: .cancel) {}
+        }
     }
 
     // MARK: - Header
 
     private var header: some View {
         VStack(spacing: 12) {
-            BrandScreenHeader(
-                title: viewModel.step == .store
-                    ? LocalizedStringKey("Your store")
-                    : LocalizedStringKey("Categories"),
-                subtitle: "Step \(viewModel.step.rawValue + 1) of \(OnboardingViewModel.Step.allCases.count)"
-            )
+            HStack(spacing: 12) {
+                BrandHeaderIconButton(
+                    systemImage: "chevron.left",
+                    accessibilityLabel: "Back"
+                ) {
+                    if viewModel.step == .store {
+                        isBackOptionsPresented = true
+                    } else {
+                        viewModel.back()
+                    }
+                }
+                .disabled(viewModel.isSaving)
 
-            // Proqres zolağı: keçilmiş addımlar tam ağ olur.
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: "Step \(viewModel.step.rawValue + 1) of \(OnboardingViewModel.Step.allCases.count)")
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .lineLimit(1)
+
+                    Text(viewModel.step == .store
+                         ? LocalizedStringKey("Your store")
+                         : LocalizedStringKey("Categories"))
+                        .font(.title2.bold())
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 4)
+            .padding(.bottom, 8)
+
+            // Proqres zolağı aşağıda olduğu kimi qalır
             HStack(spacing: 6) {
                 ForEach(OnboardingViewModel.Step.allCases, id: \.rawValue) { step in
                     Capsule()
@@ -160,21 +198,6 @@ struct OnboardingView: View {
 
     private var footer: some View {
         HStack(spacing: 12) {
-            if viewModel.step == .categories {
-                Button {
-                    viewModel.back()
-                } label: {
-                    Text("Back")
-                        .font(.inter(.bold, size: 16))
-                        .foregroundStyle(.textPrimary)
-                        .padding(.horizontal, 24)
-                        .frame(height: 50)
-                        .background(.border)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .disabled(viewModel.isSaving)
-            }
-
             AppButtonView(
                 title: viewModel.step == .store ? LocalizedStringKey("Continue") : LocalizedStringKey("Finish"),
                 isLoading: viewModel.isSaving,

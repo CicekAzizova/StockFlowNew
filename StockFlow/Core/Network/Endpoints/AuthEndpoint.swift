@@ -12,6 +12,8 @@ enum AuthEndpoint: Endpoint {
     case login(email: String,password: String)
     case refresh(refreshToken: String)
     case logout(refreshToken: String)
+    case verifyEmail(code: String)
+    case resendVerification
     
     var path: String {
         switch self {
@@ -21,18 +23,27 @@ enum AuthEndpoint: Endpoint {
             return "/auth/refresh"
         case .logout:
             return "/auth/logout"
+        case .verifyEmail:
+            return "/auth/verify-email"
+        case .resendVerification:
+            return "/auth/resend-verification"
         }
     }
     
     var method: HttpMethod {
         switch self {
-        case .login, .refresh, .logout:
+        case .login, .refresh, .logout, .verifyEmail, .resendVerification:
             return .post
         }
     }
     
     var requiresAuthentication: Bool {
-        false
+        switch self {
+        case .verifyEmail, .resendVerification:
+            return true
+        default:
+            return false
+        }
     }
     
     var httpBody: (any Encodable)? {
@@ -44,6 +55,11 @@ enum AuthEndpoint: Endpoint {
             )
         case .refresh(let refreshToken), .logout(let refreshToken):
             return RefreshRequest(refreshToken: refreshToken)
+        case .verifyEmail(let code):
+            return VerifyEmailRequest(code: code)
+        case .resendVerification:
+            return nil
         }
+        
     }
 }

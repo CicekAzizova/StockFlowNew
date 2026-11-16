@@ -178,6 +178,16 @@ struct PreviewUserRepository: UserRepository {
 }
 
 struct PreviewAuthRepository: AuthRepository {
+    func verifyEmail(code: String) async throws {
+        throw PreviewError.failed
+
+    }
+    
+    func resendVerification() async throws {
+        throw PreviewError.failed
+
+    }
+    
     func login(email: String, password: String) async throws -> LoginResponse {
         throw PreviewError.failed
     }

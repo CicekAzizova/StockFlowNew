@@ -16,6 +16,7 @@ struct User: Decodable {
     var phone: String?
     var avatarUrl: String?
     var currency: String? = nil
+    var emailVerified: Bool? = nil
     
     var mainCategories: [String]? = nil
     
@@ -37,5 +38,6 @@ struct User: Decodable {
         case avatarUrl = "avatar_url"
         case mainCategories = "main_categories"
         case onboardingCompleted = "onboarding_completed"
+        case emailVerified = "email_verified"
     }
 }
