@@ -12,6 +12,8 @@ protocol AuthRepository {
     func logout(refreshToken: String) async
     func verifyEmail(code: String) async throws
     func resendVerification() async throws
+    func forgotPassword(email: String) async throws
+    func resetPassword(email: String, code: String, newPassword: String) async throws
 }
 
 final class DefaultAuthRepository: AuthRepository {
@@ -43,5 +45,15 @@ final class DefaultAuthRepository: AuthRepository {
 
     func resendVerification() async throws {
         try await networkService.requestVoid(AuthEndpoint.resendVerification)
+    }
+    
+    func forgotPassword(email: String) async throws {
+        try await networkService.requestVoid(AuthEndpoint.forgotPassword(email: email))
+    }
+
+    func resetPassword(email: String, code: String, newPassword: String) async throws {
+        try await networkService.requestVoid(
+            AuthEndpoint.resetPassword(email: email, code: code, newPassword: newPassword)
+        )
     }
 }

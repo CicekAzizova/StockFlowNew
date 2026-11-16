@@ -163,6 +163,11 @@ final class AppDependencies {
     }
     
     @MainActor
+    func makeForgotPasswordViewModel() -> ForgotPasswordViewModel {
+        ForgotPasswordViewModel(authRepository: authRepository)
+    }
+    
+    @MainActor
     func makeProfileViewModel(appStateManager: AppStateManager) -> ProfileViewModel {
         ProfileViewModel(
             userRepository: userRepository,

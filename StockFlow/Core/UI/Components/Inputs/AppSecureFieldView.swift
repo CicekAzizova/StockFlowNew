@@ -70,7 +70,7 @@ struct AppSecureFieldView<FocusedField: Hashable>: View {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
                         focusedFieldBinding.wrappedValue == focusedField
-                        ? Color.accentColor
+                        ? Color.brandTeal
                         : Color.clear,
                         lineWidth: 1.5
                     )

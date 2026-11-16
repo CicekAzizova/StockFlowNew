@@ -11,9 +11,9 @@ struct AppButtonView: View {
 
     let title: LocalizedStringKey
     var isLoading: Bool = false
-    var background: Color
+    var background: Color = .brandTeal
+    var usesBrandGradient: Bool = false
     var action: () -> Void
-    
 
     var body: some View {
         Button {
@@ -31,7 +31,17 @@ struct AppButtonView: View {
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .frame(height: 50)
-            .background(background)
+            .background {
+                if usesBrandGradient {
+                    LinearGradient(
+                        colors: [.brandDark, .brandGreen],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                } else {
+                    background
+                }
+            }
             .clipShape(
                 RoundedRectangle(cornerRadius: 12)
             )

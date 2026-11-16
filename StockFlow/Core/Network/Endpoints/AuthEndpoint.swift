@@ -14,6 +14,8 @@ enum AuthEndpoint: Endpoint {
     case logout(refreshToken: String)
     case verifyEmail(code: String)
     case resendVerification
+    case forgotPassword(email: String)
+    case resetPassword(email: String, code: String, newPassword: String)
     
     var path: String {
         switch self {
@@ -27,12 +29,16 @@ enum AuthEndpoint: Endpoint {
             return "/auth/verify-email"
         case .resendVerification:
             return "/auth/resend-verification"
+        case .forgotPassword:
+            return "/auth/forgot-password"
+        case .resetPassword:
+            return "/auth/reset-password"
         }
     }
     
     var method: HttpMethod {
         switch self {
-        case .login, .refresh, .logout, .verifyEmail, .resendVerification:
+        case .login, .refresh, .logout, .verifyEmail, .resendVerification, .forgotPassword, .resetPassword:
             return .post
         }
     }
@@ -57,6 +63,10 @@ enum AuthEndpoint: Endpoint {
             return RefreshRequest(refreshToken: refreshToken)
         case .verifyEmail(let code):
             return VerifyEmailRequest(code: code)
+        case .forgotPassword(let email):
+            return ForgotPasswordRequest(email: email)
+        case .resetPassword(let email, let code, let newPassword):
+            return ResetPasswordRequest(email: email, code: code, newPassword: newPassword)
         case .resendVerification:
             return nil
         }
