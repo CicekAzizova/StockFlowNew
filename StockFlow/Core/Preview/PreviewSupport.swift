@@ -230,6 +230,26 @@ struct PreviewCatalogRepository: CatalogRepository {
     }
 }
 
+struct PreviewLocationRepository: LocationRepository {
+    func deleteLocation(id: Int) async throws {}
+    
+    func getLocations() async throws -> [StoreLocation] {
+        [
+            StoreLocation(id: 1, name: "Main store", kind: .store, address: "Baku", isMain: true),
+            StoreLocation(id: 2, name: "Central warehouse", kind: .warehouse, address: "", isMain: false)
+        ]
+    }
+
+    func createLocation(_ request: CreateLocationRequest) async throws -> StoreLocation {
+        StoreLocation(id: 3, name: request.name, kind: request.kind, address: request.address, isMain: request.isMain)
+    }
+
+    func updateLocation(id: Int, _ request: UpdateLocationRequest) async throws -> StoreLocation {
+        StoreLocation(id: id, name: request.name ?? "Location", kind: .store, address: request.address ?? "", isMain: request.isMain ?? false)
+    }
+    
+    
+}
 struct PreviewSellerRepository: SellerRepository {
     func deactivateSeller(id: Int) async throws -> SellerResponse {
         throw PreviewError.failed

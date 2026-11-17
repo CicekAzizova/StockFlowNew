@@ -19,6 +19,8 @@ struct User: Decodable {
     var emailVerified: Bool? = nil
     
     var mainCategories: [String]? = nil
+    var subcategories: [String]? = nil
+    var customSubcategories: [CustomSubcategory]? = nil
     
     var onboardingCompleted: Bool? = nil
     
@@ -37,7 +39,9 @@ struct User: Decodable {
         case phone
         case avatarUrl = "avatar_url"
         case mainCategories = "main_categories"
+        case subcategories
         case onboardingCompleted = "onboarding_completed"
         case emailVerified = "email_verified"
+        case customSubcategories = "custom_subcategories"
     }
 }

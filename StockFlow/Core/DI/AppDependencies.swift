@@ -21,6 +21,9 @@ final class AppDependencies {
     
     let storeRepository: StoreRepository
     
+    
+    let locationRepository: LocationRepository
+    
     let userRepository: UserRepository
     
     let productRepository: ProductRepository
@@ -63,6 +66,8 @@ final class AppDependencies {
             tokenStorage: tokenStorage
         )
         
+        let locationRepository = DefaultLocationRepository(networkService: networkService)
+        
         let userRepository = DefaultUserRepository(
             networkService: networkService, tokenStorage: tokenStorage
         )
@@ -89,6 +94,7 @@ final class AppDependencies {
         self.authRepository = authRepository
         
         self.storeRepository = storeRepository
+        self.locationRepository = locationRepository
         
         self.userRepository = userRepository
         
@@ -116,7 +122,9 @@ final class AppDependencies {
         imageUploadRepository: ImageUploadRepository,
         sellerRepository: SellerRepository,
         salesRepository: SalesRepository,
-        catalogRepository: CatalogRepository = PreviewCatalogRepository()
+        catalogRepository: CatalogRepository = PreviewCatalogRepository(),
+        locationRepository: LocationRepository = PreviewLocationRepository()
+        
 
     ) {
         self.tokenStorage = tokenStorage
@@ -135,6 +143,7 @@ final class AppDependencies {
         self.appPreferences = AppPreferences()
         self.catalogRepository = catalogRepository
         self.catalogStore = CatalogStore(catalogRepository: catalogRepository)
+        self.locationRepository = locationRepository
     }
     #endif
 
@@ -154,7 +163,11 @@ final class AppDependencies {
     
     @MainActor
     func makeOnboardingViewModel(appStateManager: AppStateManager) -> OnboardingViewModel {
-        OnboardingViewModel(storeRepository: storeRepository, appStateManager: appStateManager)
+        OnboardingViewModel(
+            storeRepository: storeRepository,
+            locationRepository: locationRepository,
+            appStateManager: appStateManager
+        )
     }
     
     @MainActor

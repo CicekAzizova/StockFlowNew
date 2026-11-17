@@ -16,13 +16,16 @@ struct StoreDetailsResponse: Decodable {
     let timezone: String
     let currency: String
     let mainCategories: [String]
+    let subcategories: [String]
+    let customSubcategories: [CustomSubcategory]
     let country: String?
     let city: String
     let onboardingCompleted: Bool
 
     enum CodingKeys: String, CodingKey {
-        case id, name, address, phone, timezone, currency, country, city
+        case id, name, address, phone, timezone, currency, country, city, subcategories
         case mainCategories = "main_categories"
         case onboardingCompleted = "onboarding_completed"
+        case customSubcategories = "custom_subcategories"
     }
 }

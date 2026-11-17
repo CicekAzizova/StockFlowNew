@@ -20,6 +20,14 @@ struct OnboardingView: View {
     @State private var isBackOptionsPresented = false
 
     var body: some View {
+        if viewModel.finishedStore != nil {
+            OnboardingDoneView(viewModel: viewModel)
+        } else {
+            wizard
+        }
+    }
+    
+    private var wizard: some View {
         ZStack {
             Color.background
                 .ignoresSafeArea()
@@ -34,6 +42,8 @@ struct OnboardingView: View {
                             storeStep
                         case .categories:
                             categoriesStep
+                        case .locations:
+                            LocationsStepView(viewModel: viewModel)
                         }
 
                         if let message = viewModel.errorMessage {
@@ -80,37 +90,67 @@ struct OnboardingView: View {
                 .disabled(viewModel.isSaving)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: "Step \(viewModel.step.rawValue + 1) of \(OnboardingViewModel.Step.allCases.count)")
-                        .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.7))
-                        .lineLimit(1)
+                    if viewModel.step == .store {
+                        Text("Welcome, \(viewModel.userName)")
+                            .font(.footnote)
+                            .foregroundStyle(.white.opacity(0.7))
+                            .lineLimit(1)
+                    } else {
+                        Text(verbatim: viewModel.storeName)
+                            .font(.footnote)
+                            .foregroundStyle(.white.opacity(0.7))
+                            .lineLimit(1)
+                    }
 
-                    Text(viewModel.step == .store
-                         ? LocalizedStringKey("Your store")
-                         : LocalizedStringKey("Categories"))
+                    Text(stepTitle)
                         .font(.title2.bold())
                         .foregroundStyle(.white)
                         .lineLimit(1)
                 }
 
                 Spacer(minLength: 0)
+
+                Text("Step \(viewModel.step.rawValue + 1)/\(OnboardingViewModel.Step.allCases.count)")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.7))
             }
             .padding(.horizontal, 16)
             .padding(.top, 4)
             .padding(.bottom, 8)
 
-            // Proqres zolağı aşağıda olduğu kimi qalır
             HStack(spacing: 6) {
                 ForEach(OnboardingViewModel.Step.allCases, id: \.rawValue) { step in
-                    Capsule()
-                        .fill(.white.opacity(step.rawValue <= viewModel.step.rawValue ? 1 : 0.3))
-                        .frame(height: 4)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Capsule()
+                            .fill(.white.opacity(step.rawValue <= viewModel.step.rawValue ? 1 : 0.3))
+                            .frame(height: 4)
+
+                        Text(stepLabel(step))
+                            .font(.caption2.bold())
+                            .foregroundStyle(.white.opacity(step == viewModel.step ? 1 : 0.6))
+                    }
                 }
             }
             .padding(.horizontal, 16)
         }
         .padding(.bottom, 16)
         .brandHeaderBackground()
+    }
+
+    private func stepLabel(_ step: OnboardingViewModel.Step) -> LocalizedStringKey {
+        switch step {
+        case .store: "Info"
+        case .categories: "Categories"
+        case .locations: "Locations"
+        }
+    }
+    
+    private var stepTitle: LocalizedStringKey {
+        switch viewModel.step {
+        case .store: "Create your store"
+        case .categories: "Categories"
+        case .locations: "Locations"
+        }
     }
 
     // MARK: - Step 1: store
@@ -128,6 +168,9 @@ struct OnboardingView: View {
             text: $viewModel.storeName,
             focusedFieldBinding: $focusedField
         )
+        
+        ActivityTypeGrid(selected: $viewModel.selectedCategories)
+            .padding(.vertical, 8)
 
         AppTextFieldView(
             title: "Store Phone",
@@ -186,20 +229,29 @@ struct OnboardingView: View {
 
     @ViewBuilder
     private var categoriesStep: some View {
-        Text("What do you sell? Choose up to 5 categories.")
+        Text("Tap to choose what you sell, or add your own.")
             .font(.inter(.regular, size: 15))
             .foregroundStyle(.textSecondary)
             .padding(.bottom, 16)
 
-        CategoryPicker(selected: $viewModel.selectedCategories)
+        SubcategoryChips(
+            mainCategories: viewModel.selectedCategories.isEmpty ? ["other"] : viewModel.selectedCategories,
+            selected: $viewModel.selectedSubcategories,
+            drafts: viewModel.customDrafts,
+            onAddCustom: { viewModel.addCustomSubcategory($0) },
+            onRemoveCustom: { viewModel.removeCustomSubcategory($0) }
+        )
     }
-
     // MARK: - Footer
+    
+    private var footerTitle: LocalizedStringKey {
+        viewModel.step == .locations ? "Create store" : "Continue"
+    }
 
     private var footer: some View {
         HStack(spacing: 12) {
             AppButtonView(
-                title: viewModel.step == .store ? LocalizedStringKey("Continue") : LocalizedStringKey("Finish"),
+                title: footerTitle,
                 isLoading: viewModel.isSaving,
                 usesBrandGradient: true
             ) {
@@ -207,7 +259,8 @@ struct OnboardingView: View {
                 Task {
                     switch viewModel.step {
                     case .store: await viewModel.continueFromStore()
-                    case .categories: await viewModel.finish()
+                    case .categories: await viewModel.continueFromCategories()
+                    case .locations: await viewModel.finish()
                     }
                 }
             }

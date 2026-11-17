@@ -166,9 +166,24 @@ struct CreateStoreView: View {
             errorMessage: viewModel.fieldErrors[.surname],
             submitLabel: .next,
             onSubmit: {
-                focusedField = .email
+                focusedField = .phone
             },
             text: $viewModel.surname,
+            focusedFieldBinding: $focusedField
+        )
+        
+        AppTextFieldView(
+            title: "Phone",
+            placeholder: "+994",
+            icon: nil,
+            focusedField: .phone,
+            errorMessage: viewModel.fieldErrors[.phone],
+            keyboardType: .phonePad,
+            submitLabel: .next,
+            onSubmit: {
+                focusedField = .email
+            },
+            text: $viewModel.phone,
             focusedFieldBinding: $focusedField
         )
         
@@ -182,24 +197,9 @@ struct CreateStoreView: View {
             keyboardType: .emailAddress,
             submitLabel: .next,
             onSubmit: {
-                focusedField = .phone
-            },
-            text: $viewModel.email,
-            focusedFieldBinding: $focusedField
-        )
-        
-        AppTextFieldView(
-            title: "Phone",
-            placeholder: "+994",
-            icon: nil,
-            focusedField: .phone,
-            errorMessage: viewModel.fieldErrors[.phone],
-            keyboardType: .phonePad,
-            submitLabel: .next,
-            onSubmit: {
                 focusedField = .password
             },
-            text: $viewModel.phone,
+            text: $viewModel.email,
             focusedFieldBinding: $focusedField
         )
 

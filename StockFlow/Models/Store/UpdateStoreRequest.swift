@@ -13,14 +13,17 @@ struct UpdateStoreRequest: Encodable {
     var phone: String? = nil
     var currency: String? = nil
     var mainCategories: [String]? = nil
+    var subcategories: [String]? = nil
+    var customSubcategories: [CustomSubcategoryInput]? = nil
     var country: String? = nil
     var city: String? = nil
     var timezone: String? = nil
     var onboardingCompleted: Bool? = nil
 
     enum CodingKeys: String, CodingKey {
-        case name, phone, currency, country, city, timezone
+        case name, phone, currency, country, city, timezone, subcategories
         case mainCategories = "main_categories"
         case onboardingCompleted = "onboarding_completed"
+        case customSubcategories = "custom_subcategories"
     }
 }
