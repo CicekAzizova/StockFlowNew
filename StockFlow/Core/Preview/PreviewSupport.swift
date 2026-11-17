@@ -250,6 +250,19 @@ struct PreviewLocationRepository: LocationRepository {
     
     
 }
+struct PreviewTransferRepository: TransferRepository {
+    func createTransfer(_ request: CreateTransferRequest) async throws -> StockTransfer {
+        StockTransfer(
+            id: 1,
+            fromLocationName: "Central warehouse",
+            toLocationName: "Main store",
+            createdByName: "Owner",
+            note: nil,
+            createdAt: "2026-11-17 12:00:00",
+            items: []
+        )
+    }
+}
 struct PreviewSellerRepository: SellerRepository {
     func deactivateSeller(id: Int) async throws -> SellerResponse {
         throw PreviewError.failed

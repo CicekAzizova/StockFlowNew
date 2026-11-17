@@ -15,9 +15,12 @@ final class ProductDetailViewModel {
     private let productStore: ProductsStore
     private let initialProduct: ProductsResponse
     
+    private var refreshedProduct: ProductsResponse?
+
     var product: ProductsResponse {
-        productStore.product(withID: initialProduct.id) ?? initialProduct
+        productStore.product(withID: initialProduct.id) ?? refreshedProduct ?? initialProduct
     }
+
     
     var state: ProductDetailViewState = .idle
 
@@ -26,6 +29,11 @@ final class ProductDetailViewModel {
         self.initialProduct = product
         
         
+    }
+    
+    /// Transferdən sonra qalıqları təzələyir.
+    func reload() async {
+        refreshedProduct = await productStore.refreshProduct(sku: initialProduct.sku)
     }
     
     func deleteProduct() async {

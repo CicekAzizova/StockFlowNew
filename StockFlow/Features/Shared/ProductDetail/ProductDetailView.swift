@@ -11,6 +11,8 @@ struct ProductDetailView: View {
     
     @Binding var path: NavigationPath
     @State private var showingDeleteConfirmation = false
+    @State private var isTransferPresented = false
+    private let dependencies: AppDependencies?
     private let canManageProducts: Bool
     
     private var product: ProductsResponse {
@@ -19,13 +21,16 @@ struct ProductDetailView: View {
     init(
         viewModel: ProductDetailViewModel,
         path: Binding<NavigationPath>,
-        canManageProducts: Bool = false
+        canManageProducts: Bool = false,
+        dependencies: AppDependencies? = nil
 
     ) {
         _viewModel = State(initialValue: viewModel)
         _path = path
         self.canManageProducts = canManageProducts
+        self.dependencies = dependencies
     }
+    
     
     private var imageGallery: some View {
         TabView {
@@ -178,6 +183,14 @@ struct ProductDetailView: View {
                             } label: {
                                 Label("Edit", systemImage: "pencil")
                             }
+                            
+                            if dependencies != nil, product.stocks.count > 1 {
+                                Button {
+                                    isTransferPresented = true
+                                } label: {
+                                    Label("Transfer stock", systemImage: "arrow.left.arrow.right")
+                                }
+                            }
 
                             Button(role: .destructive) {
                                 showingDeleteConfirmation = true
@@ -189,6 +202,14 @@ struct ProductDetailView: View {
                                 .foregroundStyle(.textPrimary)
                         }
                     }
+                }
+            }
+            .sheet(isPresented: $isTransferPresented) {
+                if let dependencies {
+                    TransferStockSheet(
+                        viewModel: dependencies.makeTransferStockViewModel(product: product),
+                        onTransferred: { await viewModel.reload() }
+                    )
                 }
             }
     }

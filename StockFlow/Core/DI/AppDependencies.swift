@@ -23,6 +23,7 @@ final class AppDependencies {
     
     
     let locationRepository: LocationRepository
+    let transferRepository: TransferRepository
     
     let userRepository: UserRepository
     
@@ -68,6 +69,8 @@ final class AppDependencies {
         
         let locationRepository = DefaultLocationRepository(networkService: networkService)
         
+        let transferRepository = DefaultTransferRepository(networkService: networkService)
+        
         let userRepository = DefaultUserRepository(
             networkService: networkService, tokenStorage: tokenStorage
         )
@@ -96,6 +99,8 @@ final class AppDependencies {
         self.storeRepository = storeRepository
         self.locationRepository = locationRepository
         
+        self.transferRepository = transferRepository
+        
         self.userRepository = userRepository
         
         self.productRepository = productRepository
@@ -123,7 +128,8 @@ final class AppDependencies {
         sellerRepository: SellerRepository,
         salesRepository: SalesRepository,
         catalogRepository: CatalogRepository = PreviewCatalogRepository(),
-        locationRepository: LocationRepository = PreviewLocationRepository()
+        locationRepository: LocationRepository = PreviewLocationRepository(),
+        transferRepository: TransferRepository = PreviewTransferRepository()
         
 
     ) {
@@ -144,6 +150,7 @@ final class AppDependencies {
         self.catalogRepository = catalogRepository
         self.catalogStore = CatalogStore(catalogRepository: catalogRepository)
         self.locationRepository = locationRepository
+        self.transferRepository = transferRepository
     }
     #endif
 
@@ -211,6 +218,15 @@ final class AppDependencies {
     @MainActor
     func makeProductDetailViewModel(product: ProductsResponse) -> ProductDetailViewModel {
         ProductDetailViewModel(productStore: productsStore, product: product)
+    }
+    
+    @MainActor
+    func makeTransferStockViewModel(product: ProductsResponse) -> TransferStockViewModel {
+        TransferStockViewModel(
+            transferRepository: transferRepository,
+            locationRepository: locationRepository,
+            product: product
+        )
     }
     
     @MainActor

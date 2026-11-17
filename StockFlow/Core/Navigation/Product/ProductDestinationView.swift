@@ -19,7 +19,8 @@ struct ProductDestinationView: View {
             ProductDetailView(
                 viewModel: dependencies.makeProductDetailViewModel(product: product),
                 path: $path,
-                canManageProducts: canManageProducts
+                canManageProducts: canManageProducts,
+                dependencies: canManageProducts ? dependencies : nil
             )
         case .addProduct where canManageProducts:
             AddProductView(

@@ -150,6 +150,21 @@ final class ProductsStore {
         return response
     }
     
+    /// Bir məhsulu serverdən təzələyir və siyahılardakı köhnə nüsxəni əvəz edir.
+    func refreshProduct(sku: String) async -> ProductsResponse? {
+        guard let fresh = try? await productRepository.getProduct(bySku: sku) else { return nil }
+
+        if let index = products.firstIndex(where: { $0.id == fresh.id }) {
+            products[index] = fresh
+        }
+        if let index = lowStockProducts.firstIndex(where: { $0.id == fresh.id }) {
+            lowStockProducts[index] = fresh
+        }
+        await refreshLowStock()
+        return fresh
+    }
+    
+    
     func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse {
         let response = try await productRepository.restockProduct(id: id, quantity: quantity)
 
