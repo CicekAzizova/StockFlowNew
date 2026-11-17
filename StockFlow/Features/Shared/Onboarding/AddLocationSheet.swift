@@ -13,7 +13,9 @@ struct AddLocationSheet: View {
         case name, address
     }
 
-    let viewModel: OnboardingViewModel
+    let locationRepository: LocationRepository
+    var onAdded: () async -> Void = {}
+    
     @Environment(\.dismiss) private var dismiss
     @FocusState private var focusedField: Field?
 
@@ -116,16 +118,19 @@ struct AddLocationSheet: View {
         isSaving = true
         defer { isSaving = false }
 
-        let error = await viewModel.addLocation(
-            name: trimmedName,
-            kind: kind,
-            address: address.trimmingCharacters(in: .whitespacesAndNewlines),
-            makeMain: kind == .store && makeMain
-        )
-        if let error {
-            errorMessage = error
-        } else {
+        do {
+            _ = try await locationRepository.createLocation(
+                CreateLocationRequest(
+                    name: trimmedName,
+                    kind: kind,
+                    address: address.trimmingCharacters(in: .whitespacesAndNewlines),
+                    isMain: kind == .store && makeMain
+                )
+            )
+            await onAdded()
             dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 }

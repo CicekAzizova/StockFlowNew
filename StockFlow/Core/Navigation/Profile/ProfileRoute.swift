@@ -8,4 +8,5 @@
 enum ProfileRoute: Hashable {
     case personalInformation
     case team
+    case storeInfo
 }

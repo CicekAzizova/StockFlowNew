@@ -193,6 +193,11 @@ final class AppDependencies {
     }
     
     @MainActor
+    func makeLocationsViewModel() -> LocationsViewModel {
+        LocationsViewModel(locationRepository: locationRepository)
+    }
+    
+    @MainActor
     func makeAddProductViewModel(product: ProductsResponse? = nil) -> AddProductViewModel {
         AddProductViewModel(productStore: productsStore, imageUploadRepository: imageUploadRepository,
             product: product)

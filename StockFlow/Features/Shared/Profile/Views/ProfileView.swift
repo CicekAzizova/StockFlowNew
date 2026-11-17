@@ -48,6 +48,9 @@ struct ProfileView: View {
             await viewModel.loadStats()
             await viewModel.loadLocations()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .locationsChanged)) { _ in
+            Task { await viewModel.loadLocations() }
+        }
         .deleteAccountAlert(isPresented: $isDeleteAccountPresented) { password in
             await viewModel.deleteAccount(password: password)
         }

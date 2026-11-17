@@ -133,6 +133,16 @@ struct AddProductView: View {
         field("Discount (%)", "0–100, enter 0 for none", .discount, next: .costPrice, keyboard: .decimalPad, text: $viewModel.discount)
         field("Cost price ($)", "What you paid, e.g. 12.50", .costPrice, next: .quantity, keyboard: .decimalPad, text: $viewModel.costPrice)
         field("Quantity", "Units in stock, e.g. 50", .quantity, next: .lowStockLimit, keyboard: .numberPad, text: $viewModel.quantity)
+        
+        if let locationName = ActiveLocationStore.name {
+            HStack(spacing: 6) {
+                Image(systemName: "mappin.and.ellipse")
+                Text("Quantity is saved for \(locationName)")
+            }
+            .font(.inter(.regular, size: 12))
+            .foregroundStyle(Color.brandTeal)
+        }
+        
         field("Low stock limit", "Warn when stock is at or below, e.g. 5", .lowStockLimit, next: nil, keyboard: .numberPad, text: $viewModel.lowStockLimit)
     }
     

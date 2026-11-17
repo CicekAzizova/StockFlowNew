@@ -68,7 +68,10 @@ struct LocationsStepView: View {
             }
         }
         .sheet(isPresented: $isAddPresented) {
-            AddLocationSheet(viewModel: viewModel)
+            AddLocationSheet(
+                locationRepository: viewModel.locationRepository,
+                onAdded: { await viewModel.loadLocations() }
+            )
         }
         .confirmationDialog(
             "Delete this location?",

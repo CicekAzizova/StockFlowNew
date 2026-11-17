@@ -53,7 +53,7 @@ final class OnboardingViewModel {
     var errorMessage: String?
 
     private let storeRepository: StoreRepository
-    private let locationRepository: LocationRepository
+    let locationRepository: LocationRepository
     private let appStateManager: AppStateManager
 
     init(

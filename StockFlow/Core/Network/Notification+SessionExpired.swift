@@ -13,4 +13,5 @@ extension Notification.Name {
 
 extension Notification.Name {
     static let activeLocationChanged = Notification.Name("activeLocationChanged")
+    static let locationsChanged = Notification.Name("locationsChanged")
 }

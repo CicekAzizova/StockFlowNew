@@ -27,6 +27,13 @@ struct ProfileDestinationView: View {
                 path: $path,
                 viewModel: dependencies.makeTeamViewModel()
             )
+        case .storeInfo where canManageTeam:
+            if let user {
+                StoreInfoView(
+                    user: user,
+                    viewModel: dependencies.makeLocationsViewModel()
+                )
+            }
         default:
             EmptyView()
         }

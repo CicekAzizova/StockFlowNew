@@ -24,6 +24,15 @@ struct ProfileAccountSection: View {
             }
 
             if user.role == .owner {
+                
+                Button {
+                    path.append(ProfileRoute.storeInfo)
+                } label: {
+                    AppRowView(icon: "storefront", tint: .brandTeal, title: "Store information") {
+                        AppRowDisclosure()
+                    }
+                }
+                
                 Button {
                     path.append(ProfileRoute.team)
                 } label: {
