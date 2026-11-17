@@ -152,11 +152,14 @@ final class ProductsStore {
     
     func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse {
         let response = try await productRepository.restockProduct(id: id, quantity: quantity)
-        
+
         if let index = products.firstIndex(where: { $0.id == id }) {
+            products[index] = response
+        }
+        if let index = lowStockProducts.firstIndex(where: { $0.id == id }) {
             lowStockProducts[index] = response
         }
-        
+
         await refreshLowStock()
         return response
     }
