@@ -224,7 +224,11 @@ final class AppDependencies {
     
     @MainActor
     func makeAddSellerViewModel(seller: SellerResponse? = nil) -> AddSellerViewModel {
-        AddSellerViewModel(repository: sellerRepository, associate: seller)
+        AddSellerViewModel(
+            repository: sellerRepository,
+            locationRepository: locationRepository,
+            associate: seller
+        )
     }
     
     @MainActor

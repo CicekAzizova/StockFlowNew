@@ -25,6 +25,8 @@ struct SellerResponse: Decodable, Hashable {
     let monthOrders: Int?
     let isActive: Bool?
     let isOnline: Bool?
+    let locationId: Int?
+    let locationName: String?
     /// Backend formatı: UTC, "yyyy-MM-dd HH:mm:ss".
     let lastActiveAt: String?
 
@@ -59,5 +61,7 @@ struct SellerResponse: Decodable, Hashable {
         case isActive = "is_active"
         case isOnline = "is_online"
         case lastActiveAt = "last_active_at"
+        case locationId = "location_id"
+        case locationName = "location_name"
     }
 }

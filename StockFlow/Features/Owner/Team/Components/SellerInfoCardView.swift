@@ -28,6 +28,17 @@ struct SellerInfoCardView: View {
                     .font(.caption)
                     .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)
+                
+                if let locationName = associate.locationName {
+                        Label {
+                            Text(verbatim: locationName)
+                        } icon: {
+                            Image(systemName: "storefront")
+                        }
+                        .font(.caption)
+                        .foregroundStyle(Color.brandTeal)
+                        .lineLimit(1)
+                    }
             }
 
             Spacer(minLength: 8)

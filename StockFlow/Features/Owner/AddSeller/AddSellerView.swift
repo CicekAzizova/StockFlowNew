@@ -152,6 +152,38 @@ struct AddSellerView: View {
                 text: $viewModel.password,
                 focusedFieldBinding: $focusedField
             )
+            if viewModel.stores.count > 1 {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Works at")
+                        .font(.inter(.medium, size: 14))
+                        .foregroundStyle(.textPrimary)
+
+                    Menu {
+                        Picker("Works at", selection: $viewModel.selectedLocationId) {
+                            ForEach(viewModel.stores) { store in
+                                Text(verbatim: store.name).tag(Optional(store.id))
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "storefront")
+                                .foregroundStyle(Color.brandTeal)
+
+                            Text(verbatim: viewModel.stores.first { $0.id == viewModel.selectedLocationId }?.name ?? "")
+                                .foregroundStyle(.textPrimary)
+
+                            Spacer()
+
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.footnote)
+                                .foregroundStyle(.textSecondary)
+                        }
+                        .padding(14)
+                        .background(Color.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+            }
             
         }
     }
@@ -181,5 +213,6 @@ struct AddSellerView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .dismissKeyboardOnTap()
+        .task { await viewModel.loadStores() }
     }
 }

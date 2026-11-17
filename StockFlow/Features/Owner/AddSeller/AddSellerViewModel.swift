@@ -14,6 +14,12 @@ final class AddSellerViewModel {
     
     private let repository: SellerRepository
     
+    private let locationRepository: LocationRepository
+
+    /// Satıcının işləyə biləcəyi məkanlar (yalnız mağazalar, anbar yox).
+    var stores: [StoreLocation] = []
+    var selectedLocationId: Int?
+    
     var state: AddSellerViewState = .idle
     
     let associate: SellerResponse?
@@ -30,21 +36,34 @@ final class AddSellerViewModel {
     var emailError: String?
     var passwordError: String?
     
-    init(repository: SellerRepository,associate: SellerResponse? = nil ) {
+    init(repository: SellerRepository,
+         locationRepository: LocationRepository,
+         associate: SellerResponse? = nil) {
         self.repository = repository
+        self.locationRepository = locationRepository
         self.associate = associate
-        
+
         guard let associate else { return }
-        
+
         name = associate.name
         surname = associate.surname
         fin = associate.fin
         phone = associate.phone
         email = associate.email
-        
+        selectedLocationId = associate.locationId
     }
     var isEdit: Bool {
         associate != nil
+    }
+    
+    func loadStores() async {
+        let all = (try? await locationRepository.getLocations()) ?? []
+        stores = all.filter { $0.kind == .store }
+
+        // Seçim yoxdursa əsas mağaza seçilir.
+        if selectedLocationId == nil {
+            selectedLocationId = stores.first(where: { $0.isMain })?.id
+        }
     }
     
     func createSeller() async {
@@ -60,7 +79,8 @@ final class AddSellerViewModel {
                     fin: fin,
                     phone: phone,
                     email: email.trimmingCharacters(in: .whitespacesAndNewlines),
-                    password: password
+                    password: password,
+                    locationId: selectedLocationId
                 )
             )
             state = .success(response)
@@ -84,7 +104,8 @@ final class AddSellerViewModel {
                     fin: fin.trimmed,
                     phone: phone.trimmed,
                     email: email.trimmed,
-                    password: password.nilIfBlank
+                    password: password.nilIfBlank,
+                    locationId: selectedLocationId
                 )
             )
             state = .success(response)

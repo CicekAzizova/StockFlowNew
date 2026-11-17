@@ -214,6 +214,13 @@ struct SellerDetailView: View {
                 } else {
                     emailRow
                 }
+                if let locationName = viewModel.associate.locationName {
+                    AppRowView(icon: "storefront", tint: .brandTeal, title: "Works at") {
+                        Text(verbatim: locationName)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
             }
         }
     }
