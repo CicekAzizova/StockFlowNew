@@ -10,3 +10,7 @@ import Foundation
 extension Notification.Name {
     static let sessionExpired = Notification.Name("sessionExpired")
 }
+
+extension Notification.Name {
+    static let activeLocationChanged = Notification.Name("activeLocationChanged")
+}

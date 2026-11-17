@@ -65,6 +65,8 @@ final class  AppStateManager {
         try? tokenStorage.deleteToken()
         try? tokenStorage.deleteRefreshToken()
         
+        ActiveLocationStore.id = nil
+        ActiveLocationStore.name = nil
         user = nil
         onLogout?()
         state = .unauthenticated

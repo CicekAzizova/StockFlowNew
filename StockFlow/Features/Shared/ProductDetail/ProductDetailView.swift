@@ -108,13 +108,42 @@ struct ProductDetailView: View {
         }
     }
     
+    
+    /// Məhsulun hər məkandakı qalığı (yalnız sahib, 2+ məkan olanda).
+    @ViewBuilder
+    private var stockByLocation: some View {
+        if canManageProducts, product.stocks.count > 1 {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Stock by location")
+                    .font(.inter(.bold, size: 15))
+
+                ForEach(product.stocks) { stock in
+                    HStack {
+                        Text(verbatim: stock.locationName)
+                            .font(.inter(.regular, size: 15))
+
+                        Spacer()
+
+                        Text("\(stock.quantity)")
+                            .font(.inter(.bold, size: 15))
+                            .foregroundStyle(stock.quantity == 0 ? Color.red : Color.textPrimary)
+                    }
+                }
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.border)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+    }
+    
     private var productDetailContent: some View {
         ScrollView {
             VStack(spacing: 20) {
                 imageGallery
                 header
                 productInformation
-                
+                stockByLocation
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)

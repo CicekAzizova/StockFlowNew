@@ -9,6 +9,7 @@ enum HttpHeader {
     static let accept = "Accept"
     static let contentType = "Content-Type"
     static let authorization = "Authorization"
+    static let locationId = "X-Location-Id"
 }
 
 enum Accept {

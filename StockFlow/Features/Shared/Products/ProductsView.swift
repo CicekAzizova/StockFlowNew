@@ -109,6 +109,9 @@ struct ProductsView: View {
             .refreshable {
                 await viewModel.refresh()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .activeLocationChanged)) { _ in
+                Task { await viewModel.refresh() }
+            }
         }
     }
 }

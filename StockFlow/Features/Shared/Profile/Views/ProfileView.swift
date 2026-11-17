@@ -18,6 +18,7 @@ struct ProfileView: View {
     @State private var isEditProfilePresented = false
     @State private var isChangePasswordPresented = false
     @State private var isDeleteAccountPresented = false
+    @State private var isLocationPickerPresented = false
 
     init(
         viewModel: ProfileViewModel,
@@ -43,7 +44,10 @@ struct ProfileView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
-        .task { await viewModel.loadStats() }
+        .task {
+            await viewModel.loadStats()
+            await viewModel.loadLocations()
+        }
         .deleteAccountAlert(isPresented: $isDeleteAccountPresented) { password in
             await viewModel.deleteAccount(password: password)
         }
@@ -54,6 +58,13 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $isChangePasswordPresented) {
             ChangePasswordView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $isLocationPickerPresented) {
+            LocationPickerSheet(
+                locations: viewModel.locations,
+                selectedId: viewModel.activeLocation?.id,
+                onSelect: { viewModel.selectLocation($0) }
+            )
         }
     }
 
@@ -84,6 +95,24 @@ struct ProfileView: View {
                             .font(.footnote)
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    if user.role == .owner, viewModel.locations.count > 1 {
+                        AppSectionView("Location") {
+                            Button {
+                                isLocationPickerPresented = true
+                            } label: {
+                                AppRowView(icon: "storefront", tint: .brandTeal, title: "Working location") {
+                                    HStack(spacing: 6) {
+                                        Text(verbatim: viewModel.activeLocation?.name ?? "")
+                                            .font(.footnote)
+                                            .foregroundStyle(.textSecondary)
+                                        AppRowDisclosure()
+                                    }
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
 
                     ProfileAccountSection(

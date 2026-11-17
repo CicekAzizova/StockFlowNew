@@ -7,6 +7,21 @@
 
 import Foundation
 
+/// Məhsulun bir məkandakı qalığı.
+struct ProductStock: Decodable, Hashable, Identifiable {
+    let locationId: Int
+    let locationName: String
+    let quantity: Int
+
+    var id: Int { locationId }
+
+    enum CodingKeys: String, CodingKey {
+        case quantity
+        case locationId = "location_id"
+        case locationName = "location_name"
+    }
+}
+
 struct ProductsResponse: Decodable, Hashable {
     let id: Int
     let name: String
@@ -22,9 +37,10 @@ struct ProductsResponse: Decodable, Hashable {
     let createdAt: String
     var soldThisMonth: Int = 0
     var subcategory: String? = nil
+    var stocks: [ProductStock] = []
     
     enum CodingKeys: String, CodingKey {
-        case id, name, sku, category, description, price, discount, quantity, subcategory
+        case id, name, sku, category, description, price, discount, quantity, subcategory, stocks
         case costPrice = "cost_price"
         case lowStockLimit = "low_stock_limit"
         case createdAt = "created_at"

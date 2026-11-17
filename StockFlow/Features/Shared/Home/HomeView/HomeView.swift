@@ -27,7 +27,8 @@ struct HomeView: View {
     var homeView: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
-               
+                ActiveLocationChip()
+
                 HomeSummaryGrid(
                     productsCount: viewModel.productsCount,
                     lowStockCount: viewModel.lowStockCount,
@@ -64,6 +65,9 @@ struct HomeView: View {
         }
         .refreshable {
             await viewModel.refresh()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .activeLocationChanged)) { _ in
+            Task { await viewModel.refresh() }
         }
     }
     

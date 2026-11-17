@@ -21,6 +21,7 @@ struct ProductsHeader: View {
                     Text("\(count)")
                         .font(.inter(.regular, size: 14))
                         .foregroundStyle(.textSecondary)
+                    ActiveLocationChip()
                 }
                 Spacer()
                 
