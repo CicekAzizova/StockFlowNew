@@ -9,6 +9,9 @@ import SwiftUI
 struct ProductsView: View {
     @State var viewModel: ProductViewModel
     @Binding var path: NavigationPath
+    @Environment(CatalogStore.self) private var catalogStore
+    @State private var isScannerPresented = false
+    @State private var notFoundSku: String?
     let canManageProducts: Bool
     
     init(
@@ -33,7 +36,7 @@ struct ProductsView: View {
         case .idle, .loading:
             ProgressView()
         case .loaded:
-            if viewModel.allProducts.isEmpty {
+            if viewModel.allProducts.isEmpty && !viewModel.hasActiveFilter {
                 ContentUnavailableView(
                     "No Products",
                     systemImage: "shippingbox",
@@ -52,9 +55,7 @@ struct ProductsView: View {
     }
     
     private var productsList: some View {
-        VStack {
-            ProductFilterPicker(selectedFilter: $viewModel.selectedFilter)
-            
+        VStack(spacing: 0) {
             if viewModel.filteredProducts.isEmpty {
                 ContentUnavailableView(
                     "No Results",
@@ -63,10 +64,10 @@ struct ProductsView: View {
                 )
             } else {
                 ScrollView {
-                    LazyVStack {
+                    LazyVStack(spacing: 10){
                         ForEach(viewModel.filteredProducts, id: \.id) { product in
                             NavigationLink(value: ProductRoute.productDetail(product)) {
-                                SummaryCardView(product: product)
+                                ProductRowView(product: product)
                             }
                             .task {
                                 if product.id == viewModel.filteredProducts.last?.id {
@@ -75,6 +76,8 @@ struct ProductsView: View {
                             }
                         }
                     }
+                    .padding(.bottom, 80)
+                    .padding(.top, 4)
                 }
                 .scrollDismissesKeyboard(.interactively)
                 .dismissKeyboardOnTap()
@@ -83,28 +86,39 @@ struct ProductsView: View {
     }
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottomTrailing) {
             Color.background
                 .ignoresSafeArea()
-            
-            VStack {
+
+            VStack(spacing: 0) {
                 ProductsHeader(
-                    count: viewModel.productsCount,
-                    onAdd: canManageProducts
-                    ? { path.append(ProductRoute.addProduct) }
-                    : nil
+                    locationSwitcher: viewModel.locationSwitcher,
+                    query: $viewModel.query,
+                    filter: $viewModel.selectedFilter,
+                    stats: viewModel.stats,
+                    onScan: {
+                        isScannerPresented = true
+
+                    }
                 )
-                
-                ProductSearchField(query: $viewModel.query)
-                
+
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+                    .padding(.horizontal)
             }
-            .padding()
             .dismissKeyboardOnTap()
             .task {
                 await viewModel.loadProductsIfNeeded()
+            }
+            .task(id: viewModel.searchKey) {
+                await viewModel.applyFilters()
+            }
+            .task {
+                if canManageProducts { await viewModel.locationSwitcher?.load() }
+            }
+            .task { await catalogStore.loadIfNeeded() }
+            .onReceive(NotificationCenter.default.publisher(for: .locationsChanged)) { _ in
+                Task { if canManageProducts { await viewModel.locationSwitcher?.load() } }
             }
             .refreshable {
                 await viewModel.refresh()
@@ -112,7 +126,78 @@ struct ProductsView: View {
             .onReceive(NotificationCenter.default.publisher(for: .activeLocationChanged)) { _ in
                 Task { await viewModel.refresh() }
             }
+
+            if canManageProducts {
+                addButton
+            }
         }
+        .toolbar(.hidden, for: .navigationBar)
+        .fullScreenCover(isPresented: $isScannerPresented) {
+            scannerSheet
+        }
+        .alert(
+            "Product not found",
+            isPresented: Binding(
+                get: { notFoundSku != nil },
+                set: { if !$0 { notFoundSku = nil } }
+            )
+        ) {
+            if canManageProducts {
+                Button("Add product") { path.append(ProductRoute.addProduct) }
+            }
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(verbatim: notFoundSku ?? "")
+        }
+    }
+    
+    private var scannerSheet: some View {
+        ZStack(alignment: .topTrailing) {
+            BarcodeInputView(placeholder: "Enter SKU manually") { code in
+                isScannerPresented = false
+                Task { await handleScan(code) }
+            }
+
+            Button {
+                isScannerPresented = false
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title)
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, .black.opacity(0.4))
+            }
+            .padding()
+        }
+    }
+
+    private func handleScan(_ code: String) async {
+        if let product = await viewModel.findProduct(sku: code) {
+            path.append(ProductRoute.productDetail(product))
+        } else {
+            notFoundSku = code
+        }
+    }
+
+    private var addButton: some View {
+        Button {
+            path.append(ProductRoute.addProduct)
+        } label: {
+            Label("Add product", systemImage: "plus")
+                .font(.inter(.bold, size: 15))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 20)
+                .frame(height: 50)
+                .background(
+                    LinearGradient(
+                        colors: [.brandDark, .brandTeal],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .clipShape(Capsule())
+                .shadow(color: .black.opacity(0.18), radius: 8, y: 4)
+        }
+        .padding(16)
     }
 }
 #if DEBUG

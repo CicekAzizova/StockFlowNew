@@ -11,6 +11,7 @@ import Foundation
 final class ProductViewModel {
     
     private let productStore: ProductsStore
+    let locationSwitcher: LocationSwitcher?
     private let defaults: UserDefaults
     
     private static let filterKey = "products.selectedFilter"
@@ -20,13 +21,23 @@ final class ProductViewModel {
     var query: String = ""
     
     var loadMoreError: String?
+    private var appliedKey = ""
     
     var selectedFilter: ProductStockFilter {
         didSet { defaults.set(selectedFilter.rawValue, forKey: Self.filterKey) }
     }
     
-    init(productStore: ProductsStore, defaults: UserDefaults = .standard) {
+    var stats: ProductStats? {
+        productStore.stats
+    }
+    
+    init(
+        productStore: ProductsStore,
+        locationSwitcher: LocationSwitcher? = nil,
+        defaults: UserDefaults = .standard
+    ) {
         self.productStore = productStore
+        self.locationSwitcher = locationSwitcher
         self.defaults = defaults
         self.selectedFilter = defaults.string(forKey: Self.filterKey)
             .flatMap(ProductStockFilter.init(rawValue:)) ?? .all
@@ -39,37 +50,34 @@ final class ProductViewModel {
         productStore.productsCount
     }
     
+    /// Filtr/axtarış artıq serverdə edilir, siyahı olduğu kimi gəlir.
     var filteredProducts: [ProductsResponse] {
-        
-        let stockFilteredProducts: [ProductsResponse]
-        
-        switch selectedFilter {
-        case .all:
-            stockFilteredProducts = allProducts
-        case .inStock:
-            stockFilteredProducts = allProducts.filter { $0.stockStatus == .inStock }
-        case .lowStock:
-            stockFilteredProducts = allProducts.filter { $0.stockStatus == .lowStock }
-        case .outStock:
-            stockFilteredProducts = allProducts.filter{ $0.stockStatus == .outOfStock }
-        }
-        guard !query.isEmpty else {
-            return stockFilteredProducts
-        }
-        return stockFilteredProducts.filter {
-            $0.name.localizedCaseInsensitiveContains(query)
-        }
-        
+        allProducts
+    }
+
+    var hasActiveFilter: Bool {
+        !query.isEmpty || selectedFilter != .all
+    }
+
+    /// Axtarış və ya çip dəyişibmi bilmək üçün.
+    var searchKey: String {
+        "\(query)|\(selectedFilter.rawValue)"
     }
     
     func loadProducts() async {
         let previousState = state
-        
+
         if !state.isLoaded {
             state = .loading
         }
+        appliedKey = searchKey
         do {
-            try await productStore.loadProducts(limit: 10)
+            await productStore.loadStats()
+            try await productStore.loadProducts(
+                limit: 10,
+                query: query.trimmingCharacters(in: .whitespaces),
+                stock: selectedFilter.apiValue
+            )
             state = .loaded(allProducts)
         }
         catch is CancellationError {
@@ -78,6 +86,14 @@ final class ProductViewModel {
         catch {
             state = .error(error.localizedDescription)
         }
+    }
+    
+    /// Axtarış yazılanda hər hərfdə sorğu getməsin deyə 0.35 san gözləyir.
+    func applyFilters() async {
+        guard searchKey != appliedKey else { return }
+        try? await Task.sleep(for: .milliseconds(350))
+        guard !Task.isCancelled else { return }
+        await loadProducts()
     }
     
     func refresh() async {
@@ -100,5 +116,9 @@ final class ProductViewModel {
     func loadProductsIfNeeded() async {
         guard case .idle = state else { return }
         await loadProducts()
+    }
+    /// Barkodla (SKU) məhsulu tapır. Tapılmasa nil.
+    func findProduct(sku: String) async -> ProductsResponse? {
+        await productStore.refreshProduct(sku: sku)
     }
 }

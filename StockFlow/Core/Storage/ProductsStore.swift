@@ -19,6 +19,8 @@ final class ProductsStore {
     private var currentProductPage = 1
     private var hasMoreProducts = true
     private var isLoadingMoreProducts = false
+    private var currentQuery: String?
+    private var currentStock: String?
     var totalProducts = 0
     
     private var productsPageSize = 10
@@ -27,6 +29,7 @@ final class ProductsStore {
     var products: [ProductsResponse] = []
     var lowStockProducts: [ProductsResponse] = []
     
+    var stats: ProductStats?
     
     // MARK: - Low Stock Pagination
     
@@ -51,24 +54,38 @@ final class ProductsStore {
         currentLowStockPage = 1
         hasMoreProducts = true
         hasMoreLowStock = true
+        stats = nil
+        currentQuery = nil
+        currentStock = nil
     }
     
-    func loadProducts(limit: Int = 10) async throws {
+    /// Çiplərdəki rəqəmlər üçün. Xəta olsa səssiz keçir, siyahı işləməyə davam edir.
+    func loadStats() async {
+        stats = try? await productRepository.getProductStats()
+    }
+    
+    func loadProducts(limit: Int = 10, query: String? = nil, stock: String? = nil) async throws {
         isLoading = true
         productsPageSize = limit
         currentProductPage = 1
         hasMoreProducts = true
-        
+        currentQuery = query
+        currentStock = stock
+
         defer {
             isLoading = false
         }
-        let response = try await productRepository.getProducts(page: currentProductPage, limit: limit)
-        
+        let response = try await productRepository.getProducts(
+            page: currentProductPage,
+            limit: limit,
+            query: query,
+            stock: stock
+        )
+
         products = response.items
         totalProducts = response.total
         hasMoreProducts = response.hasNext
     }
-    
     func loadMoreProducts() async throws {
         guard hasMoreProducts else { return }
         guard !isLoadingMoreProducts else { return }
@@ -81,7 +98,12 @@ final class ProductsStore {
         
         let nextPage = currentProductPage + 1
         
-        let response = try await productRepository.getProducts(page: nextPage, limit: productsPageSize)
+        let response = try await productRepository.getProducts(
+            page: nextPage,
+            limit: productsPageSize,
+            query: currentQuery,
+            stock: currentStock
+        )
         
         currentProductPage = response.page
         let existingProductIds = Set(products.map(\.id))

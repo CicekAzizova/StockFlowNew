@@ -11,6 +11,7 @@ import SwiftUI
 struct BrandSearchField: View {
 
     let placeholder: LocalizedStringKey
+    var autoFocus = true
     @Binding var text: String
 
     @FocusState private var isFocused: Bool
@@ -19,13 +20,13 @@ struct BrandSearchField: View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(Color.textSecondary)
-
+            
             TextField(placeholder, text: $text)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .submitLabel(.search)
                 .focused($isFocused)
-
+            
             if !text.isEmpty {
                 Button {
                     text = ""
@@ -40,6 +41,6 @@ struct BrandSearchField: View {
         .frame(height: 44)
         .background(Color.surface)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .onAppear { isFocused = true }
+        .onAppear { if autoFocus { isFocused = true } }
     }
 }

@@ -21,4 +21,14 @@ enum ProductStockFilter: String, CaseIterable {
         case .outStock: "Out of Stock"
         }
     }
+    
+    /// Serverin `stock` parametri. `all` üçün göndərilmir.
+    var apiValue: String? {
+        switch self {
+        case .all: nil
+        case .inStock: "in"
+        case .lowStock: "low"
+        case .outStock: "out"
+        }
+    }
 }

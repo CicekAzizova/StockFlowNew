@@ -10,12 +10,13 @@ import Foundation
 enum ProductsEndpoint: Endpoint {
     
     case createProduct(ProductRequest)
-    case getProducts(page: Int, limit: Int)
+    case getProducts(page: Int, limit: Int, query: String?, stock: String?)
     case getLowStockProducts(page: Int, limit: Int)
     case productBySku(String)
     case editProduct(id: Int, request: ProductRequest)
     case deleteProduct(id: Int)
     case restockProduct(id: Int, request: RestockRequest)
+    case productStats
     
     var path: String {
         switch self {
@@ -33,6 +34,8 @@ enum ProductsEndpoint: Endpoint {
             "/products/low-stock"
         case .restockProduct(let id, _):
             "/products/\(id)/restock"
+        case .productStats:
+            "/products/stats"
         }
     }
     
@@ -40,7 +43,7 @@ enum ProductsEndpoint: Endpoint {
         switch self {
         case .createProduct, .restockProduct:
             return .post
-        case .getProducts, .getLowStockProducts, .productBySku:
+        case .getProducts, .getLowStockProducts, .productBySku, .productStats:
             return .get
         case .editProduct:
             return .put
@@ -61,22 +64,34 @@ enum ProductsEndpoint: Endpoint {
             return request
         case .restockProduct(_, let request):
             return request
-        case .getProducts, .getLowStockProducts, .productBySku, .deleteProduct:
+        case .getProducts, .getLowStockProducts, .productBySku, .deleteProduct, .productStats:
             return nil
         }
     }
     
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .getProducts(let page, let limit),
-                .getLowStockProducts(let page, let limit):
+        case .getProducts(let page, let limit, let query, let stock):
+            var items = [
+                URLQueryItem(name: "page", value: String(page)),
+                URLQueryItem(name: "limit", value: String(limit))
+            ]
+            if let query, !query.isEmpty {
+                items.append(URLQueryItem(name: "q", value: query))
+            }
+            if let stock {
+                items.append(URLQueryItem(name: "stock", value: stock))
+            }
+            return items
+            
+        case .getLowStockProducts(let page, let limit):
             return [
                 URLQueryItem(name: "page", value: String(page)),
                 URLQueryItem(name: "limit", value: String(limit))
             ]
         case .productBySku(let sku):
             return [URLQueryItem(name: "sku", value: sku)]
-        case .createProduct, .editProduct, .deleteProduct, .restockProduct:
+        case .createProduct, .editProduct, .deleteProduct, .restockProduct, .productStats:
             return nil
         }
     }

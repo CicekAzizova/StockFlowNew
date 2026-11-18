@@ -8,35 +8,76 @@
 import SwiftUI
 
 struct ProductsHeader: View {
+
+    let locationSwitcher: LocationSwitcher?
+    @Binding var query: String
+    @Binding var filter: ProductStockFilter
+    let stats: ProductStats?
+    let onScan: () -> Void
     
-    let count: Int
-    var onAdd: (() -> Void)?
-    
+
     var body: some View {
-        VStack {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Products")
-                        .font(.inter(.bold, size: 24))
-                    Text("\(count)")
-                        .font(.inter(.regular, size: 14))
-                        .foregroundStyle(.textSecondary)
-                    ActiveLocationChip()
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 2) {
+                if let locationSwitcher, locationSwitcher.canSwitch {
+                    locationMenu(locationSwitcher)
                 }
-                Spacer()
+
+                Text("Products")
+                    .font(.title2.bold())
+                    .foregroundStyle(.white)
+            }
+
+            HStack(spacing: 10) {
+                BrandSearchField(
+                    placeholder: "Name, SKU or barcode",
+                    autoFocus: false,
+                    text: $query
+                )
+
+                Button(action: onScan) {
+                    Image(systemName: "barcode.viewfinder")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundStyle(Color.brandTeal)
+                        .frame(width: 44, height: 44)
+                        .background(Color.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .accessibilityLabel("Scan barcode")
                 
-                if let onAdd {
-                    Button(action: onAdd) {
-                        Image(systemName: "plus")
-                            .font(.inter(.extraBold, size: 18))
-                            .foregroundStyle(.white)
-                            .frame(width: 44,height: 44)
-                            .background(.brandPrimary.opacity(0.95))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            StockFilterChips(selected: $filter, stats: stats)
+
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
+        .padding(.bottom, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .brandHeaderBackground()
+    }
+    
+    private func locationMenu(_ switcher: LocationSwitcher) -> some View {
+        Menu {
+            ForEach(switcher.locations) { location in
+                Button {
+                    switcher.select(location)
+                } label: {
+                    if location.id == switcher.activeLocation?.id {
+                        Label(location.name, systemImage: "checkmark")
+                    } else {
+                        Text(verbatim: location.name)
                     }
                 }
             }
-            
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "mappin.and.ellipse")
+                Text(verbatim: switcher.activeLocation?.name ?? "")
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.bold))
+            }
+            .font(.footnote)
+            .foregroundStyle(.white.opacity(0.8))
         }
     }
 }

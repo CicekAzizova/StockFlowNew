@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import VisionKit
 
 struct BarcodeInputView: View {
     
     @State private var access = CameraPermission.current
     @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
     var placeholder = "Enter SKU manually"
     var showsManualEntry = true
     let onCode: (String) -> Void
@@ -26,6 +28,11 @@ struct BarcodeInputView: View {
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
                     .padding(.horizontal)
                     .padding(.bottom, 8)
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                access = CameraPermission.current
             }
         }
     }
@@ -62,14 +69,16 @@ struct BarcodeInputView: View {
     }
     
     private var unavailableView: some View {
-        ContentUnavailableView(
-            "Camera unavailable",
-            systemImage: "camera.slash",
-            description: Text(
-                showsManualEntry
-                ? "Enter the code manually below."
-                : "Close this screen and type the SKU."
+        ContentUnavailableView {
+            Label("Camera unavailable", systemImage: "camera.slash")
+        } description: {
+            Text(
+                DataScannerViewController.isSupported
+                ? "If you just allowed camera access, close the app completely and open it again."
+                : (showsManualEntry
+                   ? "Enter the code manually below."
+                   : "Close this screen and type the SKU.")
             )
-        )
+        }
     }
 }

@@ -17,7 +17,7 @@ final class ProfileViewModel {
     private let productsStore: ProductsStore
     private let salesStore: SalesStore
     private let storeRepository: StoreRepository
-    private let locationRepository: LocationRepository
+    private let locationSwitcher: LocationSwitcher
     var isUploadingAvatar = false
 
     /// Avatar xətası ekranın üstündə göstərilir (məs. şəkil oxuna bilmədi).
@@ -27,48 +27,30 @@ final class ProfileViewModel {
          productsStore: ProductsStore,
          salesStore: SalesStore,
          storeRepository: StoreRepository,
-         locationRepository: LocationRepository) {
+         locationSwitcher: LocationSwitcher) {
         self.userRepository = userRepository
         self.appStateManager = appStateManager
         self.productsStore = productsStore
         self.salesStore = salesStore
         self.storeRepository = storeRepository
-        self.locationRepository = locationRepository
+        self.locationSwitcher = locationSwitcher
     }
     
     // MARK: - Locations
 
-    var locations: [StoreLocation] = []
-    var activeLocationId: Int? = ActiveLocationStore.id
+    var locations: [StoreLocation] { locationSwitcher.locations }
 
-    /// Seçilmiş məkan. Heç nə seçilməyibsə əsas məkan.
-    var activeLocation: StoreLocation? {
-        locations.first { $0.id == activeLocationId } ?? locations.first { $0.isMain }
-    }
+    var activeLocation: StoreLocation? { locationSwitcher.activeLocation }
 
     func loadLocations() async {
         guard user?.role == .owner else { return }
-        locations = (try? await locationRepository.getLocations()) ?? locations
-
-        // Seçilmiş məkan silinibsə əsas məkana qayıdırıq.
-        if let id = activeLocationId, !locations.contains(where: { $0.id == id }) {
-            selectLocation(nil)
-        }
+        await locationSwitcher.load()
     }
 
-    /// nil = əsas məkan.
     func selectLocation(_ location: StoreLocation?) {
-        let id = (location?.isMain == true) ? nil : location?.id
-        guard id != activeLocationId else { return }
-        ActiveLocationStore.id = id
-        ActiveLocationStore.name = id == nil ? nil : location?.name
-        activeLocationId = id
-
-        // Qalıq məkandan asılıdır, köhnə siyahılar yenilənməlidir.
-        productsStore.reset()
-        salesStore.reset()
-        NotificationCenter.default.post(name: .activeLocationChanged, object: nil)
+        locationSwitcher.select(location)
     }
+    
     
     // MARK: - Stats
 

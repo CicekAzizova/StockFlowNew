@@ -23,7 +23,10 @@ final class AppDependencies {
     
     
     let locationRepository: LocationRepository
+    
     let transferRepository: TransferRepository
+    
+    let locationSwitcher: LocationSwitcher
     
     let userRepository: UserRepository
     
@@ -88,6 +91,12 @@ final class AppDependencies {
         let catalogRepository = DefaultCatalogRepository(networkService: networkService)
         let catalogStore = CatalogStore(catalogRepository: catalogRepository)
         
+        let locationSwitcher = LocationSwitcher(
+            locationRepository: locationRepository,
+            productsStore: productsStore,
+            salesStore: salesStore
+        )
+        
         self.tokenStorage = tokenStorage
         self.networkService = networkService
         self.appLockManager = appLockManager
@@ -115,9 +124,10 @@ final class AppDependencies {
         self.salesStore = salesStore
         self.catalogRepository = catalogRepository
         self.catalogStore = catalogStore
+        self.locationSwitcher = locationSwitcher
     }
 
-    #if DEBUG
+#if DEBUG
     init(
         tokenStorage: TokenStoring,
         authRepository: AuthRepository,
@@ -130,8 +140,6 @@ final class AppDependencies {
         catalogRepository: CatalogRepository = PreviewCatalogRepository(),
         locationRepository: LocationRepository = PreviewLocationRepository(),
         transferRepository: TransferRepository = PreviewTransferRepository()
-        
-
     ) {
         self.tokenStorage = tokenStorage
         self.appLockManager = AppLockManager(pinStore: KeychainPinStore(keychain: KeychainService()), biometrics: BiometricAuthenticator())
@@ -151,9 +159,15 @@ final class AppDependencies {
         self.catalogStore = CatalogStore(catalogRepository: catalogRepository)
         self.locationRepository = locationRepository
         self.transferRepository = transferRepository
+        self.locationSwitcher = LocationSwitcher(
+            locationRepository: locationRepository,
+            productsStore: self.productsStore,
+            salesStore: self.salesStore
+        )
     }
     #endif
-
+    
+    
     @MainActor
     func makeLoginViewModel(    appStateManager: AppStateManager) -> LoginViewModel {
         LoginViewModel(
@@ -195,7 +209,7 @@ final class AppDependencies {
             productsStore: productsStore,
             salesStore: salesStore,
             storeRepository: storeRepository,
-            locationRepository: locationRepository
+            locationSwitcher: locationSwitcher
         )
     }
     
@@ -212,7 +226,7 @@ final class AppDependencies {
     
     @MainActor
     func makeProductViewModel() -> ProductViewModel {
-        ProductViewModel(productStore: productsStore)
+        ProductViewModel(productStore: productsStore, locationSwitcher: locationSwitcher)
     }
     
     @MainActor

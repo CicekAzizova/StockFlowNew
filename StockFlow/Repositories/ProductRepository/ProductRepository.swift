@@ -8,12 +8,13 @@ import Foundation
 
 protocol ProductRepository {
     func createProduct(_ request: ProductRequest) async throws -> ProductsResponse
-    func getProducts(page: Int, limit: Int) async throws -> PaginationResponse<ProductsResponse>
+    func getProducts(page: Int, limit: Int, query: String?, stock: String?) async throws -> PaginationResponse<ProductsResponse>
     func getProduct(bySku sku: String) async throws -> ProductsResponse
     func updateProduct(id: Int, request: ProductRequest) async throws -> ProductsResponse
     func deleteProduct(id: Int) async throws
     func getLowStockProducts(page: Int, limit: Int) async throws -> PaginationResponse<ProductsResponse>
     func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse
+    func getProductStats() async throws -> ProductStats
 }
 
 final class DefaultProductRepository: ProductRepository {
@@ -28,8 +29,10 @@ final class DefaultProductRepository: ProductRepository {
         try await networkService.request(ProductsEndpoint.createProduct(request))
     }
     
-    func getProducts(page: Int, limit: Int) async throws -> PaginationResponse<ProductsResponse> {
-        try await networkService.request(ProductsEndpoint.getProducts(page: page, limit: limit))
+    func getProducts(page: Int, limit: Int, query: String?, stock: String?) async throws -> PaginationResponse<ProductsResponse> {
+        try await networkService.request(
+            ProductsEndpoint.getProducts(page: page, limit: limit, query: query, stock: stock)
+        )
     }
     
     func getProduct(bySku sku: String) async throws -> ProductsResponse {
@@ -51,5 +54,9 @@ final class DefaultProductRepository: ProductRepository {
         try await networkService.request(
             ProductsEndpoint.restockProduct(id: id, request: RestockRequest(quantity: quantity))
         )
+    }
+    
+    func getProductStats() async throws -> ProductStats {
+        try await networkService.request(ProductsEndpoint.productStats)
     }
 }

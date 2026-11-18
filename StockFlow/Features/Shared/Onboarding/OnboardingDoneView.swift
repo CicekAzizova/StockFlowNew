@@ -143,10 +143,13 @@ struct OnboardingDoneView: View {
                     Text("\(categoriesCount) categories")
                 }
             }
+            
             Divider()
+            
             summaryRow("Locations") {
                 Text("\(storeCount) stores · \(warehouseCount) warehouses")
             }
+            
             Divider()
             summaryRow("Currency") {
                 Text(verbatim: viewModel.currency.rawValue)

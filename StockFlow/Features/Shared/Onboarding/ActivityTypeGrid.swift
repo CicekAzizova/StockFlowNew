@@ -33,13 +33,13 @@ struct ActivityTypeGrid: View {
 
     private func tile(for category: CatalogCategory) -> some View {
         let isSelected = selected.contains(category.code)
-        let tint = Self.tint(for: category.code)
+        let tint = CategoryStyle.tint(for: category.code)
 
         return Button {
             toggle(category.code)
         } label: {
             VStack(spacing: 6) {
-                Image(systemName: Self.icon(for: category.code))
+                Image(systemName: CategoryStyle.icon(for: category.code))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(tint)
                     .frame(width: 30, height: 30)
