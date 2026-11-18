@@ -83,6 +83,14 @@ final class ProductViewModel {
         catch is CancellationError {
             state = previousState
         }
+        
+        catch NetworkError.unknown(let inner) where (inner as? URLError)?.code == .cancelled {
+            state = previousState
+        }
+        
+        catch let error as URLError where error.code == .cancelled {
+            state = previousState
+        }
         catch {
             state = .error(error.localizedDescription)
         }

@@ -53,7 +53,7 @@ struct LowStockProductCard: View {
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
 
-                Text(verbatim: "SKU · \(product.sku)")
+                Text(verbatim: "Barcode · \(product.sku)")
                     .font(.caption)
                     .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)

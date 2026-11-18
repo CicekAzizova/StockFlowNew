@@ -16,4 +16,6 @@ enum AddProductFocusedField: Hashable, CaseIterable {
     case costPrice
     case quantity
     case lowStockLimit
+    case weight
+    case size
 }

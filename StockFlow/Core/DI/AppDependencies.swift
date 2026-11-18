@@ -219,9 +219,20 @@ final class AppDependencies {
     }
     
     @MainActor
-    func makeAddProductViewModel(product: ProductsResponse? = nil) -> AddProductViewModel {
-        AddProductViewModel(productStore: productsStore, imageUploadRepository: imageUploadRepository,
-            product: product)
+    func makeAddProductViewModel(
+        product: ProductsResponse? = nil,
+        barcode: String? = nil
+    ) -> AddProductViewModel {
+        let viewModel = AddProductViewModel(
+            productStore: productsStore,
+            imageUploadRepository: imageUploadRepository,
+            locationSwitcher: locationSwitcher,
+            product: product
+        )
+        if let barcode {
+            viewModel.sku = barcode
+        }
+        return viewModel
     }
     
     @MainActor

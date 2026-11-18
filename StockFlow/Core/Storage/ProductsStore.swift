@@ -86,6 +86,7 @@ final class ProductsStore {
         totalProducts = response.total
         hasMoreProducts = response.hasNext
     }
+    
     func loadMoreProducts() async throws {
         guard hasMoreProducts else { return }
         guard !isLoadingMoreProducts else { return }
@@ -170,6 +171,25 @@ final class ProductsStore {
         
         await refreshLowStock()
         return response
+    }
+    
+    
+    
+    enum ProductLookup {
+        case found(ProductsResponse)
+        case notFound
+        case failed
+    }
+
+    /// Barkodla məhsulu axtarır. Siyahılara toxunmur.
+    func lookupProduct(sku: String) async -> ProductLookup {
+        do {
+            return .found(try await productRepository.getProduct(bySku: sku))
+        } catch NetworkError.serverError(let statusCode, _) where statusCode == 404 {
+            return .notFound
+        } catch {
+            return .failed
+        }
     }
     
     /// Bir məhsulu serverdən təzələyir və siyahılardakı köhnə nüsxəni əvəz edir.

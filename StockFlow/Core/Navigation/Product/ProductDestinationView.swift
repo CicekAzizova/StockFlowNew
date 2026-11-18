@@ -22,6 +22,11 @@ struct ProductDestinationView: View {
                 canManageProducts: canManageProducts,
                 dependencies: canManageProducts ? dependencies : nil
             )
+        case .addProductWithBarcode(let barcode) where canManageProducts:
+            AddProductView(
+                viewModel: dependencies.makeAddProductViewModel(barcode: barcode),
+                path: $path
+            )
         case .addProduct where canManageProducts:
             AddProductView(
                 viewModel: dependencies.makeAddProductViewModel(),

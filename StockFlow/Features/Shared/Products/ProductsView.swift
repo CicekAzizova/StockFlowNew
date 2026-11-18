@@ -46,11 +46,16 @@ struct ProductsView: View {
                 productsList
             }
         case .error(let message):
-            ContentUnavailableView(
-                "Error",
-                systemImage: "exclamationmark.triangle",
-                description: Text(message)
-            )
+            ContentUnavailableView {
+                Label("Something went wrong", systemImage: "exclamationmark.triangle")
+            } description: {
+                Text(message)
+            } actions: {
+                Button("Retry") {
+                    Task { await viewModel.refresh() }
+                }
+                .buttonStyle(.borderedProminent)
+            }
         }
     }
     
@@ -140,20 +145,23 @@ struct ProductsView: View {
             isPresented: Binding(
                 get: { notFoundSku != nil },
                 set: { if !$0 { notFoundSku = nil } }
-            )
-        ) {
+            ),
+            presenting: notFoundSku
+        ) { sku in
             if canManageProducts {
-                Button("Add product") { path.append(ProductRoute.addProduct) }
+                Button("Add product") {
+                    path.append(ProductRoute.addProductWithBarcode(sku))
+                }
             }
             Button("OK", role: .cancel) {}
-        } message: {
-            Text(verbatim: notFoundSku ?? "")
+        } message: { sku in
+            Text(verbatim: sku)
         }
     }
     
     private var scannerSheet: some View {
         ZStack(alignment: .topTrailing) {
-            BarcodeInputView(placeholder: "Enter SKU manually") { code in
+            BarcodeInputView(placeholder: "Enter barcode manually") { code in
                 isScannerPresented = false
                 Task { await handleScan(code) }
             }

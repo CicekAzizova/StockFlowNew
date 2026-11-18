@@ -142,6 +142,9 @@ final class DefaultNetworkService: NetworkService {
 
         do {
             (data, response) = try await session.data(for: request)
+        } catch let error as URLError where error.code == .cancelled {
+            // Ekran bağlananda və ya yeni sorğu başlananda köhnəsi ləğv olunur. Bu xəta deyil.
+            throw CancellationError()
         } catch {
             throw NetworkError.unknown(error)
         }

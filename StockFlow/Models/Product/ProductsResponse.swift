@@ -38,14 +38,19 @@ struct ProductsResponse: Decodable, Hashable {
     var soldThisMonth: Int = 0
     var subcategory: String? = nil
     var stocks: [ProductStock] = []
+    var unit: ProductUnit? = nil
+    var weight: Double? = nil
+    var weightUnit: String? = nil
+    var size: String? = nil
     
     enum CodingKeys: String, CodingKey {
-        case id, name, sku, category, description, price, discount, quantity, subcategory, stocks
+        case id, name, sku, category, description, price, discount, quantity, subcategory, stocks,unit, weight, size
         case costPrice = "cost_price"
         case lowStockLimit = "low_stock_limit"
         case createdAt = "created_at"
         case imageUrls = "image_urls"
         case soldThisMonth = "sold_this_month"
+        case weightUnit = "weight_unit"
         
     }
 }

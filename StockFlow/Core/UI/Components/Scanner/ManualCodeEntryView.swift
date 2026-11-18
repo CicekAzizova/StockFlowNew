@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ManualCodeEntryView: View {
-    var placeholder = "Enter SKU manually"
+    var placeholder = "Enter barcode manually"
     let onSubmit: (String) -> Void
 
     @State private var code = ""

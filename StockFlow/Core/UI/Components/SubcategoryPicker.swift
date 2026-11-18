@@ -20,37 +20,47 @@ struct SubcategoryPicker: View {
     private var language: AppLanguage { languageManager.language }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             Text("Category")
-                .font(.inter(.medium, size: 14))
-                .foregroundStyle(.textPrimary)
+                .font(.inter(.regular, size: 13))
+                .foregroundStyle(.textSecondary)
+                .padding(.leading, 4)
 
             Button {
                 isPresented = true
             } label: {
-                HStack {
+                HStack(spacing: 10) {
+                    if let selected {
+                        Circle()
+                            .fill(CategoryStyle.tint(for: mainCode(of: selected)))
+                            .frame(width: 10, height: 10)
+                    }
                     Text(selectedName ?? String(localized: "Select category"))
                         .font(.inter(.regular, size: 16))
                         .foregroundStyle(selected == nil ? Color.textSecondary : Color.textPrimary)
                         .lineLimit(1)
                     Spacer()
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 12))
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.textSecondary)
                 }
-                .padding(.horizontal, 12)
-                .frame(height: 44)
-                .background(.border)
+                .padding(.horizontal, 14)
+                .frame(height: 52)
+                .background(Color.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.gray.opacity(0.25), lineWidth: 1)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
         }
         .task { await catalogStore.loadIfNeeded() }
         .sheet(isPresented: $isPresented) { selectionSheet }
+    }
+
+    /// "food.dairy" → "food"
+    private func mainCode(of code: String) -> String {
+        code.split(separator: ".").first.map(String.init) ?? ""
     }
 
     // MARK: - Data

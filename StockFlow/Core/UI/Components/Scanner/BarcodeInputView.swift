@@ -13,7 +13,7 @@ struct BarcodeInputView: View {
     @State private var access = CameraPermission.current
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
-    var placeholder = "Enter SKU manually"
+    var placeholder = "Enter barcode manually"
     var showsManualEntry = true
     let onCode: (String) -> Void
     
@@ -77,7 +77,7 @@ struct BarcodeInputView: View {
                 ? "If you just allowed camera access, close the app completely and open it again."
                 : (showsManualEntry
                    ? "Enter the code manually below."
-                   : "Close this screen and type the SKU.")
+                   : "Close this screen and type the barcode.")
             )
         }
     }

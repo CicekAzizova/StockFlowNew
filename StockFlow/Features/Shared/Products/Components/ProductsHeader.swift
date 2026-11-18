@@ -30,7 +30,7 @@ struct ProductsHeader: View {
 
             HStack(spacing: 10) {
                 BrandSearchField(
-                    placeholder: "Name, SKU or barcode",
+                    placeholder: "Name or barcode",
                     autoFocus: false,
                     text: $query
                 )

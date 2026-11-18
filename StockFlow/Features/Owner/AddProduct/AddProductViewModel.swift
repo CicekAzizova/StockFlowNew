@@ -25,6 +25,19 @@ final class AddProductViewModel {
     var state: AddProductViewState = .idle
 
     let product: ProductsResponse?
+    
+    private let locationSwitcher: LocationSwitcher?
+    
+    enum BarcodeStatus: Equatable {
+        case unchecked, checking, available, taken, failed
+    }
+
+    var barcodeStatus: BarcodeStatus = .unchecked
+
+    /// Yeni məhsul üçün hər məkanın başlanğıc qalığı (məkan id → say).
+    var stockByLocation: [Int: Int] = [:]
+    
+    var step = 1
 
     var name = ""
     var sku = ""
@@ -36,6 +49,10 @@ final class AddProductViewModel {
     var quantity = ""
     var lowStockLimit = ""
     var imageUrls: [String]?
+    var unit: ProductUnit = .piece
+    var weight = ""
+    var weightUnit = "g"
+    var size = ""
     
     var pickerItems: [PhotosPickerItem] = []
     private(set) var selectedImages: [SelectedImage] = []
@@ -46,10 +63,12 @@ final class AddProductViewModel {
     init(
         productStore: ProductsStore,
         imageUploadRepository: ImageUploadRepository,
+        locationSwitcher: LocationSwitcher? = nil,
         product: ProductsResponse? = nil,
     ) {
         self.productStore = productStore
         self.imageUploadRepository = imageUploadRepository
+        self.locationSwitcher = locationSwitcher
         self.product = product
 
         guard let product else { return }
@@ -64,6 +83,10 @@ final class AddProductViewModel {
         quantity = String(product.quantity)
         lowStockLimit = String(product.lowStockLimit)
         imageUrls = product.imageUrls
+        unit = product.unit ?? .piece
+        weight = product.weight.map { String($0) } ?? ""
+        weightUnit = product.weightUnit ?? "g"
+        size = product.size ?? ""
     }
     
     //MARK: - Images
@@ -101,31 +124,148 @@ final class AddProductViewModel {
         selectedImages.remove(at: index)
         pickerItems.remove(at: index)
     }
+    
+    // MARK: - Barcode check
+
+    /// Barkod dəyişəndə 0.5 san gözləyib yoxlayır (yazarkən hər hərfdə sorğu getməsin).
+    func barcodeChanged() async {
+        barcodeStatus = .unchecked
+        try? await Task.sleep(for: .milliseconds(500))
+        guard !Task.isCancelled else { return }
+        await checkBarcode()
+    }
+
+    func checkBarcode() async {
+        let code = sku.trimmingCharacters(in: .whitespaces)
+        guard !code.isEmpty else {
+            barcodeStatus = .unchecked
+            return
+        }
+        // Redaktədə məhsulun öz barkodu "artıq var" sayılmır.
+        if let product, product.sku.caseInsensitiveCompare(code) == .orderedSame {
+            barcodeStatus = .unchecked
+            return
+        }
+
+        barcodeStatus = .checking
+        let result = await productStore.lookupProduct(sku: code)
+
+        // Yoxlama gedərkən istifadəçi barkodu dəyişibsə köhnə nəticə atılır.
+        guard code == sku.trimmingCharacters(in: .whitespaces) else { return }
+
+        switch result {
+        case .found: barcodeStatus = .taken
+        case .notFound: barcodeStatus = .available
+        case .failed: barcodeStatus = .failed
+        }
+    }
+
+    /// Addım 1-dən 2-yə keçməzdən əvvəl: ad və barkod məcburidir, barkod təkrar olmamalıdır.
+    func goToNextStep() async {
+        guard !name.isBlank, !sku.isBlank else {
+            validationMessage = "Name and barcode are required."
+            return
+        }
+
+        if barcodeStatus != .available {
+            await checkBarcode()
+        }
+
+        if barcodeStatus == .taken {
+            validationMessage = "A product with this barcode already exists."
+            return
+        }
+
+        validationMessage = nil
+        step = 2
+    }
+    func goToPreviousStep() {
+        validationMessage = nil
+        step = 1
+    }
+    
+    /// Redaktədə ixtiyari bölmə doludursa avtomatik açıq olsun.
+    var hasExtraInfo: Bool {
+        (discount.asDecimal ?? 0) > 0
+        || !description.isBlank
+        || !weight.isBlank
+        || !size.isBlank
+    }
+
+    static let weightUnits = ["mg", "g", "kg", "ml", "l"]
+    
+    // MARK: - Profit
+
+    /// Satış və alış qiyməti ikisi də yazılıbsa, bir satışdan qazanc.
+    var profit: Double? {
+        guard let sell = price.asDecimal, let cost = costPrice.asDecimal, sell > 0 else {
+            return nil
+        }
+        return sell - cost
+    }
+
+    /// Marja faizi (qazanc / satış qiyməti).
+    var margin: Double? {
+        guard let profit, let sell = price.asDecimal, sell > 0 else { return nil }
+        return profit / sell * 100
+    }
+    
+    // MARK: - Stock by location
+
+    var locations: [StoreLocation] {
+        locationSwitcher?.locations ?? []
+    }
+
+    /// Yeni məhsulda hər məkan üçün qalıq yazılır. Redaktədə yalnız aktiv məkanın qalığı dəyişir.
+    var usesLocationStocks: Bool {
+        product == nil && !locations.isEmpty
+    }
+
+    var totalStock: Int {
+        locations.reduce(0) { $0 + (stockByLocation[$1.id] ?? 0) }
+    }
+
+    func loadLocations() async {
+        await locationSwitcher?.load()
+    }
+
+    /// İlk məkandakı sayı hamısına yazır ("Hamısına eyni").
+    func applySameStockForAll() {
+        guard let first = locations.first else { return }
+        let value = stockByLocation[first.id] ?? 0
+        for location in locations {
+            stockByLocation[location.id] = value
+        }
+    }
 
     //MARK: - Validation
     
     func validateFields() -> Bool {
-        let fields = [
-            name,
-            sku,
-            description,
-            price,
-            discount,
-            costPrice,
-            quantity,
-            lowStockLimit
-        ]
+        // Ad və barkod 1-ci addıma aiddir: boşdursa oraya qaytarırıq.
+        if name.isBlank || sku.isBlank {
+            step = 1
+            validationMessage = "Name and barcode are required."
+            return false
+        }
 
-        guard fields.allSatisfy({
-            !$0.isBlank
-        }) else {
-            validationMessage = "Please fill in all fields."
+        if price.isBlank {
+            validationMessage = "Selling price is required."
             return false
         }
 
         return true
     }
     
+    
+    /// Boş xana varsa default dəyər götürülür, yazılıb səhvdirsə nil qaytarır.
+    private func number(_ text: String, default fallback: Double) -> Double? {
+        text.isBlank ? fallback : text.asDecimal
+    }
+
+    private func integer(_ text: String, default fallback: Int) -> Int? {
+        text.isBlank ? fallback : Int(text)
+    }
+
     private func makeProductRequest() -> ProductRequest? {
         guard validateFields() else {
             return nil
@@ -133,14 +273,23 @@ final class AddProductViewModel {
 
         guard
             let price = price.asDecimal,
-            let discount = discount.asDecimal,
-            let costPrice = costPrice.asDecimal,
-            let quantity = Int(quantity),
-            let lowStockLimit = Int(lowStockLimit)
+            let discount = number(discount, default: 0),
+            let costPrice = number(costPrice, default: 0),
+            let quantity = integer(quantity, default: 0),
+            let lowStockLimit = integer(lowStockLimit, default: 5),
+            let weightValue = weight.isBlank ? .some(nil) : weight.asDecimal.map(Optional.some)
         else {
             validationMessage = "Please enter valid values."
             return nil
         }
+
+        let trimmedSize = size.trimmingCharacters(in: .whitespaces)
+
+        let stocks: [InitialStock]? = usesLocationStocks
+            ? locations.map {
+                InitialStock(locationId: $0.id, quantity: stockByLocation[$0.id] ?? 0)
+            }
+            : nil
 
         return ProductRequest(
             name: name,
@@ -152,7 +301,12 @@ final class AddProductViewModel {
             quantity: quantity,
             lowStockLimit: lowStockLimit,
             subcategory: subcategory,
-            imageUrls: imageUrls
+            imageUrls: imageUrls,
+            unit: unit,
+            weight: weightValue,
+            weightUnit: weightValue == nil ? nil : weightUnit,
+            size: trimmedSize.isEmpty ? nil : trimmedSize,
+            stocks: stocks
         )
     }
 

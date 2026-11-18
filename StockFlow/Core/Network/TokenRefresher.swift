@@ -47,6 +47,8 @@ final class TokenRefresher: TokenRefreshing {
         let response: URLResponse
         do {
             (data, response) = try await session.data(for: request)
+        } catch let error as URLError where error.code == .cancelled {
+            throw CancellationError()
         } catch {
             throw NetworkError.unknown(error)
         }
