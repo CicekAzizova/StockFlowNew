@@ -130,8 +130,10 @@ final class DefaultNetworkService: NetworkService {
             }
             request.setValue("Bearer \(token)", forHTTPHeaderField: HttpHeader.authorization)
         }
-        
-        if endpoint.requiresAuthentication, let locationId = ActiveLocationStore.id {
+
+        if endpoint.requiresAuthentication,
+           request.value(forHTTPHeaderField: HttpHeader.locationId) == nil,
+           let locationId = ActiveLocationStore.id {
             request.setValue(String(locationId), forHTTPHeaderField: HttpHeader.locationId)
         }
 

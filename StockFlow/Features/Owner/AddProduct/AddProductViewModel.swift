@@ -77,9 +77,9 @@ final class AddProductViewModel {
         sku = product.sku
         subcategory = product.subcategory
         description = product.description
-        price = String(product.price)
-        discount = String(product.discount)
-        costPrice = String(product.costPrice)
+        price = Self.text(product.price)
+        discount = Self.text(product.discount)
+        costPrice = product.costPrice > 0 ? Self.text(product.costPrice) : ""
         quantity = String(product.quantity)
         lowStockLimit = String(product.lowStockLimit)
         imageUrls = product.imageUrls
@@ -87,6 +87,13 @@ final class AddProductViewModel {
         weight = product.weight.map { String($0) } ?? ""
         weightUnit = product.weightUnit ?? "g"
         size = product.size ?? ""
+    }
+    
+    /// 112.0 → "112", 12.5 → "12.5"
+    private static func text(_ value: Double) -> String {
+        value.truncatingRemainder(dividingBy: 1) == 0
+            ? String(Int(value))
+            : String(value)
     }
     
     //MARK: - Images

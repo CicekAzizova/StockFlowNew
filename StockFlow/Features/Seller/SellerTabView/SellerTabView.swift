@@ -126,6 +126,12 @@ struct SellerTabView: View {
             }
             
         }
+        .onChange(of: languageManager.language) {
+            homePath = NavigationPath()
+            productPath = NavigationPath()
+            salesPath = NavigationPath()
+            profilePath = NavigationPath()
+        }
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
             await sendHeartbeats()

@@ -21,15 +21,13 @@ struct ProfitCard: View {
             Image(systemName: isLoss ? "arrow.down.right" : "receipt")
                 .foregroundStyle(tint)
 
-            (
+            HStack(spacing: 4) {
                 Text("Profit per sale")
-                + Text(verbatim: " ")
-                + Text(verbatim: profit.asCurrency).bold()
-                + Text(verbatim: " · ")
-                + Text("margin")
-                + Text(verbatim: " ")
-                + Text(verbatim: "\(Int(margin.rounded()))%").bold()
-            )
+                Text(verbatim: profit.asCurrency).bold()
+                Text(verbatim: "·")
+                Text("margin")
+                Text(verbatim: "\(Int(margin.rounded()))%").bold()
+            }
             .font(.inter(.regular, size: 14))
             .foregroundStyle(tint)
 

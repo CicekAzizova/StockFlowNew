@@ -12,8 +12,12 @@ struct RestockSheet: View {
     let product: ProductsResponse
     let isSaving: Bool
     let errorMessage: String?
-    /// "Əlavə et" basılanda əlavə olunacaq ədəd sayı ötürülür.
-    let onConfirm: (Int) -> Void
+    /// true olsa, 2+ məkan varsa məkan seçimi görünür.
+    var showsLocationPicker = false
+    /// (əlavə olunacaq say, seçilmiş məkan id-si). Seçim yoxdursa id nil olur.
+    let onConfirm: (Int, Int?) -> Void
+
+    @State private var selectedLocationId: Int?
 
     @Environment(\.dismiss) private var dismiss
     @State private var quantityText = ""
@@ -23,7 +27,18 @@ struct RestockSheet: View {
     private let quickAmounts = [10, 20, 50]
 
     private var quantity: Int { Int(quantityText) ?? 0 }
+    
     private var isValid: Bool { quantity >= 1 && quantity <= 1_000_000 }
+    
+    private var pickerVisible: Bool { showsLocationPicker && product.stocks.count > 1 }
+
+    /// Seçilmiş məkanın qalığı (seçim yoxdursa ümumi).
+    private var currentQuantity: Int {
+        guard pickerVisible,
+              let stock = product.stocks.first(where: { $0.locationId == selectedLocationId })
+        else { return product.quantity }
+        return stock.quantity
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -39,15 +54,17 @@ struct RestockSheet: View {
                 .foregroundStyle(Color.textPrimary)
 
             productCard
-
+            
+            if pickerVisible {
+                locationPicker
+            }
+            
             quantityEditor
 
             quickChips
 
             if isValid {
-                Text("New stock: \(product.quantity + quantity)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.success)
+                Text("New stock: \(currentQuantity + quantity)")
             }
 
             if let errorMessage {
@@ -75,6 +92,9 @@ struct RestockSheet: View {
             let digits = newValue.filter(\.isNumber)
             if digits != newValue { quantityText = digits }
         }
+        .onAppear {
+            selectedLocationId = ActiveLocationStore.id ?? product.stocks.first?.locationId
+        }
     }
 
     // MARK: - Parts
@@ -94,9 +114,7 @@ struct RestockSheet: View {
                     .foregroundStyle(Color.textPrimary)
                     .lineLimit(1)
 
-                Text("Current stock: \(product.quantity)")
-                    .font(.caption)
-                    .foregroundStyle(Color.textSecondary)
+                Text("Current stock: \(currentQuantity)")
             }
 
             Spacer(minLength: 0)
@@ -150,7 +168,7 @@ struct RestockSheet: View {
         VStack(spacing: 10) {
             Button {
                 isFocused = false
-                onConfirm(quantity)
+                onConfirm(quantity, pickerVisible ? selectedLocationId : nil)
             } label: {
                 Group {
                     if isSaving {
@@ -184,6 +202,30 @@ struct RestockSheet: View {
             .buttonStyle(.plain)
         }
     }
+    
+    private var locationPicker: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(product.stocks) { stock in
+                    let isSelected = stock.locationId == selectedLocationId
+                    Button {
+                        selectedLocationId = stock.locationId
+                    } label: {
+                        Text(verbatim: stock.locationName)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(isSelected ? Color.white : Color.textPrimary)
+                            .padding(.horizontal, 14)
+                            .frame(height: 36)
+                            .background(
+                                isSelected ? Color.brandTeal : Color.textSecondary.opacity(0.12),
+                                in: Capsule()
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
 
     // MARK: - Helpers
 
@@ -202,17 +244,3 @@ struct RestockSheet: View {
         quantityText = value == 0 ? "" : String(min(value, 1_000_000))
     }
 }
-
-#if DEBUG
-#Preview {
-    Color.background
-        .sheet(isPresented: .constant(true)) {
-            RestockSheet(
-                product: PreviewData.products[0],
-                isSaving: false,
-                errorMessage: nil,
-                onConfirm: { _ in }
-            )
-        }
-}
-#endif

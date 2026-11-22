@@ -45,7 +45,7 @@ struct LowStockView: View {
                     product: product,
                     isSaving: viewModel.isRestocking,
                     errorMessage: viewModel.restockError
-                ) { quantity in
+                ) { quantity, _ in
                     Task { await viewModel.restock(quantity: quantity) }
                 }
             }

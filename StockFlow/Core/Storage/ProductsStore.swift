@@ -207,8 +207,27 @@ final class ProductsStore {
     }
     
     
-    func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse {
-        let response = try await productRepository.restockProduct(id: id, quantity: quantity)
+    func restockProduct(id: Int, quantity: Int, locationId: Int? = nil) async throws -> ProductsResponse {
+        let response = try await productRepository.restockProduct(
+            id: id,
+            quantity: quantity,
+            locationId: locationId
+        )
+
+        // Cavab başqa məkanın sayını göstərə bilər. Seçili məkanla təzələyirik.
+        return await refreshProduct(sku: response.sku) ?? response
+    }
+    
+    
+    // MARK: - History & For sale
+
+    func loadProductHistory(id: Int, page: Int, limit: Int) async throws -> PaginationResponse<StockMovement> {
+        try await productRepository.getProductHistory(id: id, page: page, limit: limit)
+    }
+
+    /// "Satışdadır" açarı. Cavabı siyahılardakı köhnə nüsxənin yerinə qoyur.
+    func setForSale(id: Int, forSale: Bool) async throws -> ProductsResponse {
+        let response = try await productRepository.setForSale(id: id, forSale: forSale)
 
         if let index = products.firstIndex(where: { $0.id == id }) {
             products[index] = response
@@ -216,8 +235,6 @@ final class ProductsStore {
         if let index = lowStockProducts.firstIndex(where: { $0.id == id }) {
             lowStockProducts[index] = response
         }
-
-        await refreshLowStock()
         return response
     }
     

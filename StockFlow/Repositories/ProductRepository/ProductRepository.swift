@@ -13,8 +13,10 @@ protocol ProductRepository {
     func updateProduct(id: Int, request: ProductRequest) async throws -> ProductsResponse
     func deleteProduct(id: Int) async throws
     func getLowStockProducts(page: Int, limit: Int) async throws -> PaginationResponse<ProductsResponse>
-    func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse
+    func restockProduct(id: Int, quantity: Int, locationId: Int?) async throws -> ProductsResponse
     func getProductStats() async throws -> ProductStats
+    func getProductHistory(id: Int, page: Int, limit: Int) async throws -> PaginationResponse<StockMovement>
+    func setForSale(id: Int, forSale: Bool) async throws -> ProductsResponse
 }
 
 final class DefaultProductRepository: ProductRepository {
@@ -50,13 +52,25 @@ final class DefaultProductRepository: ProductRepository {
     func getLowStockProducts(page: Int, limit: Int) async throws -> PaginationResponse<ProductsResponse> {
         try await networkService.request(ProductsEndpoint.getLowStockProducts(page: page, limit: limit))
     }
-    func restockProduct(id: Int, quantity: Int) async throws -> ProductsResponse {
-        try await networkService.request(
-            ProductsEndpoint.restockProduct(id: id, request: RestockRequest(quantity: quantity))
-        )
+    
+    func restockProduct(id: Int, quantity: Int, locationId: Int?) async throws -> ProductsResponse {
+        try await networkService.request(ProductsEndpoint.restockProduct(
+            id: id,
+            request: RestockRequest(quantity: quantity),
+            locationId: locationId
+        ))
     }
     
     func getProductStats() async throws -> ProductStats {
         try await networkService.request(ProductsEndpoint.productStats)
+    }
+    func getProductHistory(id: Int, page: Int, limit: Int) async throws -> PaginationResponse<StockMovement> {
+        try await networkService.request(ProductsEndpoint.productHistory(id: id, page: page, limit: limit))
+    }
+
+    func setForSale(id: Int, forSale: Bool) async throws -> ProductsResponse {
+        try await networkService.request(
+            ProductsEndpoint.setForSale(id: id, request: ForSaleRequest(forSale: forSale))
+        )
     }
 }

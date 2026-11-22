@@ -39,6 +39,7 @@ struct ProductsResponse: Decodable, Hashable {
     var subcategory: String? = nil
     var stocks: [ProductStock] = []
     var unit: ProductUnit? = nil
+    var forSale: Bool? = nil
     var weight: Double? = nil
     var weightUnit: String? = nil
     var size: String? = nil
@@ -51,7 +52,7 @@ struct ProductsResponse: Decodable, Hashable {
         case imageUrls = "image_urls"
         case soldThisMonth = "sold_this_month"
         case weightUnit = "weight_unit"
-        
+        case forSale = "for_sale"
     }
 }
 
@@ -71,4 +72,7 @@ extension ProductsResponse {
     }
 
     var hasDiscount: Bool { discount > 0 }
+    
+    /// Server göndərməyibsə (köhnə versiya) satışda sayılır.
+    var isForSale: Bool { forSale ?? true }
 }

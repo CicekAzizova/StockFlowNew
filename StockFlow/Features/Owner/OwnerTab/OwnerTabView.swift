@@ -127,6 +127,11 @@ struct OwnerTabView: View {
                     
             }
         }
+        .onChange(of: languageManager.language) {
+            homePath = NavigationPath()
+            productPath = NavigationPath()
+            profilePath = NavigationPath()
+        }
     }
 
 }

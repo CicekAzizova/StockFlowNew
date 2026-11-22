@@ -15,8 +15,10 @@ enum ProductsEndpoint: Endpoint {
     case productBySku(String)
     case editProduct(id: Int, request: ProductRequest)
     case deleteProduct(id: Int)
-    case restockProduct(id: Int, request: RestockRequest)
+    case restockProduct(id: Int, request: RestockRequest, locationId: Int?)
     case productStats
+    case productHistory(id: Int, page: Int, limit: Int)
+    case setForSale(id: Int, request: ForSaleRequest)
     
     var path: String {
         switch self {
@@ -32,10 +34,14 @@ enum ProductsEndpoint: Endpoint {
             "/products/\(id)"
         case .getLowStockProducts:
             "/products/low-stock"
-        case .restockProduct(let id, _):
+        case .restockProduct(let id, _, _):
             "/products/\(id)/restock"
         case .productStats:
             "/products/stats"
+        case .productHistory(let id, _, _):
+            "/products/\(id)/history"
+        case .setForSale(let id, _):
+            "/products/\(id)/for-sale"
         }
     }
     
@@ -43,12 +49,14 @@ enum ProductsEndpoint: Endpoint {
         switch self {
         case .createProduct, .restockProduct:
             return .post
-        case .getProducts, .getLowStockProducts, .productBySku, .productStats:
+        case .getProducts, .getLowStockProducts, .productBySku, .productStats, .productHistory:
             return .get
         case .editProduct:
             return .put
         case .deleteProduct:
             return .delete
+        case .setForSale:
+            return .patch
         }
     }
     
@@ -62,9 +70,11 @@ enum ProductsEndpoint: Endpoint {
             return request
         case .editProduct(_, let request):
             return request
-        case .restockProduct(_, let request):
+        case .restockProduct(_, let request, _):
             return request
-        case .getProducts, .getLowStockProducts, .productBySku, .deleteProduct, .productStats:
+        case .setForSale(_, let request):
+            return request
+        case .getProducts, .getLowStockProducts, .productBySku, .deleteProduct, .productStats, .productHistory:
             return nil
         }
     }
@@ -91,8 +101,24 @@ enum ProductsEndpoint: Endpoint {
             ]
         case .productBySku(let sku):
             return [URLQueryItem(name: "sku", value: sku)]
-        case .createProduct, .editProduct, .deleteProduct, .restockProduct, .productStats:
+        case .productHistory(_, let page, let limit):
+            return [
+                URLQueryItem(name: "page", value: String(page)),
+                URLQueryItem(name: "limit", value: String(limit))
+            ]
+        case .createProduct, .editProduct, .deleteProduct, .restockProduct, .productStats, .setForSale:
             return nil
         }
+    }
+    
+    var headers: [String: String]? {
+        var headers = [
+            HttpHeader.accept: Accept.json,
+            HttpHeader.contentType: ContentType.json
+        ]
+        if case .restockProduct(_, _, let locationId?) = self {
+            headers[HttpHeader.locationId] = String(locationId)
+        }
+        return headers
     }
 }

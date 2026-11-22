@@ -11,6 +11,7 @@ protocol Endpoint {
     
     var path: String { get }
     var method: HttpMethod { get }
+    var headers: [String: String]? { get }
     var queryItems: [URLQueryItem]? { get }
     var httpBody: Encodable? { get }
     var requiresAuthentication: Bool { get }
