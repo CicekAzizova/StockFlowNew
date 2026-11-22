@@ -17,6 +17,7 @@ protocol ProductRepository {
     func getProductStats() async throws -> ProductStats
     func getProductHistory(id: Int, page: Int, limit: Int) async throws -> PaginationResponse<StockMovement>
     func setForSale(id: Int, forSale: Bool) async throws -> ProductsResponse
+    func setStock(id: Int, quantity: Int, locationId: Int) async throws
 }
 
 final class DefaultProductRepository: ProductRepository {
@@ -71,6 +72,16 @@ final class DefaultProductRepository: ProductRepository {
     func setForSale(id: Int, forSale: Bool) async throws -> ProductsResponse {
         try await networkService.request(
             ProductsEndpoint.setForSale(id: id, request: ForSaleRequest(forSale: forSale))
+        )
+    }
+    
+    func setStock(id: Int, quantity: Int, locationId: Int) async throws {
+        try await networkService.requestVoid(
+            ProductsEndpoint.setStock(
+                id: id,
+                request: SetStockRequest(quantity: quantity),
+                locationId: locationId
+            )
         )
     }
 }

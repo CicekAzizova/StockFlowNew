@@ -218,6 +218,10 @@ final class ProductsStore {
         return await refreshProduct(sku: response.sku) ?? response
     }
     
+    /// Mağazanın qalığını düzəldir (tarixçədə "Düzəliş"). Təzələməni çağıran edir.
+    func setStock(id: Int, quantity: Int, locationId: Int) async throws {
+        try await productRepository.setStock(id: id, quantity: quantity, locationId: locationId)
+    }
     
     // MARK: - History & For sale
 

@@ -19,6 +19,7 @@ enum ProductsEndpoint: Endpoint {
     case productStats
     case productHistory(id: Int, page: Int, limit: Int)
     case setForSale(id: Int, request: ForSaleRequest)
+    case setStock(id: Int, request: SetStockRequest, locationId: Int)
     
     var path: String {
         switch self {
@@ -42,6 +43,8 @@ enum ProductsEndpoint: Endpoint {
             "/products/\(id)/history"
         case .setForSale(let id, _):
             "/products/\(id)/for-sale"
+        case .setStock(let id, _, _):
+            "/products/\(id)/stock"
         }
     }
     
@@ -55,7 +58,7 @@ enum ProductsEndpoint: Endpoint {
             return .put
         case .deleteProduct:
             return .delete
-        case .setForSale:
+        case .setForSale, .setStock:
             return .patch
         }
     }
@@ -76,6 +79,8 @@ enum ProductsEndpoint: Endpoint {
             return request
         case .getProducts, .getLowStockProducts, .productBySku, .deleteProduct, .productStats, .productHistory:
             return nil
+        case .setStock(_, let request, _):
+            return request
         }
     }
     
@@ -106,7 +111,7 @@ enum ProductsEndpoint: Endpoint {
                 URLQueryItem(name: "page", value: String(page)),
                 URLQueryItem(name: "limit", value: String(limit))
             ]
-        case .createProduct, .editProduct, .deleteProduct, .restockProduct, .productStats, .setForSale:
+        case .createProduct, .editProduct, .deleteProduct, .restockProduct, .productStats, .setForSale, .setStock:
             return nil
         }
     }
@@ -117,6 +122,10 @@ enum ProductsEndpoint: Endpoint {
             HttpHeader.contentType: ContentType.json
         ]
         if case .restockProduct(_, _, let locationId?) = self {
+            headers[HttpHeader.locationId] = String(locationId)
+        }
+        
+        if case .setStock(_, _, let locationId) = self {
             headers[HttpHeader.locationId] = String(locationId)
         }
         return headers

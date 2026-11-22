@@ -15,11 +15,13 @@ struct StockByLocationCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Starting stock")
-                    .font(.inter(.regular, size: 13))
-                    .foregroundStyle(.textSecondary)
+                if viewModel.product == nil {
+                    Text("Starting stock")
+                } else {
+                    Text("Stock by location")
+                }
                 Spacer()
-                if viewModel.locations.count > 1 {
+                if viewModel.product == nil, viewModel.locations.count > 1 {
                     Button("Same for all") {
                         viewModel.applySameStockForAll()
                     }
@@ -27,6 +29,8 @@ struct StockByLocationCard: View {
                     .foregroundStyle(Color.brandTeal)
                 }
             }
+            .font(.inter(.regular, size: 13))
+            .foregroundStyle(.textSecondary)
             .padding(.horizontal, 4)
 
             VStack(spacing: 0) {

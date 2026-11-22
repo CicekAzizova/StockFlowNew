@@ -87,6 +87,9 @@ final class AddProductViewModel {
         weight = product.weight.map { String($0) } ?? ""
         weightUnit = product.weightUnit ?? "g"
         size = product.size ?? ""
+        for stock in product.stocks {
+            stockByLocation[stock.locationId] = stock.quantity
+        }
     }
     
     /// 112.0 → "112", 12.5 → "12.5"
@@ -223,9 +226,9 @@ final class AddProductViewModel {
         locationSwitcher?.locations ?? []
     }
 
-    /// Yeni məhsulda hər məkan üçün qalıq yazılır. Redaktədə yalnız aktiv məkanın qalığı dəyişir.
+    /// Yeni məhsulda başlanğıc qalıq, redaktədə düzəliş. İkisində də hər məkanın kartı görünür.
     var usesLocationStocks: Bool {
-        product == nil && !locations.isEmpty
+        !locations.isEmpty
     }
 
     var totalStock: Int {
@@ -292,7 +295,7 @@ final class AddProductViewModel {
 
         let trimmedSize = size.trimmingCharacters(in: .whitespaces)
 
-        let stocks: [InitialStock]? = usesLocationStocks
+        let stocks: [InitialStock]? = (product == nil && usesLocationStocks)
             ? locations.map {
                 InitialStock(locationId: $0.id, quantity: stockByLocation[$0.id] ?? 0)
             }
@@ -320,6 +323,22 @@ final class AddProductViewModel {
    
     //MARK: - Save
     
+    /// Yalnız sayı dəyişmiş mağazalar üçün sorğu göndərir. Nəsə dəyişibsə true qaytarır.
+    private func applyStockChanges(for product: ProductsResponse) async throws -> Bool {
+        var changed = false
+        for stock in product.stocks {
+            guard let newValue = stockByLocation[stock.locationId],
+                  newValue != stock.quantity else { continue }
+            try await productStore.setStock(
+                id: product.id,
+                quantity: newValue,
+                locationId: stock.locationId
+            )
+            changed = true
+        }
+        return changed
+    }
+    
     func saveProduct() async {
         validationMessage = nil
 
@@ -339,13 +358,17 @@ final class AddProductViewModel {
 
             request.imageUrls = uploadedUrls
             
-            let response: ProductsResponse
+            var response: ProductsResponse
 
             if let product {
                 response = try await productStore.saveProduct(
                     id: product.id,
                     request: request
                 )
+                // Sayı dəyişmiş mağazalar üçün düzəliş göndərilir.
+                if try await applyStockChanges(for: product) {
+                    response = await productStore.refreshProduct(sku: response.sku) ?? response
+                }
             } else {
                 response = try await productStore.addProduct(request)
             }
