@@ -37,6 +37,7 @@ final class ProductDetailViewModel {
     private(set) var historyError: String?
     private var historyPage = 1
     private var hasMoreHistory = false
+    private var isHistoryStale = false
 
     /// Mənim tərəfimdən xəta: "satışdadır" açarı və s. üçün.
     var actionError: String?
@@ -51,6 +52,8 @@ final class ProductDetailViewModel {
         refreshedProduct = await productStore.refreshProduct(sku: initialProduct.sku)
         if selectedTab == .history {
             await loadHistory()
+        } else {
+            isHistoryStale = true
         }
     }
 
@@ -68,6 +71,7 @@ final class ProductDetailViewModel {
                 id: product.id, page: 1, limit: historyPageSize
             )
             history = response.items
+            isHistoryStale = false
             historyPage = response.page
             hasMoreHistory = response.hasNext
         } catch is CancellationError {
@@ -78,7 +82,8 @@ final class ProductDetailViewModel {
     }
 
     func loadHistoryIfNeeded() async {
-        guard history.isEmpty, historyError == nil else { return }
+        let isFirstLoad = history.isEmpty && historyError == nil
+        guard isFirstLoad || isHistoryStale else { return }
         await loadHistory()
     }
 
@@ -128,7 +133,7 @@ final class ProductDetailViewModel {
 
         do {
             _ = try await productStore.restockProduct(id: product.id, quantity: quantity, locationId: locationId)
-            if selectedTab == .history { await loadHistory() }
+            isHistoryStale = true
             return true
         } catch is CancellationError {
             return false

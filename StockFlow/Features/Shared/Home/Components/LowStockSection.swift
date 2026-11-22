@@ -93,6 +93,12 @@ private struct LowStockRow: View {
                     .font(.caption)
                     .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)
+
+                if !product.isForSale {
+                    Label("Not for sale", systemImage: "pause.circle")
+                        .font(.inter(.bold, size: 11))
+                        .foregroundStyle(Color.textSecondary)
+                }
             }
 
             Spacer(minLength: 8)
@@ -106,6 +112,7 @@ private struct LowStockRow: View {
                 .clipShape(Capsule())
         }
         .padding(12)
+        .opacity(product.isForSale ? 1 : 0.55)
         .contentShape(Rectangle())
     }
 }

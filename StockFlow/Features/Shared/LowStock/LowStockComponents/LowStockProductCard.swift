@@ -34,6 +34,7 @@ struct LowStockProductCard: View {
             RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.border, lineWidth: 1)
         }
+        .opacity(product.isForSale ? 1 : 0.55)
     }
 
     // MARK: - Parts
@@ -57,6 +58,12 @@ struct LowStockProductCard: View {
                     .font(.caption)
                     .foregroundStyle(Color.textSecondary)
                     .lineLimit(1)
+                
+                if !product.isForSale {
+                    Label("Not for sale", systemImage: "pause.circle")
+                        .font(.inter(.bold, size: 11))
+                        .foregroundStyle(Color.textSecondary)
+                }
             }
 
             Spacer(minLength: 8)

@@ -64,8 +64,20 @@ struct ProductDetailView: View {
                 )
             }
         }
+        
+        .alert(
+            "Something Went Wrong",
+            isPresented: Binding(
+                get: { viewModel.actionError != nil },
+                set: { if !$0 { viewModel.actionError = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.actionError ?? "")
+        }
     }
-
+    
     
     @ViewBuilder
     private var content: some View {
@@ -122,21 +134,92 @@ struct ProductDetailView: View {
             showingDeleteConfirmation = true
         }
     }
+    
+    private func valueText(_ text: String) -> some View {
+        Text(verbatim: text)
+            .font(.inter(.regular, size: 14))
+            .foregroundStyle(.textSecondary)
+            .lineLimit(1)
+    }
+
+    private func valueText(_ text: LocalizedStringKey) -> some View {
+        Text(text)
+            .font(.inter(.regular, size: 14))
+            .foregroundStyle(.textSecondary)
+            .lineLimit(1)
+    }
+
     private var overviewTab: some View {
         VStack(spacing: 0) {
-            InfoRow(title: "Category", value: categoryName)
-            Divider().padding(.vertical, 12)
-            InfoRow(title: "Barcode", value: product.sku)
-            Divider().padding(.vertical, 12)
-            InfoRow(title: "Total stock", localizedValue: "\(product.quantity) units")
-            Divider().padding(.vertical, 12)
-            InfoRow(title: "Low-stock threshold", localizedValue: "\(product.lowStockLimit) units")
-            Divider().padding(.vertical, 12)
-            InfoRow(title: "Sold this month", localizedValue: "\(product.soldThisMonth) units")
+            AppRowView(icon: "tag", tint: .orange, title: "Category") {
+                valueText(categoryName)
+            }
+            .compact()
+            Divider()
+
+            AppRowView(icon: "barcode", tint: .gray, title: "Barcode") {
+                valueText(product.sku)
+            }
+            .compact()
+            Divider()
+
+            AppRowView(icon: "shippingbox", tint: .brandTeal, title: "Total stock") {
+                valueText("\(product.quantity) units · \(product.stocks.count) locations")
+            }
+            .compact()
+            Divider()
+
+            lowStockRow
+            Divider()
+
+            AppRowView(icon: "receipt", tint: .blue, title: "Sold this month") {
+                valueText("\(product.soldThisMonth) units")
+            }
+            .compact()
+
+            if canManageProducts {
+                Divider()
+                AppRowView(icon: "cart", tint: .brandTeal, title: "On sale") {
+                    Toggle("", isOn: Binding(
+                        get: { product.isForSale },
+                        set: { value in Task { await viewModel.setForSale(value) } }
+                    ))
+                    .labelsHidden()
+                    .tint(.brandTeal)
+                }
+                .compact()
+            }
         }
-        .font(.inter(.regular, size: 15))
-        .padding(20)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
         .background(Color.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    /// Sahibdə basanda redaktə ekranı açılır (limit orada dəyişir).
+    @ViewBuilder
+    private var lowStockRow: some View {
+        let row = AppRowView(icon: "exclamationmark.triangle", tint: .pending, title: "Low-stock threshold") {
+            HStack(spacing: 6) {
+                valueText("\(product.lowStockLimit) units")
+                if canManageProducts {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.textSecondary)
+                }
+            }
+        }
+            .compact()
+
+        if canManageProducts {
+            Button {
+                path.append(ProductRoute.editProduct(product))
+            } label: {
+                row
+            }
+            .buttonStyle(.plain)
+        } else {
+            row
+        }
     }
     
     @ViewBuilder
@@ -144,7 +227,7 @@ struct ProductDetailView: View {
         switch viewModel.selectedTab {
         case .overview: overviewTab
         case .stock: stockTab
-        case .history: EmptyView()   // növbəti addım
+        case .history: historyTab
         }
     }
     
@@ -162,6 +245,15 @@ struct ProductDetailView: View {
             }
             
             ScrollView {
+                if !product.isForSale {
+                    Label("Not for sale. Sellers can't sell this product.", systemImage: "pause.circle")
+                        .font(.inter(.bold, size: 13))
+                        .foregroundStyle(.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.pending.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .padding(8)
+                }
                 VStack(spacing: 16) {
                     ProductStatsCard(product: product, showsCost: canManageProducts)
                     
@@ -191,20 +283,20 @@ struct ProductDetailView: View {
     private func location(for stock: ProductStock) -> StoreLocation? {
         dependencies?.locationSwitcher.locations.first { $0.id == stock.locationId }
     }
-
+    
     private var stockTab: some View {
         VStack(spacing: 12) {
             HStack {
                 Text("In \(product.stocks.count) locations total")
                     .font(.inter(.regular, size: 14))
                     .foregroundStyle(.textSecondary)
-
+                
                 Spacer()
-
+                
                 Text("\(product.quantity) units")
                     .font(.inter(.bold, size: 14))
                     .foregroundStyle(.textPrimary)
-
+                
                 Text(product.stockStatus == .outOfStock ? "Out" : product.stockStatus == .lowStock ? "Low" : "Normal")
                     .font(.inter(.bold, size: 12))
                     .foregroundStyle(product.stockStatus.color)
@@ -213,7 +305,7 @@ struct ProductDetailView: View {
                     .background(product.stockStatus.backgroundColor, in: Capsule())
             }
             .padding(.horizontal, 4)
-
+            
             ForEach(product.stocks) { stock in
                 LocationStockCard(
                     name: stock.locationName,
@@ -222,7 +314,7 @@ struct ProductDetailView: View {
                     lowStockLimit: product.lowStockLimit
                 )
             }
-
+            
             HStack(spacing: 12) {
                 if dependencies != nil, product.stocks.count > 1 {
                     Button {
@@ -237,7 +329,7 @@ struct ProductDetailView: View {
                             .overlay(Capsule().stroke(Color.gray.opacity(0.2), lineWidth: 1))
                     }
                 }
-
+                
                 Button {
                     viewModel.restockError = nil
                     isRestockPresented = true
@@ -259,4 +351,83 @@ struct ProductDetailView: View {
             }
             .padding(.top, 4)
         }
-    }}
+    }
+    
+    
+    /// "Gələn" köçürmə yazısı gizlədilir: bir köçürmə bir sətir göstərilir.
+    private var visibleHistory: [StockMovement] {
+        viewModel.history.filter { $0.type != .transferIn }
+    }
+
+    private var historyGroups: [(day: Date, items: [StockMovement])] {
+        let calendar = Calendar.current
+        let grouped = Dictionary(grouping: visibleHistory) {
+            calendar.startOfDay(for: $0.date ?? .distantPast)
+        }
+        return grouped.keys.sorted(by: >).map { ($0, grouped[$0] ?? []) }
+    }
+
+    @ViewBuilder
+    private func dayTitle(_ day: Date) -> some View {
+        if Calendar.current.isDateInToday(day) {
+            Text("Today")
+        } else if Calendar.current.isDateInYesterday(day) {
+            Text("Yesterday")
+        } else {
+            Text(day, format: .dateTime.day().month(.wide).year())
+        }
+    }
+
+    private var historyTab: some View {
+        VStack(spacing: 12) {
+            if viewModel.history.isEmpty {
+                if viewModel.isLoadingHistory {
+                    ProgressView().padding(.top, 32)
+                } else if let error = viewModel.historyError {
+                    VStack(spacing: 12) {
+                        Text(verbatim: error)
+                            .font(.inter(.regular, size: 14))
+                            .foregroundStyle(.textSecondary)
+                            .multilineTextAlignment(.center)
+                        Button("Try again") {
+                            Task { await viewModel.loadHistory() }
+                        }
+                    }
+                    .padding(.top, 32)
+                } else {
+                    ContentUnavailableView("No history yet", systemImage: "clock")
+                        .padding(.top, 16)
+                }
+            } else {
+                ForEach(historyGroups, id: \.day) { group in
+                    VStack(alignment: .leading, spacing: 8) {
+                        dayTitle(group.day)
+                            .font(.inter(.bold, size: 13))
+                            .foregroundStyle(.textSecondary)
+                            .padding(.horizontal, 4)
+
+                        VStack(spacing: 0) {
+                            ForEach(group.items) { movement in
+                                StockMovementRow(movement: movement)
+                                    .padding(.vertical, 12)
+                                    .onAppear {
+                                        if movement.id == visibleHistory.last?.id {
+                                            Task { await viewModel.loadMoreHistory() }
+                                        }
+                                    }
+
+                                if movement.id != group.items.last?.id {
+                                    Divider()
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .background(Color.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
+                }
+            }
+        }
+        .task { await viewModel.loadHistoryIfNeeded() }
+    }
+    
+}

@@ -15,6 +15,8 @@ struct AppRowView<Trailing: View>: View {
     let title: LocalizedStringKey
     var titleColor: Color = .textPrimary
     private let trailing: Trailing
+    private var titleFont: Font = .body.weight(.medium)
+    private var iconSize: CGFloat = 40
 
     init(
         icon: String,
@@ -33,14 +35,14 @@ struct AppRowView<Trailing: View>: View {
     var body: some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 17, weight: .medium))
+                .font(.system(size: iconSize * 0.42, weight: .medium))
                 .foregroundStyle(tint)
-                .frame(width: 40, height: 40)
+                .frame(width: iconSize, height: iconSize)
                 .background(tint.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: iconSize * 0.3))
 
             Text(title)
-                .font(.body.weight(.medium))
+                .font(titleFont)
                 .foregroundStyle(titleColor)
 
             Spacer(minLength: 8)
@@ -64,6 +66,16 @@ extension AppRowView where Trailing == EmptyView {
         self.init(icon: icon, tint: tint, title: title, titleColor: titleColor) {
             EmptyView()
         }
+    }
+}
+
+extension AppRowView {
+    /// Kiçik variant: detal ekranlarındakı sıx siyahılar üçün.
+    func compact() -> AppRowView {
+        var copy = self
+        copy.titleFont = .inter(.regular, size: 14)
+        copy.iconSize = 34
+        return copy
     }
 }
 

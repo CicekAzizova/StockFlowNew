@@ -50,6 +50,12 @@ struct ProductRowView: View {
                     .font(.inter(.regular, size: 12))
                     .foregroundStyle(.textSecondary)
                     .lineLimit(1)
+                
+                if !product.isForSale {
+                    Label("Not for sale", systemImage: "pause.circle")
+                        .font(.inter(.bold, size: 11))
+                        .foregroundStyle(.textSecondary)
+                }
             }
 
             Spacer(minLength: 8)
@@ -63,6 +69,7 @@ struct ProductRowView: View {
         .frame(maxWidth: .infinity)
         .background(Color.surface)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .opacity(product.isForSale ? 1 : 0.55)
     }
 
     // MARK: - Şəkil və ya ikon
