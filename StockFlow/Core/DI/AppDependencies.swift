@@ -43,6 +43,8 @@ final class AppDependencies {
     
     let catalogRepository: CatalogRepository
     
+    let reportRepository: ReportRepository
+    
     let catalogStore: CatalogStore
     
 
@@ -89,6 +91,8 @@ final class AppDependencies {
         let salesRepository = DefaultSalesRepository(networkService: networkService)
         let salesStore = SalesStore(salesRepository: salesRepository)
         let catalogRepository = DefaultCatalogRepository(networkService: networkService)
+        let reportRepository = DefaultReportRepository(networkService: networkService)
+        
         let catalogStore = CatalogStore(catalogRepository: catalogRepository)
         
         let locationSwitcher = LocationSwitcher(
@@ -123,6 +127,7 @@ final class AppDependencies {
         self.salesRepository = salesRepository
         self.salesStore = salesStore
         self.catalogRepository = catalogRepository
+        self.reportRepository = reportRepository
         self.catalogStore = catalogStore
         self.locationSwitcher = locationSwitcher
     }
@@ -139,7 +144,8 @@ final class AppDependencies {
         salesRepository: SalesRepository,
         catalogRepository: CatalogRepository = PreviewCatalogRepository(),
         locationRepository: LocationRepository = PreviewLocationRepository(),
-        transferRepository: TransferRepository = PreviewTransferRepository()
+        transferRepository: TransferRepository = PreviewTransferRepository(),
+        reportRepository: ReportRepository = PreviewReportRepository()
     ) {
         self.tokenStorage = tokenStorage
         self.appLockManager = AppLockManager(pinStore: KeychainPinStore(keychain: KeychainService()), biometrics: BiometricAuthenticator())
@@ -159,6 +165,7 @@ final class AppDependencies {
         self.catalogStore = CatalogStore(catalogRepository: catalogRepository)
         self.locationRepository = locationRepository
         self.transferRepository = transferRepository
+        self.reportRepository = reportRepository
         self.locationSwitcher = LocationSwitcher(
             locationRepository: locationRepository,
             productsStore: self.productsStore,

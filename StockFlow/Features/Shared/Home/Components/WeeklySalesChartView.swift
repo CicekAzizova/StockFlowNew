@@ -12,6 +12,11 @@ struct WeeklySalesChartView: View {
     
     let days: [DailySales]
     
+    /// Verilərsə (owner), başlıqda "›" düyməsi görünür.
+    var onReportTap: (() -> Void)? = nil
+    
+    @Environment(\.locale) private var locale
+    
     @State private var selectedId: String?
     
     private let chartHeight: CGFloat = 50
@@ -29,6 +34,7 @@ struct WeeklySalesChartView: View {
         days.first { $0.id == selectedId } ?? days.last
     }
     
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             header
@@ -41,8 +47,22 @@ struct WeeklySalesChartView: View {
     
     private var header: some View {
         HStack(alignment: .top) {
-            Text("Last 7 days")
-                .font(.subheadline.weight(.bold))
+            HStack(spacing: 4) {
+                Text("Last 7 days")
+                    .font(.subheadline.weight(.bold))
+
+                if let onReportTap {
+                    Button(action: onReportTap) {
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Color.brandTeal)
+                            .padding(6)
+                            .background(Color.brandTeal.opacity(0.12), in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Report")
+                }
+            }
             
             Spacer(minLength: 8)
             
@@ -54,7 +74,7 @@ struct WeeklySalesChartView: View {
                 
                 // Altda: seçilmiş gün (seçim yoxdursa bu gün).
                 if let day = selected {
-                    Text("\(Self.shortWeekday(day.date)) · \(day.total.asCurrency) · \(day.orders) sales")
+                    Text("\(shortWeekday(day.date)) · \(day.total.asCurrency) · \(day.orders) sales")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -78,7 +98,7 @@ struct WeeklySalesChartView: View {
                             .frame(height: max(4, chartHeight * day.total / maxTotal))
                             .frame(height: chartHeight, alignment: .bottom)
                         
-                        Text(Self.shortWeekday(day.date))
+                        Text(shortWeekday(day.date))
                             .font(.caption2)
                             .foregroundStyle(isSelected ? Color.brandTeal : Color.secondary)
                             .fontWeight(isSelected ? .bold : .regular)
@@ -112,15 +132,15 @@ struct WeeklySalesChartView: View {
         return f
     }()
     
-    private static func weekday(_ date: String, format: String) -> String {
-        guard let d = parser.date(from: date) else { return date }
+    private func weekday(_ date: String, format: String) -> String {
+        guard let d = Self.parser.date(from: date) else { return date }
         let f = DateFormatter()
-        f.locale = .current
+        f.locale = locale
         f.dateFormat = format
         return f.string(from: d).capitalized
     }
-    
-    private static func shortWeekday(_ date: String) -> String {
+
+    private func shortWeekday(_ date: String) -> String {
         weekday(date, format: "EEE")
     }
 }

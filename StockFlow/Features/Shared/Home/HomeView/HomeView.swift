@@ -52,7 +52,8 @@ struct HomeView: View {
                     todaySales: viewModel.todaySales,
                     todayOrders: viewModel.todayOrders,
                     differenceFromYesterday: viewModel.differenceFromYesterday,
-                    weeklySales: viewModel.weeklySales
+                    weeklySales: viewModel.weeklySales,
+                    onReportTap: user.role == .owner ? { path.append(HomeRoute.report) } : nil
                 )
                 
                 content

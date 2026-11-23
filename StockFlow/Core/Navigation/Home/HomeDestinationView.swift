@@ -23,6 +23,11 @@ struct HomeDestinationView: View {
             )
         case .salesHistory:
             SalesHistoryView(viewModel: dependencies.makeSalesHistoryViewModel())
+        case .report:
+            ReportView(
+                repository: dependencies.reportRepository,
+                locationSwitcher: dependencies.locationSwitcher
+            )
         }
     }
 }

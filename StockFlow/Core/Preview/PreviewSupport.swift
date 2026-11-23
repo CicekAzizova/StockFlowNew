@@ -123,6 +123,61 @@ struct PreviewProductRepository: ProductRepository {
     func deleteProduct(id: Int) async throws {}
 }
 
+
+struct PreviewReportRepository: ReportRepository {
+    func getSalesReport(period: ReportPeriod, year: Int?, locationId: Int?) async throws -> SalesReport {
+        let buckets: [ReportBucket]
+        if period == .year {
+            let shownYear = year ?? 2026
+            let yearBonus = (shownYear - 2020) * 30
+            var months: [ReportBucket] = []
+
+            for month in 1...12 {
+                let revenue: Double = Double(month * 90 + yearBonus)
+                let profit: Double = Double(month * 27)
+                let label = "\(shownYear)-" + String(format: "%02d", month)
+
+                months.append(
+                    ReportBucket(
+                        label: label,
+                        revenue: revenue,
+                        profit: profit,
+                        orders: month + 2,
+                        itemsSold: month * 2
+                    )
+                )
+            }
+            buckets = months
+        } else {
+            buckets = (0..<7).map { i in
+                ReportBucket(
+                    label: "2026-11-\(String(format: "%02d", 17 + i))",
+                    revenue: Double(100 + i * 40),
+                    profit: Double(30 + i * 12),
+                    orders: 3 + i,
+                    itemsSold: 6 + i * 2
+                )
+            }
+        }
+        return SalesReport(
+            period: period.rawValue,
+            firstYear: 2024,
+            from: "2026-11-17",
+            to: "2026-11-23",
+            revenue: 1540,
+            profit: 462,
+            orders: 42,
+            itemsSold: 90,
+            unknownCostRevenue: 120,
+            previous: ReportTotals(revenue: 1300, profit: 480, orders: 38, itemsSold: 80),
+            byLocation: [
+                ReportLocationSales(locationId: 1, name: "Nərimanov", revenue: 1000, profit: 300, orders: 25),
+                ReportLocationSales(locationId: 2, name: "Gənclik", revenue: 540, profit: 162, orders: 17)
+            ],
+            buckets: buckets
+        )
+    }
+}
 struct PreviewSalesRepository: SalesRepository {
     func getDailySales(days: Int) async throws -> DailySalesResponse {
         if fails { throw PreviewError.failed }

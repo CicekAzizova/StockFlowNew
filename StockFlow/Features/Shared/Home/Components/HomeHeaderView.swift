@@ -18,6 +18,7 @@ struct HomeHeaderView: View {
     let differenceFromYesterday: Double?
     var onNotificationsTap: () -> Void = {}
     let weeklySales: [DailySales]
+    var onReportTap: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,7 +34,7 @@ struct HomeHeaderView: View {
             .brandHeaderBackground()
 
             if !weeklySales.isEmpty {
-                WeeklySalesChartView(days: weeklySales)
+                WeeklySalesChartView(days: weeklySales, onReportTap: onReportTap)
                     .padding(.horizontal, 16)
                     .padding(.top, -110)
                     .padding(.bottom, 8)
