@@ -14,6 +14,7 @@ struct ProductDetailHeader<MenuContent: View>: View {
     let subtitle: String
     let onBack: () -> Void
     var onEdit: (() -> Void)? = nil
+    var shareText: String? = nil
     @ViewBuilder var menu: MenuContent
 
     private var mainCategory: String {
@@ -30,6 +31,13 @@ struct ProductDetailHeader<MenuContent: View>: View {
                 )
 
                 Spacer()
+                
+                if let shareText {
+                    ShareLink(item: shareText) {
+                        BrandHeaderIcon(systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel("Share")
+                }
 
                 if let onEdit {
                     BrandHeaderIconButton(

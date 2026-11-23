@@ -13,10 +13,10 @@ struct ProductStatsCard: View {
     let product: ProductsResponse
     let showsCost: Bool
 
-    /// Marja: qazanc / satış qiyməti. Alış qiyməti yoxdursa (0) göstərilmir.
+    /// Marja: qazanc / satış qiyməti. Alış qiyməti məlum deyilsə göstərilmir.
     private var marginText: String {
-        guard product.costPrice > 0, product.price > 0 else { return "—" }
-        let margin = (product.price - product.costPrice) / product.price * 100
+        guard let cost = product.costPrice, product.price > 0 else { return "—" }
+        let margin = (product.price - cost) / product.price * 100
         return "\(Int(margin.rounded()))%"
     }
 
@@ -26,9 +26,9 @@ struct ProductStatsCard: View {
 
             if showsCost {
                 divider
-                column("Cost price", product.costPrice > 0 ? product.costPrice.asCurrency : "—")
+                column("Cost price", product.costPrice?.asCurrency ?? "—")
                 divider
-                column("Margin", marginText, tint: product.costPrice > 0 ? Color.brandTeal : nil)
+                column("Margin", marginText, tint: product.costPrice != nil ? Color.brandTeal : nil)
             } else {
                 divider
                 column("Barcode", product.sku)

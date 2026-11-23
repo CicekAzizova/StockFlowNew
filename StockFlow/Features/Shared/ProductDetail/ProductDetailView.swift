@@ -126,6 +126,18 @@ struct ProductDetailView: View {
             .joined(separator: " · ")
     }
     
+    /// Paylaşma mətni: ad, qiymət, təsvir və ilk şəklin linki.
+    private var shareText: String {
+        var lines = [product.name, product.discountedPrice.asCurrency]
+        if !product.description.isBlank {
+            lines.append(product.description)
+        }
+        if let imageUrl = product.imageUrls?.first, !imageUrl.isEmpty {
+            lines.append(imageUrl)
+        }
+        return lines.joined(separator: "\n")
+    }
+    
     private var deleteButton: some View {
         BrandHeaderIconButton(
             systemImage: "trash",
@@ -239,7 +251,8 @@ struct ProductDetailView: View {
                 onBack: { dismiss() },
                 onEdit: canManageProducts
                 ? { path.append(ProductRoute.editProduct(product)) }
-                : nil
+                : nil,
+                shareText: canManageProducts ? shareText : nil
             ) {
                 if canManageProducts { deleteButton }
             }

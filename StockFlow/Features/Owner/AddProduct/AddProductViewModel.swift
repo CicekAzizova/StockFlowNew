@@ -79,7 +79,7 @@ final class AddProductViewModel {
         description = product.description
         price = Self.text(product.price)
         discount = Self.text(product.discount)
-        costPrice = product.costPrice > 0 ? Self.text(product.costPrice) : ""
+        costPrice = product.costPrice.map { Self.text($0) } ?? ""
         quantity = String(product.quantity)
         lowStockLimit = String(product.lowStockLimit)
         imageUrls = product.imageUrls
@@ -284,7 +284,7 @@ final class AddProductViewModel {
         guard
             let price = price.asDecimal,
             let discount = number(discount, default: 0),
-            let costPrice = number(costPrice, default: 0),
+            let costValue = costPrice.isBlank ? .some(nil) : costPrice.asDecimal.map(Optional.some),
             let quantity = integer(quantity, default: 0),
             let lowStockLimit = integer(lowStockLimit, default: 5),
             let weightValue = weight.isBlank ? .some(nil) : weight.asDecimal.map(Optional.some)
@@ -307,7 +307,7 @@ final class AddProductViewModel {
             description: description,
             price: price,
             discount: discount,
-            costPrice: costPrice,
+            costPrice: costValue,
             quantity: quantity,
             lowStockLimit: lowStockLimit,
             subcategory: subcategory,

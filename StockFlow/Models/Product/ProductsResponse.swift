@@ -30,7 +30,7 @@ struct ProductsResponse: Decodable, Hashable {
     let description: String
     let price: Double
     let discount: Double
-    let costPrice: Double
+    let costPrice: Double?
     let quantity: Int
     let lowStockLimit: Int
     let imageUrls: [String]?
