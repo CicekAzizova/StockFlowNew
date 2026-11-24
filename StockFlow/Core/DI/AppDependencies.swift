@@ -294,6 +294,15 @@ final class AppDependencies {
         SellerSalesViewModel(salesStore: salesStore)
     }
     
+    func makeSalesViewModel(currentUser: User? = nil) -> SalesViewModel {
+        let viewModel = SalesViewModel(repository: salesRepository, sellerRepository: sellerRepository)
+        viewModel.currentUserId = currentUser?.id
+        viewModel.currentUserName = [currentUser?.name, currentUser?.surname]
+            .compactMap { $0 }
+            .joined(separator: " ")
+        return viewModel
+    }
+    
     @MainActor
     func makeSalesHistoryViewModel() -> SalesHistoryViewModel {
         SalesHistoryViewModel(salesStore: salesStore)
@@ -304,10 +313,26 @@ final class AppDependencies {
         LowStockViewModel(productStore: productsStore)
     }
     
+    @MainActor
     func makeScanProductViewModel() -> ScanProductViewModel {
         ScanProductViewModel(
             productRepository: productRepository,
             salesStore: salesStore, productsStore: productsStore
         )
+    }
+    
+    @MainActor
+    func makeCartScanViewModel(cart: CartViewModel) -> CartScanViewModel {
+        CartScanViewModel(productRepository: productRepository, cart: cart)
+    }
+    
+    @MainActor
+    func makeCartSearchViewModel(cart: CartViewModel) -> CartSearchViewModel {
+        CartSearchViewModel(productRepository: productRepository, cart: cart)
+    }
+    
+    @MainActor
+    func makePaymentViewModel(cart: CartViewModel) -> PaymentViewModel {
+        PaymentViewModel(salesStore: salesStore, productsStore: productsStore, cart: cart)
     }
 }

@@ -14,11 +14,11 @@ struct SalesDestinationView: View {
     var body: some View {
         switch route {
         case .scanner:
-            ScanProductView(viewModel: dependencies.makeScanProductViewModel())
+            NewSaleView(dependencies: dependencies)
         case .history:
             SalesHistoryView(viewModel: dependencies.makeSalesHistoryViewModel())
         case .detail(let sale):
-            SaleDetailView(sale: sale)
+            SaleDetailView(sale: sale, locationSwitcher: dependencies.locationSwitcher)
         }
     }
 }

@@ -179,6 +179,42 @@ struct PreviewReportRepository: ReportRepository {
     }
 }
 struct PreviewSalesRepository: SalesRepository {
+    func createCartSale(_ request: CreateCartSaleRequest) async throws -> CreateSaleResponse {
+        throw PreviewError.failed
+    }
+    
+    func getSalesInRange(
+        from: String,
+        to: String,
+        sellerId: Int?,
+        page: Int,
+        limit: Int
+    ) async throws -> PaginationResponse<SaleResponse> {
+        if fails { throw PreviewError.failed }
+        if empty { return PreviewData.page([]) }
+        return PreviewData.page([
+            PreviewData.sale(id: 1042, name: "Süd 1L", quantity: 3, unitPrice: 2.35),
+            PreviewData.sale(id: 1041, name: "Mineral su", quantity: 1, unitPrice: 0.6),
+            PreviewData.sale(id: 1040, name: "Düyü 1kg", quantity: 6, unitPrice: 3.1)
+        ])
+    }
+
+    func getSalesTotals(from: String, to: String, sellerId: Int?) async throws -> SalesTotalsResponse {
+        if fails { throw PreviewError.failed }
+        return SalesTotalsResponse(
+            from: from,
+            to: to,
+            revenue: 1245.8,
+            orders: 38,
+            averageCheck: 32.78,
+            previous: SalesTotals(revenue: 1100, orders: 34, averageCheck: 32.35),
+            bySeller: [
+                SellerTotals(sellerId: 2, sellerName: "Rəşad M.", revenue: 800, orders: 20),
+                SellerTotals(sellerId: 3, sellerName: "Leyla H.", revenue: 445.8, orders: 18)
+            ], byPayment: [PaymentTotal(method: "card", amount: 20)]
+        )
+    }
+    
     func getDailySales(days: Int) async throws -> DailySalesResponse {
         if fails { throw PreviewError.failed }
         if empty { return DailySalesResponse(days: [], total: 0, orders: 0) }

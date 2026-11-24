@@ -11,4 +11,6 @@ struct CreateSaleResponse: Decodable {
     let message: String
     let saleId: Int
     let totalPrice: Double
+    var sale: SaleResponse? = nil
+
 }

@@ -105,4 +105,13 @@ final class SalesStore {
 
         return response
     }
+    
+    func createCartSale(_ request: CreateCartSaleRequest) async throws -> CreateSaleResponse {
+        let response = try await salesRepository.createCartSale(request)
+        try? await loadRecentSales(limit: salesPageSize)
+        try? await loadSalesSummary()
+        try? await loadDailySales()
+
+        return response
+    }
 }

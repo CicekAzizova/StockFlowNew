@@ -5,6 +5,13 @@
 //  Created by Cicek on 06.10.26.
 //
 
+//
+//  SellerTabView.swift
+//  StockFlow
+//
+//  Created by Cicek on 06.10.26.
+//
+
 import SwiftUI
 
 struct SellerTabView: View {
@@ -12,6 +19,7 @@ struct SellerTabView: View {
     let dependencies: AppDependencies
     let appStateManager: AppStateManager
     @Environment(LanguageManager.self) private var languageManager
+    @State private var selection: MainTab = .home
     @State private var homePath = NavigationPath()
     @State private var productPath = NavigationPath()
     @State private var salesPath = NavigationPath()
@@ -22,10 +30,10 @@ struct SellerTabView: View {
     let user: User?
     
     var body: some View {
-        TabView {
+        TabView(selection: $selection) {
             
             //MARK: - Home
-            Tab {
+            Tab(value: MainTab.home) {
                 NavigationStack(path: $homePath) {
                     if let user {
                         HomeView(
@@ -62,7 +70,7 @@ struct SellerTabView: View {
             
             //MARK: - Products
             
-            Tab {
+            Tab(value: MainTab.products) {
                 NavigationStack(path: $productPath) {
                     ProductsView(
                         viewModel: dependencies.makeProductViewModel(),
@@ -82,11 +90,19 @@ struct SellerTabView: View {
                     .renderingMode(.template)
                 Text("Products")            }
             
+            //MARK: - Scan (placeholder)
+            
+            Tab(value: MainTab.scan) {
+                Color.clear
+            } label: {
+                Image(uiImage: UIImage())
+                Text(verbatim: " ")
+            }
+            
             //MARK: - Sales
-            Tab {
+            Tab(value: MainTab.sales) {
                 NavigationStack(path: $salesPath) {
-                    SellerSalesView(viewModel: dependencies.makeSellerSalesViewModel(), path: $salesPath)
-                    
+                    SalesView(viewModel: dependencies.makeSalesViewModel(), path: $salesPath)
                         .navigationDestination(for: SalesRoute.self) { route in
                             SalesDestinationView(route: route, dependencies: dependencies)
                         }
@@ -102,7 +118,7 @@ struct SellerTabView: View {
             
             //MARK: - Profile
             
-            Tab {
+            Tab(value: MainTab.profile) {
                 NavigationStack(path: $profilePath) {
                     ProfileView(
                         viewModel: dependencies.makeProfileViewModel(appStateManager: appStateManager),
@@ -126,6 +142,8 @@ struct SellerTabView: View {
             }
             
         }
+        .tint(.brandTeal)
+        .scanTab(selection: $selection, dependencies: dependencies)
         .onChange(of: languageManager.language) {
             homePath = NavigationPath()
             productPath = NavigationPath()

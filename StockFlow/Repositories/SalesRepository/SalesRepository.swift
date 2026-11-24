@@ -14,9 +14,17 @@ protocol SalesRepository {
             limit: Int
         ) async throws -> PaginationResponse<SaleResponse>
     func createSale(_ request: CreateSaleRequest) async throws -> CreateSaleResponse
+    func createCartSale(_ request: CreateCartSaleRequest) async throws -> CreateSaleResponse
     func getSales(sellerId: Int, page: Int, limit: Int) async throws -> PaginationResponse<SaleResponse>
     func getDailySales(days: Int) async throws -> DailySalesResponse
-
+    func getSalesInRange(
+        from: String,
+        to: String,
+        sellerId: Int?,
+        page: Int,
+        limit: Int
+    ) async throws -> PaginationResponse<SaleResponse>
+    func getSalesTotals(from: String, to: String, sellerId: Int?) async throws -> SalesTotalsResponse
 }
 
 final class DefaultSalesRepository: SalesRepository {
@@ -36,6 +44,11 @@ final class DefaultSalesRepository: SalesRepository {
     func createSale(_ request: CreateSaleRequest) async throws -> CreateSaleResponse {
         try await networkService.request(SalesEndpoint.createSale(request))
     }
+
+    func createCartSale(_ request: CreateCartSaleRequest) async throws -> CreateSaleResponse {
+        try await networkService.request(SalesEndpoint.createCartSale(request))
+    }
+    
     func getSales(sellerId: Int, page: Int, limit: Int) async throws -> PaginationResponse<SaleResponse> {
         try await networkService.request(
             SalesEndpoint.sellerSales(sellerId: sellerId, page: page, limit: limit)
@@ -44,5 +57,21 @@ final class DefaultSalesRepository: SalesRepository {
     
     func getDailySales(days: Int) async throws -> DailySalesResponse {
         try await networkService.request(SalesEndpoint.daily(days: days))
+    }
+    
+    func getSalesInRange(
+        from: String,
+        to: String,
+        sellerId: Int?,
+        page: Int,
+        limit: Int
+    ) async throws -> PaginationResponse<SaleResponse> {
+        try await networkService.request(
+            SalesEndpoint.rangeSales(from: from, to: to, sellerId: sellerId, page: page, limit: limit)
+        )
+    }
+    
+    func getSalesTotals(from: String, to: String, sellerId: Int?) async throws -> SalesTotalsResponse {
+        try await networkService.request(SalesEndpoint.totals(from: from, to: to, sellerId: sellerId))
     }
 }
