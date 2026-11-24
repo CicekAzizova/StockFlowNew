@@ -11,10 +11,11 @@ import SwiftUI
 struct CartScannerSheet: View {
 
     @State var viewModel: CartScanViewModel
-    @Environment(\.dismiss) private var dismiss
+    let onDone: () -> Void
 
-    init(viewModel: CartScanViewModel) {
+    init(viewModel: CartScanViewModel, onDone: @escaping () -> Void) {
         _viewModel = State(initialValue: viewModel)
+        self.onDone = onDone
     }
 
     var body: some View {
@@ -47,7 +48,7 @@ struct CartScannerSheet: View {
 
             Spacer()
 
-            Button("Done") { dismiss() }
+            Button("Done") { onDone() }
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Color.brandTeal)
         }

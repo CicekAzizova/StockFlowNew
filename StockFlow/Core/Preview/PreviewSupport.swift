@@ -242,20 +242,10 @@ struct PreviewSalesRepository: SalesRepository {
         return PreviewData.summary
     }
 
-    func getRecentSales(page: Int, limit: Int) async throws -> PaginationResponse<SaleResponse> {
-        if fails { throw PreviewError.failed }
-        if empty { return PreviewData.page([]) }
-        return PreviewData.page(PreviewData.sales)
-    }
-
     func getSales(sellerId: Int, page: Int, limit: Int) async throws -> PaginationResponse<SaleResponse> {
         if fails { throw PreviewError.failed }
         if empty { return PreviewData.page([]) }
         return PreviewData.page(PreviewData.sales)
-    }
-
-    func createSale(_ request: CreateSaleRequest) async throws -> CreateSaleResponse {
-        throw PreviewError.failed
     }
 }
 

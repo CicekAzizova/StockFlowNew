@@ -15,8 +15,6 @@ struct SalesDestinationView: View {
         switch route {
         case .scanner:
             NewSaleView(dependencies: dependencies)
-        case .history:
-            SalesHistoryView(viewModel: dependencies.makeSalesHistoryViewModel())
         case .detail(let sale):
             SaleDetailView(sale: sale, locationSwitcher: dependencies.locationSwitcher)
         }

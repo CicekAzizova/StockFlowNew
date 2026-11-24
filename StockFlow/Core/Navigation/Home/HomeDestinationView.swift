@@ -21,8 +21,6 @@ struct HomeDestinationView: View {
                 path: $path,
                 canRestock: canRestock
             )
-        case .salesHistory:
-            SalesHistoryView(viewModel: dependencies.makeSalesHistoryViewModel())
         case .report:
             ReportView(
                 repository: dependencies.reportRepository,

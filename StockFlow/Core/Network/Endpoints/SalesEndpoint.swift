@@ -11,11 +11,9 @@ enum SalesEndpoint: Endpoint {
     
     case summary
     case daily(days: Int)
-    case recentSales(page: Int, limit: Int)
     case sellerSales(sellerId: Int, page: Int, limit: Int)
     case rangeSales(from: String, to: String, sellerId: Int?, page: Int, limit: Int)
     case totals(from: String, to: String, sellerId: Int?)
-    case createSale(CreateSaleRequest)
     case createCartSale(CreateCartSaleRequest)
     
     var path: String {
@@ -26,16 +24,16 @@ enum SalesEndpoint: Endpoint {
             "/sales/daily"
         case .totals:
             "/sales/totals"
-        case .recentSales, .createSale, .sellerSales, .rangeSales, .createCartSale:
+        case .sellerSales, .rangeSales, .createCartSale:
             "/sales"
         }
     }
     
     var method: HttpMethod {
         switch self {
-        case .createSale, .createCartSale:
+        case .createCartSale:
             return .post
-        case .summary, .daily, .recentSales, .sellerSales, .rangeSales, .totals:
+        case .summary, .daily, .sellerSales, .rangeSales, .totals:
             return .get
         }
     }
@@ -46,28 +44,20 @@ enum SalesEndpoint: Endpoint {
     
     var httpBody: (any Encodable)? {
         switch self {
-        case .createSale(let request):
-            return request
         case .createCartSale(let request):
             return request
-        case .summary, .daily, .recentSales, .sellerSales, .rangeSales, .totals:
+        case .summary, .daily, .sellerSales, .rangeSales, .totals:
             return nil
         }
     }
     
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .summary, .createSale, .createCartSale:
+        case .summary, .createCartSale:
             return nil
             
         case .daily(let days):
             return [URLQueryItem(name: "days", value: String(days))]
-            
-        case .recentSales(let page, let limit):
-            return [
-                URLQueryItem(name: "page", value: String(page)),
-                URLQueryItem(name: "limit", value: String(limit))
-            ]
             
         case .sellerSales(let sellerId, let page, let limit):
             return [

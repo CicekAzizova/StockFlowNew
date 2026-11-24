@@ -7,7 +7,6 @@
 
 enum HomeRoute: Hashable {
     case lowStock
-    case salesHistory
     case report
 
 }

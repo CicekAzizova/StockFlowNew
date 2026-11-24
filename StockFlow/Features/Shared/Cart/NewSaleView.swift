@@ -7,13 +7,19 @@
 
 import SwiftUI
 
-/// Yeni satış axını: səbət → skan/axtarış → ödəniş → tamamlandı.
+/// Yeni satış axını: skaner/səbət → ödəniş → tamamlandı.
 struct NewSaleView: View {
 
+    private enum Step {
+        case cart, scanner
+    }
+
     let dependencies: AppDependencies
+    /// Satış tamamlanıb ekran bağlananda çağırılır (tab bardan açılanda Satışlar tabına keçmək üçün).
+    private let onFinished: () -> Void
 
     @State private var cart = CartViewModel()
-    @State private var showsScanner = false
+    @State private var step: Step
     @State private var showsSearch = false
     @State private var showsPayment = false
     @State private var completed: CompletedSale?
@@ -29,25 +35,46 @@ struct NewSaleView: View {
         var id: Int { response.saleId }
     }
 
+    init(
+        dependencies: AppDependencies,
+        startsWithScanner: Bool = false,
+        onFinished: @escaping () -> Void = {}
+    ) {
+        self.dependencies = dependencies
+        self.onFinished = onFinished
+        _step = State(initialValue: startsWithScanner ? .scanner : .cart)
+    }
+
     var body: some View {
-        CartView(
-            viewModel: cart,
-            onScan: { showsScanner = true },
-            onSearch: { showsSearch = true },
-            onCheckout: { showsPayment = true }
-        )
-        .fullScreenCover(isPresented: $showsScanner) {
-            CartScannerSheet(viewModel: dependencies.makeCartScanViewModel(cart: cart))
-        }
-        .sheet(isPresented: $showsSearch) {
-            CartSearchSheet(viewModel: dependencies.makeCartSearchViewModel(cart: cart))
-        }
-        .fullScreenCover(isPresented: $showsPayment) {
-            paymentFlow
+        content
+            .toolbar(step == .scanner ? .hidden : .visible, for: .tabBar)
+            .sheet(isPresented: $showsSearch) {
+                CartSearchSheet(viewModel: dependencies.makeCartSearchViewModel(cart: cart))
+            }
+            .fullScreenCover(isPresented: $showsPayment) {
+                paymentFlow
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch step {
+        case .scanner:
+            CartScannerSheet(
+                viewModel: dependencies.makeCartScanViewModel(cart: cart),
+                onDone: { step = .cart }
+            )
+
+        case .cart:
+            CartView(
+                viewModel: cart,
+                onScan: { step = .scanner },
+                onSearch: { showsSearch = true },
+                onCheckout: { showsPayment = true }
+            )
         }
     }
 
-    
     /// Ödəniş və "tamamlandı" eyni pəncərədədir, arada səbət görünməsin.
     @ViewBuilder
     private var paymentFlow: some View {
@@ -61,8 +88,7 @@ struct NewSaleView: View {
                     showsPayment = false
                 },
                 onClose: {
-                    completed = nil
-                    showsPayment = false
+                    onFinished()
                     dismiss()
                 }
             )

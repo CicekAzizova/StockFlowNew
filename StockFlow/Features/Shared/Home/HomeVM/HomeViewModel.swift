@@ -41,7 +41,6 @@ final class HomeViewModel {
         do   {
             async let loadProducts: () = loadProducts()
             async let loadLowStock: () = loadLowStock()
-            async let loadRecentSales: () = loadRecentSales()
             async let loadSalesSummary: () = loadSalesSummary()
             async let loadAssociatesCount: () = loadAssociatesCount()
             async let loadDailySales: () = loadDailySales()
@@ -50,7 +49,6 @@ final class HomeViewModel {
             _ = try await (
                 loadProducts,
                 loadLowStock,
-                loadRecentSales,
                 loadSalesSummary,
                 loadAssociatesCount,
                 loadDailySales
@@ -72,10 +70,6 @@ final class HomeViewModel {
     
     func loadLowStock() async throws {
         try await productStore.loadLowStock(limit: 5)
-    }
-    
-    func loadRecentSales() async throws {
-        try await salesStore.loadRecentSales(limit: 5)
     }
     
     func loadSalesSummary() async throws {
@@ -110,9 +104,6 @@ final class HomeViewModel {
         Array(productStore.lowStockProducts.prefix(5))
     }
     
-    var recentSales: [SaleResponse] {
-        Array(salesStore.recentSales.prefix(5))
-    }
     
     var revenue: Double {
         salesStore.salesSummary?.totalSales ?? 0

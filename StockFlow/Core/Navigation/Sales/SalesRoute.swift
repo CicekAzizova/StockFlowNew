@@ -7,6 +7,5 @@
 
 enum SalesRoute: Hashable {
     case scanner
-    case history
     case detail(SaleResponse)
 }

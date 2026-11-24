@@ -28,17 +28,8 @@ struct ScanTabModifier: ViewModifier {
                     .padding(.bottom, 18)
             }
             .fullScreenCover(isPresented: $isPresented) {
-                NavigationStack {
-                    ScanProductView(viewModel: dependencies.makeScanProductViewModel())
-                        .toolbar {
-                            ToolbarItem(placement: .topBarLeading) {
-                                Button {
-                                    isPresented = false
-                                } label: {
-                                    Image(systemName: "xmark")
-                                }
-                            }
-                        }
+                NewSaleView(dependencies: dependencies, startsWithScanner: true) {
+                    selection = .sales
                 }
             }
     }

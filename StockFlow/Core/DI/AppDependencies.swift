@@ -289,11 +289,6 @@ final class AppDependencies {
         SellerDetailViewModel(repository: sellerRepository, salesRepository: salesRepository, associate: seller)
     }
     
-    @MainActor
-    func makeSellerSalesViewModel() -> SellerSalesViewModel {
-        SellerSalesViewModel(salesStore: salesStore)
-    }
-    
     func makeSalesViewModel(currentUser: User? = nil) -> SalesViewModel {
         let viewModel = SalesViewModel(repository: salesRepository, sellerRepository: sellerRepository)
         viewModel.currentUserId = currentUser?.id
@@ -304,21 +299,8 @@ final class AppDependencies {
     }
     
     @MainActor
-    func makeSalesHistoryViewModel() -> SalesHistoryViewModel {
-        SalesHistoryViewModel(salesStore: salesStore)
-    }
-    
-    @MainActor
     func makeLowStockViewModel() -> LowStockViewModel {
         LowStockViewModel(productStore: productsStore)
-    }
-    
-    @MainActor
-    func makeScanProductViewModel() -> ScanProductViewModel {
-        ScanProductViewModel(
-            productRepository: productRepository,
-            salesStore: salesStore, productsStore: productsStore
-        )
     }
     
     @MainActor
