@@ -52,7 +52,7 @@ struct CartDiscountSheet: View {
                 .foregroundStyle(Color.textPrimary)
 
             Picker("Type", selection: $kind) {
-                Text("Percent (%)").tag(Kind.percent)
+                Text("Percent").tag(Kind.percent)
                 Text("Amount").tag(Kind.amount)
             }
             .pickerStyle(.segmented)
