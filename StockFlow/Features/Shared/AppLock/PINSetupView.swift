@@ -26,7 +26,8 @@ struct PINSetupView: View {
 
     var body: some View {
         ZStack {
-            Color.background.ignoresSafeArea()
+            BrandHeaderBackground()
+                .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 header
@@ -39,7 +40,6 @@ struct PINSetupView: View {
             }
         }
     }
-
     // MARK: - Header (üç mərhələ üçün eyni gradient)
 
     private var header: some View {
@@ -87,7 +87,6 @@ struct PINSetupView: View {
         .padding(.top, 4)
         .padding(.bottom, 24)
         .frame(maxWidth: .infinity)
-        .brandHeaderBackground()
     }
 
     // MARK: - PIN yazma
@@ -95,30 +94,29 @@ struct PINSetupView: View {
     private var pinEntry: some View {
         VStack(spacing: 24) {
             Spacer()
-            
-            PINDotsView(filledCount: pin.count, tint: .brandTeal)
-            
-            if let errorMessage {
-                Text(errorMessage)
-                    .font(.footnote)
-                    .foregroundStyle(.red)
-                    .multilineTextAlignment(.center)
-            } else {
-                Text("You'll use this PIN every time you open the app")
-                    .font(.footnote)
-                    .foregroundStyle(.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
+
+            PINDotsView(filledCount: pin.count, tint: .white)
+
+            Group {
+                if let errorMessage {
+                    Text(errorMessage)
+                        .foregroundStyle(Color.brandCoral)
+                } else {
+                    Text("You'll use this PIN every time you open the app")
+                        .foregroundStyle(.white.opacity(0.8))
+                }
             }
+            .font(.footnote)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 24)
 
             Spacer()
 
-            PINPadView(onDigit: append, onDelete: deleteLast, onDark: false)
+            PINPadView(onDigit: append, onDelete: deleteLast)
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 16)
     }
-
     // MARK: - Face ID təklifi
 
     private var biometricActions: some View {
@@ -144,19 +142,29 @@ struct PINSetupView: View {
 
             Spacer()
 
-            AppButtonView(
-                title: "Enable Face ID",
-                isLoading: isSaving,
-                usesBrandGradient: true
-            ) {
+            Button {
                 Task { await enableFaceID() }
+            } label: {
+                Group {
+                    if isSaving {
+                        ProgressView().tint(Color.brandDark)
+                    } else {
+                        Text("Enable Face ID")
+                    }
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.brandDark)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(.white, in: Capsule())
             }
+            .disabled(isSaving)
 
             Button("Not now") {
                 savePIN(confirmedPIN, useBiometrics: false)
             }
-            .font(.inter(.bold, size: 15))
-            .foregroundStyle(.textSecondary)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.white.opacity(0.85))
             .padding(.vertical, 8)
             .disabled(isSaving)
         }
@@ -168,25 +176,25 @@ struct PINSetupView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundStyle(Color.brandTeal)
+                .foregroundStyle(.white)
                 .frame(width: 40, height: 40)
-                .background(Color.brandTeal.opacity(0.12))
+                .background(.white.opacity(0.18))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.inter(.bold, size: 15))
-                    .foregroundStyle(.textPrimary)
+                    .foregroundStyle(.white)
                 Text(text)
                     .font(.footnote)
-                    .foregroundStyle(.textSecondary)
+                    .foregroundStyle(.white.opacity(0.8))
             }
 
             Spacer(minLength: 0)
         }
         .padding(12)
         .frame(maxWidth: .infinity)
-        .background(.border)
+        .background(.white.opacity(0.12))
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
     // MARK: - Mətnlər
