@@ -29,7 +29,7 @@ final class KeychainService {
  
     private let service: String
 
-    init(service: String = Bundle.main.bundleIdentifier ?? "com.stockflow.app") {
+    init(service: String = Bundle.main.bundleIdentifier ?? "com.cicekazizova.trackshop") {
         self.service = service
     }
 

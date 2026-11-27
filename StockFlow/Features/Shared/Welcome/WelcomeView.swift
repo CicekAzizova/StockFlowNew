@@ -100,7 +100,7 @@ struct WelcomeView: View {
         HStack(spacing: 10) {
             BrandHeaderIcon(systemImage: "chart.line.uptrend.xyaxis")
 
-            Text(verbatim: "StockFlow")
+            Text(verbatim: AppInfo.name)
                 .font(.title3.bold())
                 .foregroundStyle(.white)
 

@@ -33,7 +33,7 @@ struct SplashView: View {
                     )
 
                 VStack(spacing: 6) {
-                    Text(verbatim: "StockFlow")
+                    Text(verbatim: AppInfo.name)
                         .font(.inter(.extraBold, size: 36))
                         .foregroundStyle(.white)
 

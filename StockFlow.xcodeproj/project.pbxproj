@@ -422,9 +422,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = StockFlow/Info.plist;
-				INFOPLIST_KEY_NSCameraUsageDescription = "StockFlow uses the camera to scan product barcodes.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "StockFlow uses Face ID to unlock the app quickly.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "StockFlow connects to your local backend server";
+				INFOPLIST_KEY_CFBundleDisplayName = TrackShop;
+				INFOPLIST_KEY_NSCameraUsageDescription = "TrackShop uses the camera to scan product barcodes.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "TrackShop uses Face ID to unlock the app quickly.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "TrackShop connects to your local backend server";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -435,7 +436,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cicekazizova.StockFlow;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cicekazizova.trackshop;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -458,9 +459,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = StockFlow/Info.plist;
-				INFOPLIST_KEY_NSCameraUsageDescription = "StockFlow uses the camera to scan product barcodes.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "StockFlow uses Face ID to unlock the app quickly.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "StockFlow connects to your local backend server";
+				INFOPLIST_KEY_CFBundleDisplayName = TrackShop;
+				INFOPLIST_KEY_NSCameraUsageDescription = "TrackShop uses the camera to scan product barcodes.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "TrackShop uses Face ID to unlock the app quickly.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "TrackShop connects to your local backend server";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -471,7 +473,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cicekazizova.StockFlow;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cicekazizova.trackshop;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

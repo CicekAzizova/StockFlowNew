@@ -106,14 +106,18 @@ final class AppLockManager {
     func unlockWithBiometrics() async ->  Bool {
         refreshLockout()
         guard isLocked, isBiometricsEnabled else { return false }
-        let success = await biometrics.authenticate(reason: "Unlock StockFlow")
+        let success = await biometrics.authenticate(
+            reason: String(localized: "Unlock \(AppInfo.name)")
+        )
         if success { isLocked = false }
         return success
     }
     
     func verifyBiometrics() async -> Bool {
         guard biometrics.isAvailable else { return false }
-        return await biometrics.authenticate(reason: "Enable Face ID for StockFlow")
+        return await biometrics.authenticate(
+            reason: String(localized: "Enable Face ID for \(AppInfo.name)")
+        )
     }
 
     func enableBiometrics() async {

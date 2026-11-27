@@ -61,8 +61,7 @@ struct LockView: View {
     private var logo: some View {
         HStack(spacing: 8) {
             Image(systemName: "chart.bar.fill")
-            Text(verbatim: "StockFlow")
-                .font(.subheadline.weight(.semibold))
+            Text(verbatim: AppInfo.name)      .font(.subheadline.weight(.semibold))
         }
         .foregroundStyle(.white.opacity(0.9))
         .frame(maxWidth: .infinity, alignment: .leading)
