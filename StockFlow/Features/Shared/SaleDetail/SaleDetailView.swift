@@ -8,9 +8,27 @@ import SwiftUI
 
 struct SaleDetailView: View {
 
-    let sale: SaleResponse
-    var locationSwitcher: LocationSwitcher? = nil
+    @State private var sale: SaleResponse
+    private let repository: SalesRepository?
+    private let canReturn: Bool
+    private let productsStore: ProductsStore?
+    private let locationSwitcher: LocationSwitcher?
 
+    @State private var showsReturn = false
+
+    init(
+        sale: SaleResponse,
+        repository: SalesRepository? = nil,
+        canReturn: Bool = false,
+        locationSwitcher: LocationSwitcher? = nil,
+        productsStore: ProductsStore? = nil
+    ) {
+        _sale = State(initialValue: sale)
+        self.repository = repository
+        self.canReturn = canReturn
+        self.locationSwitcher = locationSwitcher
+        self.productsStore = productsStore
+    }
     /// Məkan yalnız mağazada 1-dən çox məkan olanda göstərilir.
     /// Owner-də mağazada tək məkan varsa gizlədilir. Satıcıda siyahı gəlmir, məkan həmişə göstərilir.
     private var showsLocation: Bool {
@@ -49,6 +67,20 @@ struct SaleDetailView: View {
                 await locationSwitcher.load()
             }
         }
+        .sheet(isPresented: $showsReturn) {
+            if let repository {
+                ReturnView(
+                    viewModel: ReturnViewModel(
+                        repository: repository,
+                        sale: sale,
+                        productsStore: productsStore
+                    )
+                ) {
+                    Task { await reload() }
+                    NotificationCenter.default.post(name: .saleChanged, object: nil)
+                }
+            }
+        }
     }
     // MARK: - Header
 
@@ -84,6 +116,14 @@ struct SaleDetailView: View {
         lines.append("\(String(localized: "Total")): \(sale.totalPrice.asCurrency)")
         return lines.joined(separator: "\n")
     }
+    
+    /// Qaytarmadan sonra qəbzi serverdən yenidən oxuyur.
+    private func reload() async {
+        guard let repository else { return }
+        if let fresh = try? await repository.getSale(id: sale.id) {
+            sale = fresh
+        }
+    }
 
     // MARK: - Qəbz kartı
 
@@ -91,13 +131,19 @@ struct SaleDetailView: View {
         VStack(spacing: 12) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(verbatim: sale.totalPrice.asCurrency)
+                    Text(verbatim: sale.netTotal.asCurrency)
                         .font(.title2.weight(.bold))
                         .foregroundStyle(Color.textPrimary)
 
                     Text(verbatim: dateText)
                         .font(.caption)
                         .foregroundStyle(Color.textSecondary)
+
+                    if sale.isReturned {
+                        Text("Returned: \(sale.returnedAmount.asCurrency)")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.brandCoral)
+                    }
                 }
 
                 Spacer()
@@ -113,38 +159,56 @@ struct SaleDetailView: View {
 
             DashedLine()
 
-            VStack(spacing: 10) {
-                if let items = sale.items, !items.isEmpty {
-                    ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                        itemRow(item)
-                    }
-                }
-            }
-
-            DashedLine()
-
             HStack {
                 Text("Total")
                     .font(.subheadline.weight(.semibold))
                 Spacer()
-                Text(verbatim: sale.totalPrice.asCurrency)
+                Text(verbatim: sale.netTotal.asCurrency)
                     .font(.title3.weight(.bold))
             }
             .foregroundStyle(Color.textPrimary)
+
+            if let payments = sale.payments, payments.count > 1 {
+                DashedLine()
+
+                VStack(spacing: 6) {
+                    ForEach(payments, id: \.method) { payment in
+                        HStack {
+                            Text(payment.paymentMethod.title)
+                                .foregroundStyle(Color.textSecondary)
+                            Spacer()
+                            Text(verbatim: payment.amount.asCurrency)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(Color.textPrimary)
+                        }
+                        .font(.subheadline)
+                    }
+                }
+            }
         }
         .brandCard()
     }
 
     private func itemRow(_ item: SaleItemResponse) -> some View {
-        HStack {
-            HStack(spacing: 4) {
-                Text(verbatim: item.productName)
-                    .foregroundStyle(Color.textPrimary)
-                Text(verbatim: "×\(item.quantity)")
-                    .font(.caption)
-                    .foregroundStyle(Color.textSecondary)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Text(verbatim: item.productName)
+                        .foregroundStyle(Color.textPrimary)
+                    Text(verbatim: "×\(item.quantity)")
+                        .font(.caption)
+                        .foregroundStyle(Color.textSecondary)
+                }
+                .lineLimit(1)
+
+                Label {
+                    Text(verbatim: item.sku)
+                } icon: {
+                    Image(systemName: "barcode")
+                }
+                .font(.caption2)
+                .foregroundStyle(Color.textSecondary)
             }
-            .lineLimit(1)
 
             Spacer(minLength: 8)
 
@@ -154,7 +218,6 @@ struct SaleDetailView: View {
         }
         .font(.subheadline)
     }
-
     // MARK: - Kiçik kartlar
 
     private var infoTiles: some View {
@@ -209,24 +272,29 @@ struct SaleDetailView: View {
 
     // MARK: - Qaytarma
 
-    /// Refund hələ hazır deyil, düymə deaktivdir. Hazır olanda `action` doldurulacaq.
+    @ViewBuilder
     private var refundButton: some View {
-        Button {
-            // TODO: qaytarma axını
-        } label: {
-            Label("Return", systemImage: "arrow.uturn.backward")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Color.brandCoral)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(Color.surface, in: Capsule())
-                .overlay(Capsule().stroke(Color.brandCoral.opacity(0.3)))
+        if canReturn, canReturnSomething {
+            Button {
+                showsReturn = true
+            } label: {
+                Label("Return", systemImage: "arrow.uturn.backward")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.brandCoral)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.surface, in: Capsule())
+                    .overlay(Capsule().stroke(Color.brandCoral.opacity(0.3)))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color.background)
         }
-        .disabled(true)
-        .opacity(0.5)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color.background)
+    }
+
+    /// Qaytarılacaq ədəd qalıbmı.
+    private var canReturnSomething: Bool {
+        (sale.items ?? []).contains { $0.returnableQuantity > 0 }
     }
 }
 

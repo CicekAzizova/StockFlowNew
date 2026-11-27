@@ -12,9 +12,11 @@ enum SalesEndpoint: Endpoint {
     case summary
     case daily(days: Int)
     case sellerSales(sellerId: Int, page: Int, limit: Int)
-    case rangeSales(from: String, to: String, sellerId: Int?, page: Int, limit: Int)
-    case totals(from: String, to: String, sellerId: Int?)
+    case rangeSales(from: String, to: String, filter: SalesFilter, page: Int, limit: Int)
+    case totals(from: String, to: String, filter: SalesFilter)
     case createCartSale(CreateCartSaleRequest)
+    case createReturn(saleId: Int, request: CreateReturnRequest)
+    case sale(id: Int)
     
     var path: String {
         switch self {
@@ -26,14 +28,18 @@ enum SalesEndpoint: Endpoint {
             "/sales/totals"
         case .sellerSales, .rangeSales, .createCartSale:
             "/sales"
+        case .createReturn(let saleId, _):
+            "/sales/\(saleId)/returns"
+        case .sale(let id):
+            "/sales/\(id)"
         }
     }
     
     var method: HttpMethod {
         switch self {
-        case .createCartSale:
+        case .createCartSale, .createReturn:
             return .post
-        case .summary, .daily, .sellerSales, .rangeSales, .totals:
+        case .summary, .daily, .sellerSales, .rangeSales, .totals, .sale:
             return .get
         }
     }
@@ -46,14 +52,16 @@ enum SalesEndpoint: Endpoint {
         switch self {
         case .createCartSale(let request):
             return request
-        case .summary, .daily, .sellerSales, .rangeSales, .totals:
+        case .createReturn(_, let request):
+            return request
+        case .summary, .daily, .sellerSales, .rangeSales, .totals, .sale:
             return nil
         }
     }
     
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .summary, .createCartSale:
+        case .summary, .createCartSale, .createReturn, .sale:
             return nil
             
         case .daily(let days):
@@ -66,27 +74,19 @@ enum SalesEndpoint: Endpoint {
                 URLQueryItem(name: "limit", value: String(limit))
             ]
             
-        case .rangeSales(let from, let to, let sellerId, let page, let limit):
-            var items = [
+        case .rangeSales(let from, let to, let filter, let page, let limit):
+            return [
                 URLQueryItem(name: "from", value: from),
                 URLQueryItem(name: "to", value: to),
                 URLQueryItem(name: "page", value: String(page)),
                 URLQueryItem(name: "limit", value: String(limit))
-            ]
-            if let sellerId {
-                items.append(URLQueryItem(name: "seller_id", value: String(sellerId)))
-            }
-            return items
-            
-        case .totals(let from, let to, let sellerId):
-            var items = [
+            ] + filter.queryItems
+
+        case .totals(let from, let to, let filter):
+            return [
                 URLQueryItem(name: "from", value: from),
                 URLQueryItem(name: "to", value: to)
-            ]
-            if let sellerId {
-                items.append(URLQueryItem(name: "seller_id", value: String(sellerId)))
-            }
-            return items
+            ] + filter.queryItems
         }
     }
 }

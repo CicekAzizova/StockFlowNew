@@ -289,8 +289,13 @@ final class AppDependencies {
         SellerDetailViewModel(repository: sellerRepository, salesRepository: salesRepository, associate: seller)
     }
     
+    @MainActor
     func makeSalesViewModel(currentUser: User? = nil) -> SalesViewModel {
-        let viewModel = SalesViewModel(repository: salesRepository, sellerRepository: sellerRepository)
+        let viewModel = SalesViewModel(
+            repository: salesRepository,
+            sellerRepository: sellerRepository,
+            locationSwitcher: locationSwitcher
+        )
         viewModel.currentUserId = currentUser?.id
         viewModel.currentUserName = [currentUser?.name, currentUser?.surname]
             .compactMap { $0 }
@@ -316,5 +321,10 @@ final class AppDependencies {
     @MainActor
     func makePaymentViewModel(cart: CartViewModel) -> PaymentViewModel {
         PaymentViewModel(salesStore: salesStore, productsStore: productsStore, cart: cart)
+    }
+    
+    @MainActor
+    func makeReturnViewModel(sale: SaleResponse) -> ReturnViewModel {
+        ReturnViewModel(repository: salesRepository, sale: sale)
     }
 }

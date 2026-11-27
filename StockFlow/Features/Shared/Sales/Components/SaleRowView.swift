@@ -11,6 +11,8 @@ import SwiftUI
 struct SaleRowView: View {
 
     let sale: SaleResponse
+    
+    var showsLocation = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -69,19 +71,34 @@ struct SaleRowView: View {
     private var subtitle: some View {
         let time = sale.createdAt.formatted(date: .omitted, time: .shortened)
         let seller = sale.sellerName ?? "-"
+        var prefix = "\(time) · \(seller)"
+        if showsLocation, let location = sale.locationName {
+            prefix += " · \(location)"
+        }
+
         return HStack(spacing: 0) {
-            Text(verbatim: "\(time) · \(seller) · ")
+            Text(verbatim: "\(prefix) · ")
             Text("\(sale.itemsCount) items")
         }
     }
 
     private var paymentBadge: some View {
-        Text(sale.paymentMethod.title)
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(Color.brandGreen)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(Color.brandGreen.opacity(0.12), in: Capsule())
+        VStack {
+            Text(sale.paymentMethod.title)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(Color.brandGreen)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color.brandGreen.opacity(0.12), in: Capsule())
+            if sale.isReturned {
+                Text("Returned")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(Color.brandCoral)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.brandCoral.opacity(0.12), in: Capsule())
+            }
+        }
     }
     
     /// Qəbz nömrəsi yoxdursa (köhnə satışlar), satış id-si göstərilir.

@@ -18,6 +18,19 @@ struct SalesDayGroup: Identifiable {
     var id: Date { day }
 }
 
+enum SalesViewState {
+    case idle
+    case loading
+    case loaded([SalesDayGroup])
+    case empty
+    case error(String)
+
+    var isLoaded: Bool {
+        if case .loaded = self { return true }
+        return false
+    }
+}
+
 /// Süzgəc menyusundakı bir seçim.
 struct SalesSellerOption: Identifiable {
     let id: Int
@@ -30,13 +43,20 @@ final class SalesViewModel {
 
     private let repository: SalesRepository
     private let sellerRepository: SellerRepository?
+    private let locationSwitcher: LocationSwitcher?
+
+    /// Süzgəc pəncərəsi üçün məkanlar (tək məkan varsa göstərilmir).
+    var locations: [StoreLocation] {
+        locationSwitcher?.locations ?? []
+    }
+    
     private let pageSize = 20
 
     var period: SalesPeriod = .today
     var customFrom = Date.now
     var customTo = Date.now
-    /// Yalnız owner üçün: nil = bütün satıcılar.
-    var sellerId: Int?
+    /// Satıcı, məkan və ödəniş növü süzgəcləri.
+    var filter = SalesFilter()
 
     /// Cari istifadəçi (owner), menyuda ən yuxarıda göstərilir.
     var currentUserId: Int?
@@ -47,16 +67,19 @@ final class SalesViewModel {
 
     private(set) var totals: SalesTotalsResponse?
     private(set) var sales: [SaleResponse] = []
-    private(set) var isLoading = false
     private(set) var isLoadingMore = false
-    private(set) var errorMessage: String?
-
+    private(set) var state: SalesViewState = .idle
     private var page = 1
     private var hasMore = true
 
-    init(repository: SalesRepository, sellerRepository: SellerRepository? = nil) {
+    init(
+        repository: SalesRepository,
+        sellerRepository: SellerRepository? = nil,
+        locationSwitcher: LocationSwitcher? = nil
+    ) {
         self.repository = repository
         self.sellerRepository = sellerRepository
+        self.locationSwitcher = locationSwitcher
     }
 
     // MARK: - Dövr
@@ -92,52 +115,60 @@ final class SalesViewModel {
     }
 
     // MARK: - Yükləmə
-
+    
     func load() async {
-        isLoading = true
-        errorMessage = nil
+        // Yenilənmə zamanı siyahı yerində qalsın, yalnız ilk yükləmədə spinner olsun.
+        if !state.isLoaded {
+            state = .loading
+        }
         page = 1
         hasMore = true
 
         let days = rangeStrings
         do {
             async let totalsTask = repository.getSalesTotals(
-                from: days.from, to: days.to, sellerId: sellerId
+                from: days.from, to: days.to, filter: filter
             )
             async let pageTask = repository.getSalesInRange(
-                from: days.from, to: days.to, sellerId: sellerId, page: 1, limit: pageSize
+                from: days.from, to: days.to, filter: filter, page: 1, limit: pageSize
             )
             let (newTotals, firstPage) = try await (totalsTask, pageTask)
             totals = newTotals
             sales = firstPage.items
             hasMore = firstPage.hasNext
+            state = sales.isEmpty ? .empty : .loaded(groups)
         } catch is CancellationError {
             // dövr dəyişdi, yeni sorğu gəlir
         } catch {
-            errorMessage = error.localizedDescription
+            state = .error(error.localizedDescription)
         }
-        isLoading = false
     }
 
     func loadMore() async {
-        guard hasMore, !isLoading, !isLoadingMore else { return }
+        guard hasMore, state.isLoaded, !isLoadingMore else { return }
         isLoadingMore = true
         defer { isLoadingMore = false }
 
         let days = rangeStrings
         do {
             let next = try await repository.getSalesInRange(
-                from: days.from, to: days.to, sellerId: sellerId, page: page + 1, limit: pageSize
+                from: days.from, to: days.to, filter: filter, page: page + 1, limit: pageSize
             )
             page += 1
             sales += next.items
             hasMore = next.hasNext
+            state = .loaded(groups)
         } catch {
             // növbəti səhifə yüklənmədi, siyahı olduğu kimi qalır
         }
     }
+    
+    /// Süzgəc pəncərəsinin məlumatları: komanda siyahısı və məkanlar.
+    func loadFilterData() async {
+        if let locationSwitcher, locationSwitcher.locations.isEmpty {
+            await locationSwitcher.load()
+        }
 
-    func loadSellers() async {
         guard let sellerRepository, let currentUserId else { return }
         do {
             let team = try await sellerRepository.getSellers()
@@ -153,7 +184,7 @@ final class SalesViewModel {
     // MARK: - Qruplaşdırma və müqayisə
 
     /// Satışlar günlərə görə, yeni günlər yuxarıda.
-    var groups: [SalesDayGroup] {
+   private var groups: [SalesDayGroup] {
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: sales) { calendar.startOfDay(for: $0.createdAt) }
         return grouped.keys.sorted(by: >).map { SalesDayGroup(day: $0, sales: grouped[$0] ?? []) }

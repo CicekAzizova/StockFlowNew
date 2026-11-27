@@ -55,7 +55,7 @@ struct OwnerTabView: View {
                             )
                         }
                         .navigationDestination(for: SalesRoute.self) { route in
-                            SalesDestinationView(route: route, dependencies: dependencies)
+                            SalesDestinationView(route: route, dependencies: dependencies, canReturn: true)
                         }
                     }
                 }
@@ -111,11 +111,11 @@ struct OwnerTabView: View {
                 NavigationStack(path: $salesPath) {
                     SalesView(
                         viewModel: dependencies.makeSalesViewModel(currentUser: user),
-                        path: $salesPath,
+                        path: $salesPath, dependencies: dependencies,
                         canFilterBySeller: true
                     )
                         .navigationDestination(for: SalesRoute.self) { route in
-                            SalesDestinationView(route: route, dependencies: dependencies)
+                            SalesDestinationView(route: route, dependencies: dependencies, canReturn: true)
                         }
                 }
                 .id(languageManager.language)
@@ -147,7 +147,7 @@ struct OwnerTabView: View {
                         TeamDestinationView(route: route, dependencies: dependencies, path: $profilePath)
                     }
                     .navigationDestination(for: SalesRoute.self) { route in
-                        SalesDestinationView(route: route, dependencies: dependencies)
+                        SalesDestinationView(route: route, dependencies: dependencies, canReturn: true)
                     }
                     
                 }

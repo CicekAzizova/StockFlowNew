@@ -15,3 +15,8 @@ extension Notification.Name {
     static let activeLocationChanged = Notification.Name("activeLocationChanged")
     static let locationsChanged = Notification.Name("locationsChanged")
 }
+
+extension Notification.Name {
+    /// Qaytarmadan sonra satış siyahısı yenilənsin.
+    static let saleChanged = Notification.Name("saleChanged")
+}

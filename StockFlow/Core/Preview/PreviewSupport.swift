@@ -179,17 +179,25 @@ struct PreviewReportRepository: ReportRepository {
     }
 }
 struct PreviewSalesRepository: SalesRepository {
+    func getSale(id: Int) async throws -> SaleResponse {
+        PreviewData.sale(
+            id: 1,
+            name: "test",
+            quantity: 3,
+            unitPrice: 30
+        )
+    }
+    
+    
+    func createReturn(saleId: Int, request: CreateReturnRequest) async throws -> SaleReturnResponse {
+        SaleReturnResponse(id: 1, saleId: saleId, totalAmount: 0, restocked: request.restock)
+    }
+    
     func createCartSale(_ request: CreateCartSaleRequest) async throws -> CreateSaleResponse {
         throw PreviewError.failed
     }
     
-    func getSalesInRange(
-        from: String,
-        to: String,
-        sellerId: Int?,
-        page: Int,
-        limit: Int
-    ) async throws -> PaginationResponse<SaleResponse> {
+    func getSalesInRange(from: String, to: String, filter: SalesFilter, page: Int, limit: Int) async throws -> PaginationResponse<SaleResponse>  {
         if fails { throw PreviewError.failed }
         if empty { return PreviewData.page([]) }
         return PreviewData.page([
@@ -199,7 +207,7 @@ struct PreviewSalesRepository: SalesRepository {
         ])
     }
 
-    func getSalesTotals(from: String, to: String, sellerId: Int?) async throws -> SalesTotalsResponse {
+    func getSalesTotals(from: String, to: String, filter: SalesFilter) async throws -> SalesTotalsResponse {
         if fails { throw PreviewError.failed }
         return SalesTotalsResponse(
             from: from,

@@ -102,7 +102,7 @@ struct SellerTabView: View {
             //MARK: - Sales
             Tab(value: MainTab.sales) {
                 NavigationStack(path: $salesPath) {
-                    SalesView(viewModel: dependencies.makeSalesViewModel(), path: $salesPath)
+                    SalesView(viewModel: dependencies.makeSalesViewModel(), path: $salesPath, dependencies: dependencies)
                         .navigationDestination(for: SalesRoute.self) { route in
                             SalesDestinationView(route: route, dependencies: dependencies)
                         }

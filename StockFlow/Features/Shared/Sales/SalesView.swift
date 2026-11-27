@@ -9,19 +9,33 @@ import SwiftUI
 
 struct SalesView: View {
 
+    let dependencies: AppDependencies
+
     @State private var viewModel: SalesViewModel
     @Binding var path: NavigationPath
     @State private var showsDateSheet = false
+    @State private var showsFilter = false
+    @State private var showsNewSale = false
     var canFilterBySeller = false
 
-    init(viewModel: SalesViewModel, path: Binding<NavigationPath>, canFilterBySeller: Bool = false) {
+    init(
+        viewModel: SalesViewModel,
+        path: Binding<NavigationPath>,
+        dependencies: AppDependencies,
+        canFilterBySeller: Bool = false
+    ) {
         _viewModel = State(initialValue: viewModel)
         _path = path
+        self.dependencies = dependencies
         self.canFilterBySeller = canFilterBySeller
     }
 
     private var taskId: String {
-        "\(viewModel.period)-\(viewModel.customFrom)-\(viewModel.customTo)-\(viewModel.sellerId ?? 0)"
+        let filter = viewModel.filter
+        return """
+        \(viewModel.period)-\(viewModel.customFrom)-\(viewModel.customTo)\
+        -\(filter.sellerId ?? 0)-\(filter.locationId ?? 0)-\(filter.paymentMethod?.rawValue ?? "")
+        """
     }
 
     var body: some View {
@@ -59,12 +73,27 @@ struct SalesView: View {
                 viewModel.customTo = to
             }
         }
+        .fullScreenCover(isPresented: $showsNewSale) {
+            NewSaleView(dependencies: dependencies)
+        }
         .task(id: taskId) {
             await viewModel.load()
         }
+        //NotificationCenter -den xeber gelende ise dusur
+        .onReceive(NotificationCenter.default.publisher(for: .saleChanged)) { _ in
+            Task { await viewModel.load() }
+        }
         .task {
-            if canFilterBySeller {
-                await viewModel.loadSellers()
+            await viewModel.loadFilterData()
+        }
+        .sheet(isPresented: $showsFilter) {
+            SalesFilterSheet(
+                filter: viewModel.filter,
+                sellers: viewModel.sellers,
+                locations: viewModel.locations,
+                showsSellers: canFilterBySeller
+            ) { newFilter in
+                viewModel.filter = newFilter
             }
         }
     }
@@ -74,13 +103,7 @@ struct SalesView: View {
     private var header: some View {
         VStack(spacing: 12) {
             BrandScreenHeader(title: "Sales") {
-                EmptyView()
-            }
-            
-            if canFilterBySeller, viewModel.sellers.count > 1 {
-                sellerMenu
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
+                filterButton
             }
 
             SalesPeriodPicker(selection: $viewModel.period) {
@@ -94,44 +117,23 @@ struct SalesView: View {
         .brandHeaderBackground()
     }
     
-    private var sellerMenu: some View {
-        Menu {
-            Button {
-                viewModel.sellerId = nil
-            } label: {
-                Text("All sellers")
-            }
-
-            ForEach(viewModel.sellers) { seller in
-                Button {
-                    viewModel.sellerId = seller.id
-                } label: {
-                    Text(verbatim: seller.name)
-                }
-            }
+    private var filterButton: some View {
+        Button {
+            showsFilter = true
         } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "person.2")
-                selectedSellerTitle
-                Image(systemName: "chevron.down")
-                    .font(.caption2)
-            }
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.white)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background(Capsule().fill(.white.opacity(0.15)))
+            BrandHeaderIcon(systemImage: "line.3.horizontal.decrease")
+                .overlay(alignment: .topTrailing) {
+                    if viewModel.filter.activeCount > 0 {
+                        Text(verbatim: "\(viewModel.filter.activeCount)")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(Color.brandDark)
+                            .frame(width: 16, height: 16)
+                            .background(.white, in: Circle())
+                            .offset(x: 4, y: -4)
+                    }
+                }
         }
-    }
-
-    @ViewBuilder
-    private var selectedSellerTitle: some View {
-        if let id = viewModel.sellerId,
-           let seller = viewModel.sellers.first(where: { $0.id == id }) {
-            Text(verbatim: seller.name)
-        } else {
-            Text("All sellers")
-        }
+        .accessibilityLabel("Filter")
     }
 
     // MARK: - Məzmun
@@ -139,42 +141,44 @@ struct SalesView: View {
     @ViewBuilder
     private var content: some View {
         VStack(spacing: 12) {
-
             if let payments = viewModel.totals?.byPayment, !payments.isEmpty {
                 SalesPaymentsCard(payments: payments)
             }
-            
-            if let message = viewModel.errorMessage {
-                ContentUnavailableView(
-                    "Something went wrong",
-                    systemImage: "exclamationmark.triangle",
-                    description: Text(message)
-                )
-            } else if viewModel.isLoading && viewModel.sales.isEmpty {
+
+            switch viewModel.state {
+            case .idle, .loading:
                 ProgressView()
                     .padding(.top, 40)
-            } else if viewModel.sales.isEmpty {
+
+            case .loaded(let groups):
+                salesList(groups)
+
+            case .empty:
                 ContentUnavailableView(
                     "No sales",
                     systemImage: "receipt",
                     description: Text("No sales in this period")
                 )
-            } else {
-                salesList
+
+            case .error(let message):
+                ContentUnavailableView(
+                    "Something went wrong",
+                    systemImage: "exclamationmark.triangle",
+                    description: Text(message)
+                )
             }
         }
     }
-
-    private var salesList: some View {
+    private func salesList(_ groups: [SalesDayGroup]) -> some View {
         LazyVStack(spacing: 10) {
-            ForEach(viewModel.groups) { group in
+            ForEach(groups) { group in
                 SalesDayHeader(day: group.day)
 
                 ForEach(group.sales, id: \.id) { sale in
                     Button {
                         path.append(SalesRoute.detail(sale))
                     } label: {
-                        SaleRowView(sale: sale)
+                        SaleRowView(sale: sale, showsLocation: viewModel.locations.count > 1)
                     }
                     .buttonStyle(.plain)
                     .task {
@@ -182,6 +186,7 @@ struct SalesView: View {
                             await viewModel.loadMore()
                         }
                     }
+                    
                 }
             }
 
@@ -195,7 +200,7 @@ struct SalesView: View {
 
     private var newSaleButton: some View {
         Button {
-            path.append(SalesRoute.scanner)
+            showsNewSale = true
         } label: {
             Label("New sale", systemImage: "plus")
                 .font(.subheadline.weight(.semibold))
