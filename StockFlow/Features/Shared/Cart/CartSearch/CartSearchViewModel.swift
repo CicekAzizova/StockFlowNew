@@ -47,7 +47,8 @@ final class CartSearchViewModel {
                 page: 1,
                 limit: 30,
                 query: text.isEmpty ? nil : text,
-                stock: nil
+                stock: nil,
+                filter: ProductFilter(forSale: true, sort: .name)
             )
             state = page.items.isEmpty ? .empty : .loaded(page.items)
         } catch is CancellationError {

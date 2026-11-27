@@ -76,7 +76,9 @@ struct OwnerTabView: View {
                     ProductsView(
                         viewModel: dependencies.makeProductViewModel(),
                         path: $productPath,
-                        canManageProducts: true
+                        canManageProducts: true,
+                        mainCategories: user?.mainCategories ?? []
+                        
                     )
                     .navigationDestination(
                         for: ProductRoute.self

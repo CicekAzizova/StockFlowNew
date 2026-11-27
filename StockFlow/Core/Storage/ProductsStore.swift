@@ -21,6 +21,7 @@ final class ProductsStore {
     private var isLoadingMoreProducts = false
     private var currentQuery: String?
     private var currentStock: String?
+    private var currentFilter = ProductFilter()
     var totalProducts = 0
     
     private var productsPageSize = 10
@@ -64,13 +65,19 @@ final class ProductsStore {
         stats = try? await productRepository.getProductStats()
     }
     
-    func loadProducts(limit: Int = 10, query: String? = nil, stock: String? = nil) async throws {
+    func loadProducts(
+        limit: Int = 10,
+        query: String? = nil,
+        stock: String? = nil,
+        filter: ProductFilter = ProductFilter()
+        ) async throws {
         isLoading = true
         productsPageSize = limit
         currentProductPage = 1
         hasMoreProducts = true
         currentQuery = query
         currentStock = stock
+        currentFilter = filter
 
         defer {
             isLoading = false
@@ -79,7 +86,8 @@ final class ProductsStore {
             page: currentProductPage,
             limit: limit,
             query: query,
-            stock: stock
+            stock: stock,
+            filter: filter
         )
 
         products = response.items
@@ -103,7 +111,8 @@ final class ProductsStore {
             page: nextPage,
             limit: productsPageSize,
             query: currentQuery,
-            stock: currentStock
+            stock: currentStock,
+            filter: currentFilter
         )
         
         currentProductPage = response.page

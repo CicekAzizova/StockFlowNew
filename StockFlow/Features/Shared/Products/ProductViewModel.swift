@@ -16,6 +16,8 @@ final class ProductViewModel {
     
     private static let filterKey = "products.selectedFilter"
     
+    var filter = ProductFilter()
+    
     var state: ProductsViewState = .idle
     
     var query: String = ""
@@ -61,7 +63,7 @@ final class ProductViewModel {
 
     /// Axtarış və ya çip dəyişibmi bilmək üçün.
     var searchKey: String {
-        "\(query)|\(selectedFilter.rawValue)"
+        "\(query)|\(selectedFilter.rawValue)|\(filter.subcategory ?? "")|\(filter.forSale.map(String.init) ?? "")|\(filter.sort.rawValue)"
     }
     
     func loadProducts() async {
@@ -76,7 +78,8 @@ final class ProductViewModel {
             try await productStore.loadProducts(
                 limit: 10,
                 query: query.trimmingCharacters(in: .whitespaces),
-                stock: selectedFilter.apiValue
+                stock: selectedFilter.apiValue,
+                filter: filter
             )
             state = .loaded(allProducts)
         }

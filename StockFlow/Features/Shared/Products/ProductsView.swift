@@ -12,16 +12,20 @@ struct ProductsView: View {
     @Environment(CatalogStore.self) private var catalogStore
     @State private var isScannerPresented = false
     @State private var notFoundSku: String?
+    @State private var showsFilter = false
     let canManageProducts: Bool
-    
+    let mainCategories: [String]
+
     init(
         viewModel: ProductViewModel,
         path: Binding<NavigationPath>,
-        canManageProducts: Bool = false
+        canManageProducts: Bool = false,
+        mainCategories: [String] = []
     ) {
         _viewModel = State(initialValue: viewModel)
         _path = path
         self.canManageProducts = canManageProducts
+        self.mainCategories = mainCategories
     }
     
     private var emptyDescription: LocalizedStringKey {
@@ -104,8 +108,10 @@ struct ProductsView: View {
                     onScan: {
                         isScannerPresented = true
 
+                    },
+                    activeFilterCount:  viewModel.filter.activeCount) {
+                        showsFilter = true
                     }
-                )
 
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -139,6 +145,15 @@ struct ProductsView: View {
         .toolbar(.hidden, for: .navigationBar)
         .fullScreenCover(isPresented: $isScannerPresented) {
             scannerSheet
+        }
+        .sheet(isPresented: $showsFilter) {
+            ProductFilterSheet(
+                filter: viewModel.filter,
+                mainCategories: mainCategories
+            ) { newFilter in
+                viewModel.filter = newFilter
+                Task { await viewModel.loadProducts() }
+            }
         }
         .alert(
             "Product not found",

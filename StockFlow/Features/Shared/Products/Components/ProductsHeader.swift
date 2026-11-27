@@ -14,6 +14,8 @@ struct ProductsHeader: View {
     @Binding var filter: ProductStockFilter
     let stats: ProductStats?
     let onScan: () -> Void
+    let activeFilterCount: Int
+    let onFilter: () -> Void
     
 
     var body: some View {
@@ -44,6 +46,26 @@ struct ProductsHeader: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
                 .accessibilityLabel("Scan barcode")
+                
+                Button(action: onFilter) {
+                    Image(systemName: "line.3.horizontal.decrease")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundStyle(Color.brandTeal)
+                        .frame(width: 44, height: 44)
+                        .background(Color.surface)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(alignment: .topTrailing) {
+                            if activeFilterCount > 0 {
+                                Text(verbatim: "\(activeFilterCount)")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 16, height: 16)
+                                    .background(Color.brandGreen, in: Circle())
+                                    .offset(x: 5, y: -5)
+                            }
+                        }
+                }
+                .accessibilityLabel("Filter")
                 
             }
             StockFilterChips(selected: $filter, stats: stats)

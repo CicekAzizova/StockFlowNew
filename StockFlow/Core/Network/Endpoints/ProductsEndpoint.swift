@@ -10,7 +10,7 @@ import Foundation
 enum ProductsEndpoint: Endpoint {
     
     case createProduct(ProductRequest)
-    case getProducts(page: Int, limit: Int, query: String?, stock: String?)
+    case getProducts(page: Int, limit: Int, query: String?, stock: String?, filter: ProductFilter)
     case getLowStockProducts(page: Int, limit: Int)
     case productBySku(String)
     case editProduct(id: Int, request: ProductRequest)
@@ -86,7 +86,7 @@ enum ProductsEndpoint: Endpoint {
     
     var queryItems: [URLQueryItem]? {
         switch self {
-        case .getProducts(let page, let limit, let query, let stock):
+        case .getProducts(let page, let limit, let query, let stock, let filter):
             var items = [
                 URLQueryItem(name: "page", value: String(page)),
                 URLQueryItem(name: "limit", value: String(limit))
@@ -97,7 +97,7 @@ enum ProductsEndpoint: Endpoint {
             if let stock {
                 items.append(URLQueryItem(name: "stock", value: stock))
             }
-            return items
+            return items + filter.queryItems
             
         case .getLowStockProducts(let page, let limit):
             return [

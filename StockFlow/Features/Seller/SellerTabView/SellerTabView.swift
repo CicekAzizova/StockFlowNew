@@ -74,7 +74,8 @@ struct SellerTabView: View {
                 NavigationStack(path: $productPath) {
                     ProductsView(
                         viewModel: dependencies.makeProductViewModel(),
-                        path: $productPath
+                        path: $productPath,
+                        mainCategories: user?.mainCategories ?? []
                     )
                     .navigationDestination(for: ProductRoute.self) { route in
                         ProductDestinationView(

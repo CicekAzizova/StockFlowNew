@@ -77,13 +77,14 @@ enum PreviewData {
 
 /// `result` nəticəni, `delay` isə uzun yüklənmə (Loading) halını simulyasiya edir.
 struct PreviewProductRepository: ProductRepository {
+
     func setStock(id: Int, quantity: Int, locationId: Int) async throws {}
     
     func restockProduct(id: Int, quantity: Int, locationId: Int?) async throws -> ProductsResponse {
         throw PreviewError.failed
     }
     
-    func getProducts(page: Int, limit: Int, query: String?, stock: String?) async throws -> PaginationResponse<ProductsResponse> {
+    func getProducts(page: Int, limit: Int, query: String?, stock: String?, filter: ProductFilter) async throws -> PaginationResponse<ProductsResponse> {
         PreviewData.page(try await items())
 
     }
