@@ -43,23 +43,28 @@ struct SalesTotalsResponse: Decodable {
     let previous: SalesTotals
     let bySeller: [SellerTotals]
     let byPayment: [PaymentTotal]?
+    let itemsSold: Int
+    let returned: Double
 
     enum CodingKeys: String, CodingKey {
-        case from, to, revenue, orders, previous
+        case from, to, revenue, orders, previous, returned
         case averageCheck = "average_check"
         case bySeller = "by_seller"
         case byPayment = "by_payment"
+        case itemsSold = "items_sold"
     }
 }
 
 /// Bir ödəniş növü üzrə daxil olan pul.
-struct PaymentTotal: Decodable, Hashable {
+nonisolated struct PaymentTotal: Decodable, Hashable {
     let method: String
+    let received: Double
+    let refunded: Double
     let amount: Double
 
     var paymentMethod: PaymentMethod { PaymentMethod(rawValue: method) ?? .other }
 
     enum CodingKeys: String, CodingKey {
-        case method, amount
+        case method, received, refunded, amount
     }
 }

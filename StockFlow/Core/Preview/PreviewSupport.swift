@@ -220,7 +220,13 @@ struct PreviewSalesRepository: SalesRepository {
             bySeller: [
                 SellerTotals(sellerId: 2, sellerName: "Rəşad M.", revenue: 800, orders: 20),
                 SellerTotals(sellerId: 3, sellerName: "Leyla H.", revenue: 445.8, orders: 18)
-            ], byPayment: [PaymentTotal(method: "card", amount: 20)]
+            ],
+            byPayment: [
+                PaymentTotal(method: "cash", received: 845.8, refunded: 42.5, amount: 803.3),
+                PaymentTotal(method: "card", received: 400, refunded: 0, amount: 400)
+            ],
+            itemsSold: 94,
+            returned: 42.5
         )
     }
     

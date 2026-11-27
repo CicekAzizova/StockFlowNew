@@ -16,6 +16,7 @@ struct SalesView: View {
     @State private var showsDateSheet = false
     @State private var showsFilter = false
     @State private var showsNewSale = false
+    @State private var showsSummary = false
     var canFilterBySeller = false
 
     init(
@@ -96,6 +97,16 @@ struct SalesView: View {
                 viewModel.filter = newFilter
             }
         }
+        .sheet(isPresented: $showsSummary) {
+            if let totals = viewModel.totals {
+                SalesSummarySheet(
+                    totals: totals,
+                    rangeText: viewModel.rangeText,
+                    sellers: totals.bySeller,
+                    showsSellers: canFilterBySeller
+                )
+            }
+        }
     }
 
     // MARK: - Header
@@ -103,7 +114,10 @@ struct SalesView: View {
     private var header: some View {
         VStack(spacing: 12) {
             BrandScreenHeader(title: "Sales") {
-                filterButton
+                HStack(spacing: 8) {
+                    summaryButton
+                    filterButton
+                }
             }
 
             SalesPeriodPicker(selection: $viewModel.period) {
@@ -115,6 +129,16 @@ struct SalesView: View {
         }
         .padding(.bottom, 58)
         .brandHeaderBackground()
+    }
+    
+    private var summaryButton: some View {
+        Button {
+            showsSummary = true
+        } label: {
+            BrandHeaderIcon(systemImage: "doc.text")
+        }
+        .disabled(viewModel.totals == nil)
+        .accessibilityLabel("End of day")
     }
     
     private var filterButton: some View {
@@ -141,9 +165,6 @@ struct SalesView: View {
     @ViewBuilder
     private var content: some View {
         VStack(spacing: 12) {
-            if let payments = viewModel.totals?.byPayment, !payments.isEmpty {
-                SalesPaymentsCard(payments: payments)
-            }
 
             switch viewModel.state {
             case .idle, .loading:

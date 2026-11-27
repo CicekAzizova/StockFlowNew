@@ -17,4 +17,15 @@ extension PaymentMethod {
         case .mixed: "Mixed"
         }
     }
+    
+    /// Mətn kimi paylaşmaq üçün açarın özü.
+    var titleKey: String.LocalizationValue {
+        switch self {
+        case .cash: "Cash"
+        case .card: "Card"
+        case .transfer: "Transfer"
+        case .mixed: "Mixed"
+        case .other: "Other"
+        }
+    }
 }

@@ -28,6 +28,7 @@ struct ReturnView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     itemsSection
                     reasonSection
+                    refundMethodSection
                     restockRow
                     refundRow
                 }
@@ -202,6 +203,38 @@ struct ReturnView: View {
         }
     }
 
+    private var refundMethodSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("How was the money returned?")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color.textSecondary)
+
+            HStack(spacing: 8) {
+                ForEach([PaymentMethod.cash, .transfer], id: \.self) { method in
+                    let isSelected = viewModel.refundMethod == method
+
+                    Button {
+                        viewModel.refundMethod = method
+                    } label: {
+                        Text(method.title)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(isSelected ? Color.brandDark : Color.textSecondary)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                isSelected ? Color.brandGreen.opacity(0.15) : Color.surface,
+                                in: Capsule()
+                            )
+                            .overlay(
+                                Capsule().stroke(isSelected ? Color.brandGreen : .clear, lineWidth: 1.5)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
     private func reasonChip(_ reason: ReturnReason) -> some View {
         let isSelected = viewModel.reason == reason
 

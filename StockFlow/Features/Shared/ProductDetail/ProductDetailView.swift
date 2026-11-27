@@ -147,12 +147,12 @@ struct ProductDetailView: View {
         }
     }
     
-    private func valueText(_ text: String) -> some View {
-        Text(verbatim: text)
-            .font(.inter(.regular, size: 14))
-            .foregroundStyle(.textSecondary)
-            .lineLimit(1)
-    }
+    private func valueRaw(_ text: String) -> some View {
+           Text(verbatim: text)
+               .font(.inter(.regular, size: 14))
+               .foregroundStyle(.textSecondary)
+               .lineLimit(1)
+       }
 
     private func valueText(_ text: LocalizedStringKey) -> some View {
         Text(text)
@@ -164,13 +164,13 @@ struct ProductDetailView: View {
     private var overviewTab: some View {
         VStack(spacing: 0) {
             AppRowView(icon: "tag", tint: .orange, title: "Category") {
-                valueText(categoryName)
+                valueRaw(categoryName)
             }
             .compact()
             Divider()
 
             AppRowView(icon: "barcode", tint: .gray, title: "Barcode") {
-                valueText(product.sku)
+                valueRaw(product.sku)
             }
             .compact()
             Divider()

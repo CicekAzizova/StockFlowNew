@@ -1,5 +1,5 @@
 //
-//  SaleReturnViewModel.swift
+//  ReturnViewModel.swift
 //  StockFlow
 //
 //  Created by Cicek on 27.11.26.
@@ -31,12 +31,18 @@ final class ReturnViewModel {
         }
     }
     var restock = false
+    /// Pul hansı üsulla qaytarılır. Standart olaraq satışın ödəniş üsulu.
+    var refundMethod: PaymentMethod
+    
     private(set) var state: ReturnState = .editing
 
     init(repository: SalesRepository, sale: SaleResponse, productsStore: ProductsStore? = nil) {
         self.repository = repository
         self.sale = sale
         self.productsStore = productsStore
+        // Qarışıq ödənişdə kassir özü seçsin, standart nağddır.
+        // Kartla qaytarma yoxdur: nağd və ya köçürmə seçilir.
+        self.refundMethod = sale.paymentMethod == .transfer ? .transfer : .cash
     }
 
     // MARK: - Sətirlər
@@ -110,6 +116,7 @@ final class ReturnViewModel {
                 request: CreateReturnRequest(
                     items: selected,
                     reason: reason.rawValue,
+                    refundMethod: refundMethod.rawValue,
                     restock: restock
                 )
             )

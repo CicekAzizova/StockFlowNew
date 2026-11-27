@@ -71,6 +71,7 @@ final class SalesViewModel {
     private(set) var state: SalesViewState = .idle
     private var page = 1
     private var hasMore = true
+    
 
     init(
         repository: SalesRepository,
@@ -112,6 +113,18 @@ final class SalesViewModel {
 
     private var rangeStrings: (from: String, to: String) {
         (Self.dayFormatter.string(from: range.from), Self.dayFormatter.string(from: range.to))
+    }
+    
+    /// Çıxarışın başlığı: "27 noyabr 2026" və ya "20 – 27 noyabr 2026".
+    var rangeText: String {
+        let days = range
+        let formatter = Date.FormatStyle.dateTime.day().month(.wide).year()
+
+        if Calendar.current.isDate(days.from, inSameDayAs: days.to) {
+            return days.to.formatted(formatter)
+        }
+        let start = days.from.formatted(.dateTime.day().month(.wide))
+        return "\(start) – \(days.to.formatted(formatter))"
     }
 
     // MARK: - Yükləmə

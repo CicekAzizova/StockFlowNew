@@ -27,11 +27,14 @@ struct ReturnItemRequest: Encodable {
 struct CreateReturnRequest: Encodable {
     let items: [ReturnItemRequest]
     let reason: String
+    /// Pul necə qaytarıldı: nağd, kart, köçürmə.
+    let refundMethod: String
     /// Mal qalığa qayıtsın (zədəli mal üçün false).
     let restock: Bool
 
     enum CodingKeys: String, CodingKey {
         case items, reason, restock
+        case refundMethod = "refund_method"
     }
 }
 

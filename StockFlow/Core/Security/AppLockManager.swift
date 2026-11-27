@@ -18,6 +18,13 @@ final class AppLockManager {
     static let maxAttempts = 5
     static let gracePeriod: Duration = .seconds(10)
     
+    /// Blok bitənə qədər qalan saniyə (0 = blok yoxdur). Ekran saniyədə bir yeniləyir.
+    private(set) var lockoutSecondsLeft = 0
+
+    /// Neçə dəfə blok olunub: hər dəfə müddət artır.
+    private var lockoutCount: Int
+    private var lockoutUntil: Date?
+    
     private var backgroundedAt: ContinuousClock.Instant?
     private let pinStore: PinStoring
     private let biometrics: BiometricAuthenticating
@@ -25,7 +32,9 @@ final class AppLockManager {
     private let biometricKey = "biometrics_enabled"
     private let attemptsKey = "pin_failed_attempts"
     private let skipKey = "pin_setup_skipped"
-
+    private let lockoutUntilKey = "pin_lockout_until"
+    private let lockoutCountKey = "pin_lockout_count"
+    
     
     init(
         pinStore: PinStoring,
@@ -40,6 +49,10 @@ final class AppLockManager {
         self.defaults = defaults
         self.failedAttempts = defaults.integer(forKey: attemptsKey)
         self.hasSkippedPinSetup = defaults.bool(forKey: skipKey)
+        self.lockoutCount = defaults.integer(forKey: lockoutCountKey)
+        let until = defaults.object(forKey: lockoutUntilKey) as? Date
+        self.lockoutUntil = until
+        self.lockoutSecondsLeft = Self.secondsLeft(until: until)
     }
     
     var canUseBiometrics: Bool {
@@ -50,12 +63,48 @@ final class AppLockManager {
         max(Self.maxAttempts - failedAttempts, 0)
     }
     
+    // MARK: - Giriş bloku
+
+    /// Ardıcıl 5 səhvdən sonra gözləmə müddəti: 30 san, 1 dəq, 5 dəq, 15 dəq.
+    private static let lockoutSteps: [Int] = [30, 60, 300, 900]
+
+    var isLockedOut: Bool { lockoutSecondsLeft > 0 }
+
+    private static func secondsLeft(until: Date?) -> Int {
+        guard let until else { return 0 }
+        return max(Int(until.timeIntervalSinceNow.rounded(.up)), 0)
+    }
+
+    /// Ekrandakı saniyəlik taymer bunu çağırır.
+    func refreshLockout() {
+        lockoutSecondsLeft = Self.secondsLeft(until: lockoutUntil)
+        if lockoutSecondsLeft == 0, lockoutUntil != nil {
+            lockoutUntil = nil
+            defaults.removeObject(forKey: lockoutUntilKey)
+            // Yeni cəhdlər üçün sayğac sıfırlanır, blok səviyyəsi isə qalır.
+            failedAttempts = 0
+            defaults.removeObject(forKey: attemptsKey)
+        }
+    }
+
+    private func startLockout() {
+        let step = Self.lockoutSteps[min(lockoutCount, Self.lockoutSteps.count - 1)]
+        lockoutCount += 1
+        defaults.set(lockoutCount, forKey: lockoutCountKey)
+
+        let until = Date.now.addingTimeInterval(TimeInterval(step))
+        lockoutUntil = until
+        defaults.set(until, forKey: lockoutUntilKey)
+        lockoutSecondsLeft = step
+    }
+    
     func setBiometrics(_ enabled: Bool) {
         isBiometricsEnabled = enabled && isPinEnabled && biometrics.isAvailable
         defaults.set(isBiometricsEnabled, forKey: biometricKey)
     }
     
     func unlockWithBiometrics() async ->  Bool {
+        refreshLockout()
         guard isLocked, isBiometricsEnabled else { return false }
         let success = await biometrics.authenticate(reason: "Unlock StockFlow")
         if success { isLocked = false }
@@ -75,8 +124,14 @@ final class AppLockManager {
     }
     
     func unlock(with pin: String) -> Bool {
+        refreshLockout()
+        guard !isLockedOut else { return false }
+
         guard pinStore.verify(pin) else {
             registerFailedAttempt()
+            if attemptsLeft == 0 {
+                startLockout()
+            }
             return false
         }
         resetAttempts()
@@ -92,6 +147,11 @@ final class AppLockManager {
     private func resetAttempts() {
         failedAttempts = 0
         defaults.removeObject(forKey: attemptsKey)
+        lockoutCount = 0
+        lockoutUntil = nil
+        lockoutSecondsLeft = 0
+        defaults.removeObject(forKey: lockoutCountKey)
+        defaults.removeObject(forKey: lockoutUntilKey)
     }
     
     func enablePin(_ pin: String) throws {

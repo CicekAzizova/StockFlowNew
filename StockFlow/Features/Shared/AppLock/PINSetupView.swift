@@ -96,7 +96,7 @@ struct PINSetupView: View {
         VStack(spacing: 24) {
             Spacer()
             
-            PINDotsView(filledCount: pin.count)
+            PINDotsView(filledCount: pin.count, tint: .brandTeal)
             
             if let errorMessage {
                 Text(errorMessage)
@@ -113,7 +113,7 @@ struct PINSetupView: View {
 
             Spacer()
 
-            PINPadView(onDigit: append, onDelete: deleteLast)
+            PINPadView(onDigit: append, onDelete: deleteLast, onDark: false)
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 16)

@@ -8,15 +8,18 @@ import SwiftUI
 
 struct PINDotsView: View {
     let filledCount: Int
-    let total: Int = 4
+    var total: Int = 4
+    /// Dolu nöqtələrin rəngi: normalda ağ, səhvdə qırmızı, düzgündə yaşıl.
+    var tint: Color = .white
+
     var body: some View {
         HStack(spacing: 18) {
             ForEach(0..<total, id: \.self) { index in
                 Circle()
-                    .fill(index < filledCount ? Color.brandTeal : Color.clear)
+                    .fill(index < filledCount ? tint : Color.clear)
                     .overlay(
                         Circle().stroke(
-                            index < filledCount ? Color.brandTeal : Color.gray.opacity(0.5),
+                            index < filledCount ? tint : Color.white.opacity(0.45),
                             lineWidth: 1.5
                         )
                     )
@@ -24,8 +27,6 @@ struct PINDotsView: View {
             }
         }
         .animation(.easeOut(duration: 0.15), value: filledCount)
+        .animation(.easeOut(duration: 0.2), value: tint)
     }
-}
-#Preview {
-    PINDotsView(filledCount: 2)
 }
