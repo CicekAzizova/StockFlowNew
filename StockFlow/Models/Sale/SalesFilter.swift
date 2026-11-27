@@ -12,12 +12,15 @@ struct SalesFilter: Equatable {
     var sellerId: Int?
     var locationId: Int?
     var paymentMethod: PaymentMethod?
+    /// nil = hamısı, true = yalnız qaytarılanlar, false = qaytarılmayanlar.
+    var returned: Bool?
 
     static let none = SalesFilter()
 
     /// Neçə süzgəc aktivdir (başlıqdakı nişan üçün).
     var activeCount: Int {
-        [sellerId != nil, locationId != nil, paymentMethod != nil].filter { $0 }.count
+        [sellerId != nil, locationId != nil, paymentMethod != nil, returned != nil]
+            .filter { $0 }.count
     }
 
     var queryItems: [URLQueryItem] {
@@ -30,6 +33,9 @@ struct SalesFilter: Equatable {
         }
         if let paymentMethod {
             items.append(URLQueryItem(name: "payment_method", value: paymentMethod.rawValue))
+        }
+        if let returned {
+            items.append(URLQueryItem(name: "returned", value: returned ? "true" : "false"))
         }
         return items
     }

@@ -32,8 +32,8 @@ struct SalesFilterSheet: View {
         self.onApply = onApply
     }
 
-    private let payments: [PaymentMethod] = [.cash, .card, .transfer, .other]
-
+    private let payments: [PaymentMethod] = [.cash, .card, .transfer, .mixed]
+    
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -47,6 +47,7 @@ struct SalesFilterSheet: View {
                         locationSection
                     }
                     paymentSection
+                    statusSection
                 }
                 .padding(16)
             }
@@ -56,6 +57,20 @@ struct SalesFilterSheet: View {
         .background(Color.background)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+    }
+    
+    private var statusSection: some View {
+        section(title: "Status") {
+            chip(title: Text("All"), isSelected: draft.returned == nil) {
+                draft.returned = nil
+            }
+            chip(title: Text("Returned"), isSelected: draft.returned == true) {
+                draft.returned = true
+            }
+            chip(title: Text("Not returned"), isSelected: draft.returned == false) {
+                draft.returned = false
+            }
+        }
     }
 
     // MARK: - Başlıq

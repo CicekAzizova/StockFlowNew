@@ -35,7 +35,8 @@ struct SalesView: View {
         let filter = viewModel.filter
         return """
         \(viewModel.period)-\(viewModel.customFrom)-\(viewModel.customTo)\
-        -\(filter.sellerId ?? 0)-\(filter.locationId ?? 0)-\(filter.paymentMethod?.rawValue ?? "")
+        -\(filter.sellerId ?? 0)-\(filter.locationId ?? 0)-\(filter.paymentMethod?.rawValue ?? "")\
+        -\(filter.returned.map(String.init) ?? "")
         """
     }
 
@@ -79,6 +80,7 @@ struct SalesView: View {
         }
         .task(id: taskId) {
             await viewModel.load()
+            
         }
         //NotificationCenter -den xeber gelende ise dusur
         .onReceive(NotificationCenter.default.publisher(for: .saleChanged)) { _ in

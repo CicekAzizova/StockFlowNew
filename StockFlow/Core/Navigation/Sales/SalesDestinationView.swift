@@ -23,6 +23,7 @@ struct SalesDestinationView: View {
                 canReturn: canReturn,
                 locationSwitcher: dependencies.locationSwitcher,
                 productsStore: dependencies.productsStore
-            )        }
+            )
+        }
     }
 }

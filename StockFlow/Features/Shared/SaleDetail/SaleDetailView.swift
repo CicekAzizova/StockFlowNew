@@ -13,15 +13,18 @@ struct SaleDetailView: View {
     private let canReturn: Bool
     private let productsStore: ProductsStore?
     private let locationSwitcher: LocationSwitcher?
-
+    
     @State private var showsReturn = false
+    @Environment(\.locale) private var locale
+    @Environment(AppStateManager.self) private var appStateManager
+    @State private var pdfURL: URL?
 
     init(
         sale: SaleResponse,
         repository: SalesRepository? = nil,
         canReturn: Bool = false,
         locationSwitcher: LocationSwitcher? = nil,
-        productsStore: ProductsStore? = nil
+        productsStore: ProductsStore? = nil,
     ) {
         _sale = State(initialValue: sale)
         self.repository = repository
@@ -67,6 +70,12 @@ struct SaleDetailView: View {
                 await locationSwitcher.load()
             }
         }
+        .task(id: sale.id) {
+            pdfURL = makePDF()
+        }
+        .onChange(of: sale.returnedAmount) {
+            pdfURL = makePDF()
+        }
         .sheet(isPresented: $showsReturn) {
             if let repository {
                 ReturnView(
@@ -82,6 +91,7 @@ struct SaleDetailView: View {
             }
         }
     }
+    
     // MARK: - Header
 
     private var header: some View {
@@ -90,31 +100,35 @@ struct SaleDetailView: View {
             subtitle: String(localized: "Sales"),
             showsBackButton: true
         ) {
-            ShareLink(item: shareText) {
-                BrandHeaderIcon(systemImage: "square.and.arrow.up")
-            }
-            .accessibilityLabel("Share")
+            shareButton
         }
         .padding(.bottom, 58)
         .brandHeaderBackground()
     }
+    
+    private func makePDF() -> URL? {
+        ReceiptPDFExporter.makePDF(
+            sale: sale,
+            storeName: appStateManager.user?.storeName ?? "",
+            locationName: showsLocation ? sale.locationName : nil,
+            locale: locale
+        )
+    }
 
+    @ViewBuilder
+    private var shareButton: some View {
+        if let pdfURL {
+            ShareLink(item: pdfURL) {
+                BrandHeaderIcon(systemImage: "square.and.arrow.up")
+            }
+            .accessibilityLabel("Share")
+        }
+    }
     private var receiptTitle: String {
         if let receiptNo = sale.receiptNo {
             return "#\(receiptNo)"
         }
         return "#\(sale.id)"
-    }
-
-    /// Paylaşılan qəbz mətni.
-    private var shareText: String {
-        var lines = ["\(receiptTitle) · \(dateText)"]
-        
-        for item in sale.items ?? [] {
-            lines.append("\(item.productName) ×\(item.quantity): \(item.lineTotal.asCurrency)")
-        }
-        lines.append("\(String(localized: "Total")): \(sale.totalPrice.asCurrency)")
-        return lines.joined(separator: "\n")
     }
     
     /// Qaytarmadan sonra qəbzi serverdən yenidən oxuyur.
