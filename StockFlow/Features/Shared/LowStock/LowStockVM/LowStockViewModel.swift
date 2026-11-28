@@ -82,7 +82,7 @@ final class LowStockViewModel {
     }
     
     /// Seçilmiş məhsulun qalığına ədəd əlavə edir.
-    func restock(quantity: Int) async {
+    func restock(quantity: Int, locationId: Int?) async {
         guard let target = restockTarget, !isRestocking else { return }
 
         isRestocking = true
@@ -90,12 +90,15 @@ final class LowStockViewModel {
         defer { isRestocking = false }
 
         do {
-            _ = try await productStore.restockProduct(id: target.id, quantity: quantity)
+            _ = try await productStore.restockProduct(
+                id: target.id,
+                quantity: quantity,
+                locationId: locationId
+            )
             restockTarget = nil
         } catch is CancellationError {
             return
         } catch {
             restockError = error.localizedDescription
         }
-    }
-}
+    }}

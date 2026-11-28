@@ -44,9 +44,10 @@ struct LowStockView: View {
                 RestockSheet(
                     product: product,
                     isSaving: viewModel.isRestocking,
-                    errorMessage: viewModel.restockError
-                ) { quantity, _ in
-                    Task { await viewModel.restock(quantity: quantity) }
+                    errorMessage: viewModel.restockError,
+                    showsLocationPicker: true
+                ) { quantity, locationId in
+                    Task { await viewModel.restock(quantity: quantity, locationId: locationId) }
                 }
             }
         }
